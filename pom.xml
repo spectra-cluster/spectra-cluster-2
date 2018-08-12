@@ -11,6 +11,8 @@
     <properties>
        <java.version>1.8</java.version>
        <lombock.version>1.18.2</lombock.version>
+       <colt.version>1.2.0</colt.version>
+       <junit.version>4.12</junit.version>
     </properties>
 
     <dependencies>
@@ -19,6 +21,18 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombock.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>colt</groupId>
+            <artifactId>colt</artifactId>
+            <version>${colt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
         </dependency>
 
     </dependencies>

@@ -1,5 +1,7 @@
 package org.spectra.cluster.model.spectra;
 
+import cern.colt.matrix.impl.SparseDoubleMatrix1D;
+
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
@@ -20,10 +22,16 @@ public interface IBinarySpectrum {
     long getUUI();
 
     /** Get Precursor MZ in integer **/
-    int getPrecursorMz();
+    int getIntPrecursorMz();
 
     /** Get precursor charge **/
     int getPrecursorCharge();
+
+    /** Get the vector of the peaks mz Values **/
+    SparseDoubleMatrix1D getIntMzVector();
+
+    /** Get sparse matrix of Intensities **/
+    SparseDoubleMatrix1D getIntIntensityVector();
 
 
 
