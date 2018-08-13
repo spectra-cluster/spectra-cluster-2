@@ -9,26 +9,52 @@ package org.spectra.cluster.model.spectra;
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
  *
- * ==Overview==
+ * This interface structured the spectra for clustering in Binary format. Binary means that every
+ * value precursor mz, charge, etc. is encoded as integers.
  *
- * The BinarySpectrum contains the representation of
  *
  * @author ypriverol on 09/08/2018.
  */
 
-public interface IBinarySpectrum {
+interface IBinarySpectrum {
 
-    /** A unique auto generated id **/
-    long getUUI();
 
-    /** Get Precursor MZ in integer **/
+    /**
+     * Get Precursor MZ in integer
+     * @return Precursor mz
+     */
     int getPrecursorMz();
 
-    /** Get precursor charge **/
+
+    /**
+     * Get the precursor charge
+     * @return Precursor Charge
+     */
     int getPrecursorCharge();
 
-    /** Generate the UUI hash **/
-    long generateUUIHash();
 
+    /**
+     * Get the vector of the peaks mz Values
+     * @return MZ Vector of integer
+     */
+    int[] getMzVector();
+
+    /**
+     * Get the Vector of intensity Values
+     * @return Get intensity Vector
+     */
+    int[] getIntensityVector();
+
+    /**
+     * Get number of peaks in the Spectrum
+     * @return Number of Peaks
+     */
+    int getNumberOfPeaks();
+
+    /**
+     * Get the Unique identifier
+     * @return identifier
+     */
+    long getUUI();
 
 }

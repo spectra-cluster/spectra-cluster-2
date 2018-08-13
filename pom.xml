@@ -11,6 +11,10 @@
     <properties>
        <java.version>1.8</java.version>
        <lombock.version>1.18.2</lombock.version>
+       <colt.version>1.2.0</colt.version>
+       <junit.version>4.12</junit.version>
+       <common-collections.version>3.2.2</common-collections.version>
+       <jmzreader.version>2.0.4</jmzreader.version>
     </properties>
 
     <dependencies>
@@ -21,6 +25,29 @@
             <version>${lombock.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>colt</groupId>
+            <artifactId>colt</artifactId>
+            <version>${colt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${common-collections.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.ebi.pride.tools</groupId>
+            <artifactId>jmzreader</artifactId>
+            <version>${jmzreader.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -49,6 +76,25 @@
         </plugins>
 
     </build>
+
+    <repositories>
+        <repository>
+            <id>pst-release</id>
+            <name>EBI Nexus Repository</name>
+            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-release</url>
+        </repository>
+        <!-- EBI SNAPSHOT repo -->
+        <repository>
+            <id>pst-snapshots</id>
+            <name>EBI Nexus Snapshots Repository</name>
+            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-snapshots</url>
+        </repository>
+        <repository>
+            <id>springsource-repo</id>
+            <name>SpringSource Repository</name>
+            <url>http://repo.springsource.org/release</url>
+        </repository>
+    </repositories>
 
 </project>
 
