@@ -11,6 +11,8 @@ package org.spectra.cluster.model.spectra;
  *
  * ==Overview==
  *
+ * The BinarySpectrum contains the representation of
+ *
  * @author ypriverol on 09/08/2018.
  */
 
@@ -25,6 +27,8 @@ public interface IBinarySpectrum {
     /** Get precursor charge **/
     int getPrecursorCharge();
 
+    /** Generate the UUI hash **/
+    long generateUUIHash();
 
 
 }
