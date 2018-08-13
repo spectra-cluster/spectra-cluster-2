@@ -4,15 +4,12 @@ package org.spectra.cluster.normalizer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.spectra.cluster.model.commons.Tuple;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
-import java.io.LineNumberReader;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;

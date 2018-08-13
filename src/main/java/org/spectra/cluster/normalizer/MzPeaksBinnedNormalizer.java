@@ -12,7 +12,7 @@ import java.util.*;
 @Slf4j
 public class MzPeaksBinnedNormalizer {
 
-    private static  float MIN_MZ = 200F;
+    private static  float MIN_MZ = 70F;
 
     private static  float MAX_MZ = 5000F;
     private static  double HIG_RES_INTERVAL = 1.0F;
@@ -33,7 +33,8 @@ public class MzPeaksBinnedNormalizer {
         for(int i = 0; i < intervals.length ; i++){
             if(currentMZ == currentPeak){
                 intervals[i] = currentPeak;
-                currentPeak = (int) peakIt.next().floatValue();
+                if(peakIt.hasNext())
+                    currentPeak = (int) peakIt.next().floatValue();
             }
             currentMZ ++;
         }

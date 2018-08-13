@@ -22,8 +22,8 @@ public class JaccardComparator {
      */
     public static double computeVectorJaccard(int[] firstCollection,
                                               int[]  secondCollection) {
-        List<Integer> coll1 =  Arrays.stream(firstCollection).boxed().collect(Collectors.toList());
-        List<Integer> coll2 =  Arrays.stream(secondCollection).boxed().collect(Collectors.toList());
+        List<Integer> coll1 =  Arrays.stream(firstCollection).boxed().filter(x -> x > 0 ).collect(Collectors.toList());
+        List<Integer> coll2 =  Arrays.stream(secondCollection).boxed().filter(x -> x > 0 ).collect(Collectors.toList());
 
         if(coll1 == null || coll2 == null || coll1.isEmpty() || coll2.isEmpty())
             log.error("One of the peak Lists is empty -- ");
