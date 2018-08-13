@@ -17,7 +17,9 @@ public class MzPeaksBinnedNormalizer {
     private static  float MAX_MZ = 5000F;
     private static  double HIG_RES_INTERVAL = 1.0F;
 
-    public static int[] binnedHighResMzPeaks(Collection<Double> mzPeaks){
+    // TODO: @Yasset: This should be a List<Double> since it needs to be sorted.
+    // Otherwise, the return type does not make sense.
+    public static int[] binnedHighResMzPeaks(List<Double> mzPeaks){
         Iterator<Double> peakIt = mzPeaks.stream().sorted().iterator();
         int currentPeak = (int) peakIt.next().floatValue();
         Integer currentMZ = (int) MIN_MZ;
