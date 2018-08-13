@@ -1,4 +1,4 @@
-package org.spectra.cluster.utils;
+package org.spectra.cluster.utils.io;
 
 
 import org.spectra.cluster.model.commons.Tuple;

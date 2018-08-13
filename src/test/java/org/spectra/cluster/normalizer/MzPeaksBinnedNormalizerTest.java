@@ -1,13 +1,19 @@
-package org.spectra.cluster.model.spectra;
+package org.spectra.cluster.normalizer;
 
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.model.spectra.BinarySpectrum;
+import org.spectra.cluster.model.spectra.ISpectrum;
+import org.spectra.cluster.model.spectra.Spectrum;
 import org.spectra.cluster.utils.io.ParserUtilities;
 
 import java.io.LineNumberReader;
 import java.io.StringReader;
+import java.util.stream.Collectors;
 
-public class BinarySpectrumTest {
+public class MzPeaksBinnedNormalizerTest {
 
     public static final String SPECTRUM =
             "BEGIN IONS\n" +
@@ -104,13 +110,21 @@ public class BinarySpectrumTest {
                     "1607.71973\t2.67\t1\n" +
                     "END IONS\n";
 
-    @Test
-    public void readBinarySpectrum() {
+
+    ISpectrum spectrum  = null;
+    @Before
+    public void readSpectrum() {
 
         LineNumberReader inp = new LineNumberReader(new StringReader(SPECTRUM));
-        ISpectrum spectrum = ParserUtilities.readMGFScan(inp);
+        spectrum = ParserUtilities.readMGFScan(inp);
 
+    }
 
+    @Test
+    public void binnedHighResMzPeaks() {
+
+        double[] values = MzPeaksBinnedNormalizer.binnedHighResMzPeaks(((Spectrum)spectrum).getPeaks().stream().map(x->x.getKey()).collect(Collectors.toList()));
+        Assert.assertTrue(values.length == 6800);
 
     }
 }

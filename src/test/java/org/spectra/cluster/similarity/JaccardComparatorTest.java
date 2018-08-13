@@ -1,12 +1,15 @@
 package org.spectra.cluster.similarity;
 
 
+import cern.colt.matrix.impl.SparseDoubleMatrix1D;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.ISpectrum;
 import org.spectra.cluster.model.spectra.Spectrum;
-import org.spectra.cluster.utils.ParserUtilities;
+import org.spectra.cluster.normalizer.MzPeaksBinnedNormalizer;
+import org.spectra.cluster.utils.io.ParserUtilities;
 
 import java.io.LineNumberReader;
 import java.io.StringReader;
@@ -204,35 +207,54 @@ public class JaccardComparatorTest {
                     "1607.71973\t2.67\t1\n" +
                     "END IONS\n";
 
+    BinarySpectrum binarySpectrum1 = null;
+    BinarySpectrum binarySpectrum2 = null;
+    Spectrum spectrum1 = null;
+    Spectrum spectrum2 = null;
 
-    @Test
-    public void computeJaccard() {
+    @Before
+    public void setUp(){
 
         LineNumberReader inp = new LineNumberReader(new StringReader(SPECTRUM_1));
-        ISpectrum spectrum = ParserUtilities.readMGFScan(inp);
+        spectrum1 = (Spectrum) ParserUtilities.readMGFScan(inp);
 
 
-        BinarySpectrum binarySpectrum1 = BinarySpectrum.builder()
-                .precursortMZ((int) ((Spectrum)spectrum).getPrecursorMZ())
-                .precursorCharge(((Spectrum) spectrum).getPrecursorCharge())
-                .mzPeaksVector(((Spectrum) spectrum).getPeaks().stream().map(x-> (int)x.getKey().floatValue()).collect(Collectors.toList()))
+        binarySpectrum1 = BinarySpectrum.builder()
+                .precursortMZ((int) spectrum1.getPrecursorMZ())
+                .precursorCharge(( spectrum1).getPrecursorCharge())
+                .mzPeaksVector(spectrum1.getPeaks().stream().map(x-> (int)x.getKey().floatValue()).collect(Collectors.toList()))
                 .build();
 
         inp = new LineNumberReader(new StringReader(SPECTRUM_2));
-        spectrum = ParserUtilities.readMGFScan(inp);
+        spectrum2 = (Spectrum) ParserUtilities.readMGFScan(inp);
 
 
-        BinarySpectrum binarySpectrum2 = BinarySpectrum.builder()
-                .precursortMZ((int) ((Spectrum)spectrum).getPrecursorMZ())
-                .precursorCharge(((Spectrum) spectrum).getPrecursorCharge())
-                .mzPeaksVector(((Spectrum) spectrum).getPeaks().stream().map(x-> (int)x.getKey().floatValue()).collect(Collectors.toList()))
+        binarySpectrum2 = BinarySpectrum.builder()
+                .precursortMZ((int) spectrum2.getPrecursorMZ())
+                .precursorCharge(spectrum2.getPrecursorCharge())
+                .mzPeaksVector(spectrum2.getPeaks().stream().map(x-> (int)x.getKey().floatValue()).collect(Collectors.toList()))
                 .build();
+    }
 
-        float similarity = JaccardComparator.computeJaccard(binarySpectrum1.getMzPeaksVector(), binarySpectrum2.getMzPeaksVector());
+    @Test
+    public void computeVectorJaccard() {
+
+
+        double similarity = JaccardComparator.computeVectorJaccard(binarySpectrum1.getMzPeaksVector(), binarySpectrum2.getMzPeaksVector());
 
         Assert.assertTrue(similarity - 0.988f < 0.1);
+    }
 
 
+    @Test
+    public void computeSparseMatrixJaccard() {
+
+        SparseDoubleMatrix1D sparseMatrix1 = new SparseDoubleMatrix1D(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum1.getPeaks().stream().map(x->x.getKey()).collect(Collectors.toList())));
+        SparseDoubleMatrix1D sparseMatrix2 = new SparseDoubleMatrix1D(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum2.getPeaks().stream().map(x->x.getKey()).collect(Collectors.toList())));
+
+        double similarity = JaccardComparator.computeSparseMatrixJaccard(sparseMatrix1, sparseMatrix2);
+
+        Assert.assertTrue(similarity - 0.867f < 0.1);
 
     }
 }

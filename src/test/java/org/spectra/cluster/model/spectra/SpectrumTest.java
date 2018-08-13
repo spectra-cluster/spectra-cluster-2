@@ -2,12 +2,10 @@ package org.spectra.cluster.model.spectra;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.spectra.cluster.model.commons.Tuple;
-import org.spectra.cluster.utils.ParserUtilities;
+import org.spectra.cluster.utils.io.ParserUtilities;
 
 import java.io.LineNumberReader;
 import java.io.StringReader;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SpectrumTest {
