@@ -1,14 +1,16 @@
 package org.spectra.cluster.model.spectra;
 
-
 import org.junit.Assert;
 import org.junit.Test;
+import org.spectra.cluster.model.commons.Tuple;
 import org.spectra.cluster.utils.ParserUtilities;
 
 import java.io.LineNumberReader;
 import java.io.StringReader;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public class BinarySpectrumTest {
+public class SpectrumTest {
 
     public static final String SPECTRUM =
             "BEGIN IONS\n" +
@@ -105,13 +107,21 @@ public class BinarySpectrumTest {
                     "1607.71973\t2.67\t1\n" +
                     "END IONS\n";
 
+
     @Test
-    public void readBinarySpectrum() {
+    public void readSpectrum() {
 
         LineNumberReader inp = new LineNumberReader(new StringReader(SPECTRUM));
         ISpectrum spectrum = ParserUtilities.readMGFScan(inp);
 
 
+        BinarySpectrum binarySpectrum = BinarySpectrum.builder()
+                .precursortMZ((int) ((Spectrum)spectrum).precursorMZ)
+                .precursorCharge(((Spectrum) spectrum).precursorCharge)
+                .mzPeaksVector(((Spectrum) spectrum).peaks.stream().map(x-> (int)x.getKey().floatValue()).collect(Collectors.toList()))
+                .build();
+
+        Assert.assertTrue(binarySpectrum.getNumberOfPeaks() == 88);
 
     }
 }

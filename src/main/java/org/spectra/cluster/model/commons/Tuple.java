@@ -5,11 +5,11 @@ import java.io.Serializable;
 /**
  * Tuple stores two elements.
  *
- * @quthor Yasset Perez-Riverol
+ * @author Yasset Perez-Riverol
  * @version $Id$
  */
 
-public class Tuple<K, V> implements ITuple<K,V> {
+public class Tuple<K, V> implements Serializable, Cloneable {
     private K key;
     private V value;
 

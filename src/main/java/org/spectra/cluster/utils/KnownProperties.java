@@ -12,27 +12,27 @@ import java.util.*;
  *
  * @author Johannes Griss
  */
-public class KnownProperties {
+class KnownProperties {
 
     // Known properties keys
-    public static final String IDENTIFIED_PEPTIDE_KEY = "identifiedPeptide";
-    public static final String ANNOTATION_KEY = "annotation";
-    public static final String TAXONOMY_KEY = "accession";
-    public static final String PROTEIN_KEY = "protein"; // database: protein
-    public static final String MODIFICATION_KEY = "modification"; // database: protein
-    public static final String INSTRUMENT_KEY = "instrument";
-    public static final String SPECTRUM_TITLE = "custom_title";
+    private static final String IDENTIFIED_PEPTIDE_KEY = "identifiedPeptide";
+    private static final String ANNOTATION_KEY = "annotation";
+    private static final String TAXONOMY_KEY = "accession";
+    private static final String PROTEIN_KEY = "protein"; // database: protein
+    private static final String MODIFICATION_KEY = "modification"; // database: protein
+    private static final String INSTRUMENT_KEY = "instrument";
+    private static final String SPECTRUM_TITLE = "custom_title";
 
-    public static final String IDENTIFIED_PEPTIDE_MGF_KEY = "SEQ";
-    public static final String ANNOTATION_MGF_KEY = "USER00";
-    public static final String TAXONOMY_MGF_KEY = "TAXONOMY";
-    public static final String PROTEIN_MGF_KEY = "USER02";
-    public static final String MODIFICATION_MGF_KEY = "USER03";
-    public static final String INSTRUMENT_MGF_KEY = "INSTRUMENT";
-    public static final String SPECTRUM_MGF_TITLE = "USER04";
+    private static final String IDENTIFIED_PEPTIDE_MGF_KEY = "SEQ";
+    private static final String ANNOTATION_MGF_KEY = "USER00";
+    private static final String TAXONOMY_MGF_KEY = "TAXONOMY";
+    private static final String PROTEIN_MGF_KEY = "USER02";
+    private static final String MODIFICATION_MGF_KEY = "USER03";
+    private static final String INSTRUMENT_MGF_KEY = "INSTRUMENT";
+    private static final String SPECTRUM_MGF_TITLE = "USER04";
 
 
-    public static final String UNKNOWN_MGF_KEY = "USER12";
+    private static final String UNKNOWN_MGF_KEY = "USER12";
 
     // ===========================
     // Known cluster Properties
@@ -48,8 +48,8 @@ public class KnownProperties {
      * this section related to tags in MGF files where
      * SEQ, USER00, USER01, USER02 .. User12 are allowed
      */
-    private static Map<String, String> INTERNAL_KEY_TO_MGF_KEY = new HashMap<String, String>();
-    private static Map<String, String> INTERNAL_MGF_KEY_TO_KEY = new HashMap<String, String>();
+    private static final Map<String, String> INTERNAL_KEY_TO_MGF_KEY = new HashMap<>();
+    private static final Map<String, String> INTERNAL_MGF_KEY_TO_KEY = new HashMap<>();
 
     static {
         INTERNAL_KEY_TO_MGF_KEY.put(IDENTIFIED_PEPTIDE_KEY, IDENTIFIED_PEPTIDE_MGF_KEY);
@@ -70,8 +70,8 @@ public class KnownProperties {
 
     }
 
-    public static Map<String, String> KEY_TO_MGF_KEY = Collections.unmodifiableMap(INTERNAL_KEY_TO_MGF_KEY);
-    public static Map<String, String> MGF_KEY_TO_KEY = Collections.unmodifiableMap(INTERNAL_MGF_KEY_TO_KEY);
+    private static final Map<String, String> KEY_TO_MGF_KEY = Collections.unmodifiableMap(INTERNAL_KEY_TO_MGF_KEY);
+    private static final Map<String, String> MGF_KEY_TO_KEY = Collections.unmodifiableMap(INTERNAL_MGF_KEY_TO_KEY);
 
     /**
      * take property - value pair to a line to insert in MGF
@@ -106,27 +106,11 @@ public class KnownProperties {
         else {
             return false;
         }
-        // Old code changes 1-Sep-2014 SLewis
-//        String[] items = line.split("=");
-//        switch (items.length) {
-//            case 0:
-//            case 1:
-//                return false; // not handled
-//            case 2:
-//                return handleKnownProperty(props,items[0], items[1]);
-//             case 3:
-//                 return  handleUnknownProperty(props,items[0], items[1], items[2]);
-//               default:
-//               return false;  // not handled
-//        }
-
-
     }
 
     private static boolean handleUnknownProperty(Properties props,String key1, String key2, String value) {
         if (!UNKNOWN_MGF_KEY.equals(key1))
             return false;
-        //     throw new UnsupportedOperationException("Properties need to be  USER12=name=value not " + key1);
         props.setProperty(key2,value);
         return true;
     }
@@ -135,7 +119,6 @@ public class KnownProperties {
         String realKey =  MGF_KEY_TO_KEY.get(key);
         if (realKey == null)
             return false;
-        //      throw new UnsupportedOperationException("Properties need to be known key= value" + key);
         props.setProperty(realKey,value);
         return true;
     }

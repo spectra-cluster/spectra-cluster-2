@@ -13,6 +13,7 @@
        <lombock.version>1.18.2</lombock.version>
        <colt.version>1.2.0</colt.version>
        <junit.version>4.12</junit.version>
+       <common-collections.version>3.2.2</common-collections.version>
     </properties>
 
     <dependencies>
@@ -35,6 +36,11 @@
             <version>${junit.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${common-collections.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

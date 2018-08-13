@@ -1,22 +1,22 @@
 package org.spectra.cluster.model.spectra;
 
-import cern.colt.matrix.impl.SparseDoubleMatrix1D;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Collection;
+
 
 @Data
+@Builder
 public class BinarySpectrum implements IBinarySpectrum {
 
     long uui;
-    int precursorIntMZ;
+    int precursortMZ;
     int precursorCharge;
-    private SparseDoubleMatrix1D mzPeaksVector;
-    private SparseDoubleMatrix1D intensityPeaksVector;
 
-    public BinarySpectrum() {
+    private Collection<Integer> mzPeaksVector;
+    private Collection<Integer> intensityPeaksVector;
 
-    }
 
     @Override
     public long getUUI() {
@@ -24,8 +24,11 @@ public class BinarySpectrum implements IBinarySpectrum {
     }
 
     @Override
-    public int getIntPrecursorMz() {
-        return precursorIntMZ;
+    public int getNumberOfPeaks() {
+        int count = 0 ;
+        if(mzPeaksVector != null)
+            count = mzPeaksVector.size();
+        return count;
     }
 
     @Override
@@ -34,12 +37,17 @@ public class BinarySpectrum implements IBinarySpectrum {
     }
 
     @Override
-    public SparseDoubleMatrix1D getIntMzVector() {
+    public int getPrecursorMz() {
+        return precursortMZ;
+    }
+
+    @Override
+    public Collection<Integer> getMzVector() {
         return mzPeaksVector;
     }
 
     @Override
-    public SparseDoubleMatrix1D getIntIntensityVector() {
+    public Collection<Integer> getIntensityVector() {
         return intensityPeaksVector;
     }
 }

@@ -6,23 +6,20 @@ import org.spectra.cluster.model.spectra.ISpectrum;
 import org.spectra.cluster.model.spectra.Spectrum;
 
 import java.io.*;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
 /**
- * uk.ac.ebi.pride.spectracluster.util.ParserUtilities
- * Classes for reading clusters
  *
  * @author Johannes Griss
- * @author Steve Lewis
+ *
  */
 public class ParserUtilities {
 
-    public static final String BEGIN_IONS = "BEGIN IONS";
-    public static final String END_IONS = "END IONS";
-    public static final String BEGIN_CLUSTER = "BEGIN CLUSTER";
+    private static final String BEGIN_IONS = "BEGIN IONS";
+    private static final String END_IONS = "END IONS";
+    private static final String BEGIN_CLUSTER = "BEGIN CLUSTER";
 
     /**
      * take a line like BEGIN CLUSTER Charge=2 Id=VVXVXVVX  return charge
@@ -56,7 +53,7 @@ public class ParserUtilities {
         throw new IllegalArgumentException("no ContainsPeaklist= part in " + line);
     }
 
-    public static final String[] NOT_HANDLED_MGF_TAGS = {
+    private static final String[] NOT_HANDLED_MGF_TAGS = {
             "TOLU=",
             "TOL=",
             "USER00",
@@ -94,7 +91,7 @@ public class ParserUtilities {
      * @return The parsed ISpetrum object
      */
     @SuppressWarnings("ConstantConditions")
-    public static ISpectrum readMGFScan(LineNumberReader inp, String line) {
+    private static ISpectrum readMGFScan(LineNumberReader inp, String line) {
 
         Properties props = new Properties();
         //noinspection UnnecessaryLocalVariable,UnusedDeclaration,UnusedAssignment
@@ -144,8 +141,6 @@ public class ParserUtilities {
 
                 if (line.contains("=")) {
                     if (line.startsWith("TITLE=")) {
-                        title = buildMGFTitle(line);
-                        int index = line.indexOf(",sequence=");
                         line = inp.readLine();
                         continue;
                     }
@@ -211,22 +206,16 @@ public class ParserUtilities {
                     throw new IllegalStateException("Cannot parse MGF line " + line);
                 }
                 if (END_IONS.equals(line)) {
-                    //noinspection UnnecessaryLocalVariable,UnusedDeclaration,UnusedAssignment
-                    double mz = massToChargeCalledPpMass;
-                    // maybe this is what is meant - certainly scores better
-//                    Collections.sort(holder);
-
-                    Spectrum spectrum = new Spectrum();
-                    spectrum.setPrecursorCharge(dcharge);
-                    spectrum.setPeaks(holder);
-                    spectrum.setPrecursorMZ((float)mz);
+                    Spectrum spectrum = Spectrum.builder()
+                            .peaks(holder)
+                            .precursorCharge(dcharge)
+                            .precursorMZ((float) massToChargeCalledPpMass).build();
 
                     props.clear();
                     return spectrum;
                 } else {
                     line = line.replace("\t", " ");
                     String[] items = line.split(" ");
-                    // not sure we should let other ceses go but this is safer
                     if (items.length >= 2) {
                         try {
                             float peakMass = Float.parseFloat(items[0].trim());
@@ -234,11 +223,9 @@ public class ParserUtilities {
                             Tuple<Float, Float> added = new Tuple<>(peakMass, peakIntensity);
                             holder.add(added);
                         } catch (NumberFormatException e) {
-                            // I am not happy but I guess we can forgive a little bad data
                             handleBadMGFData(line);
                         }
                     } else {
-                        // I am not happy but I guess we can forgive a little bad data
                         handleBadMGFData(line);
                     }
                     line = inp.readLine();
@@ -251,25 +238,12 @@ public class ParserUtilities {
         }
     }
 
-    @SuppressWarnings("UnusedParameters")
-    protected static void handleTitleLine(ISpectrum spectrum, String titleLine) {
-        String tl = titleLine.substring("Title=".length());
-        String[] items = tl.split(",");
-        //noinspection ForLoopReplaceableByForEach
-        for (int i = 0; i < items.length; i++) {
-            //noinspection UnnecessaryLocalVariable,UnusedDeclaration,UnusedAssignment
-            String item = items[i];
-            // if(item.startsWith(""))
-        }
-
-    }
-
     /**
      * *******************************
      * Error handling code for MGF parse failure
      * *******************************
      */
-    public static final int MAX_NUMBER_BAD_MGF_LINES = 2000;
+    private static final int MAX_NUMBER_BAD_MGF_LINES = 2000;
     private static int gNumberBadMGFLines = 0;
 
     /**
@@ -280,7 +254,7 @@ public class ParserUtilities {
      * @param line !null line we cannot handle
      * @throws IllegalStateException after  MAX_NUMBER_BAD_MGF_LINES are seen
      */
-    protected static void handleBadMGFData(String line) throws IllegalStateException {
+    private static void handleBadMGFData(String line) throws IllegalStateException {
         if (gNumberBadMGFLines++ > MAX_NUMBER_BAD_MGF_LINES)
             throw new IllegalStateException("cannot read MGF data line " + line +
                     " failing after " + gNumberBadMGFLines + " errors");
@@ -306,7 +280,7 @@ public class ParserUtilities {
      *
      * @param is !null open inputstream
      */
-    public static void guaranteeMGFParse(InputStream is) {
+    private static void guaranteeMGFParse(InputStream is) {
         LineNumberReader inp = new LineNumberReader(new InputStreamReader(is));
         ISpectrum scan = readMGFScan(inp, null);
         while (scan != null) {
@@ -321,7 +295,7 @@ public class ParserUtilities {
      * @param pLine line as above
      * @return indicasted mass
      */
-    public static double parsePepMassLine(final String pLine) {
+    private static double parsePepMassLine(final String pLine) {
         final double mass;
         String numeric = pLine.substring("PEPMASS=".length());
         String massStr = numeric.split(" ")[0];
@@ -330,7 +304,7 @@ public class ParserUtilities {
     }
 
 
-    protected static String buildMGFTitle(String line) {
+    private static String buildMGFTitle(String line) {
         line = line.trim();
         int sequenceIndex = line.indexOf(",sequence=");
         String titleAndId = "TITLE=id=";
@@ -381,7 +355,7 @@ public class ParserUtilities {
 
         }
 
-        return null; // give up
+        return null;
     }
 
 }

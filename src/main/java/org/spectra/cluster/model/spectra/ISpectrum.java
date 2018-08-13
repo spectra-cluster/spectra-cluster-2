@@ -1,15 +1,15 @@
 package org.spectra.cluster.model.spectra;
 
-import org.spectra.cluster.model.commons.ITuple;
 
-import java.util.Set;
+public interface ISpectrum  {
 
-public interface ISpectrum extends IBinarySpectrum {
-
-    Set<? extends ITuple> getPeaks();
-
-    float getPrecursorMZ();
-
+    /** Get precursor charge **/
     int getPrecursorCharge();
+
+    /** A unique auto generated id **/
+    long getUUI();
+
+    /** Get number of Peaks**/
+    int getNumberOfPeaks();
 
 }
