@@ -37,10 +37,6 @@
 ehthumbs.db
 Thumbs.db
 
-# Intellij generated files #
-#####################
-*.iml
-
 # Eclipse generated files #
 ###########################
 /.settings
@@ -55,3 +51,5 @@ target/
 
 pom.xml.releaseBackup
 release.properties
+
+
