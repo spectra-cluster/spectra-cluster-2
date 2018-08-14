@@ -16,7 +16,7 @@ package org.spectra.cluster.model.spectra;
  * @author ypriverol on 09/08/2018.
  */
 
-interface IBinarySpectrum {
+public interface IBinarySpectrum {
 
 
     /**
