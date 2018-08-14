@@ -1,7 +1,6 @@
 package org.spectra.cluster.normalizer;
 
 import info.debatty.java.lsh.MinHash;
-import info.debatty.java.lsh.SuperBit;
 
 import java.util.Arrays;
 import java.util.List;

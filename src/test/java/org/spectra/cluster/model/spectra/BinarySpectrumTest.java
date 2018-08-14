@@ -12,6 +12,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.Objects;
 
 public class BinarySpectrumTest {
 
@@ -20,7 +21,7 @@ public class BinarySpectrumTest {
     @Before
     public void setUp() throws JMzReaderException, URISyntaxException {
 
-        URI uri = BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf").toURI();
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         MgfFile mgfFile = new MgfFile(new File(uri));
         specIt = mgfFile.getSpectrumIterator();
 
@@ -35,7 +36,7 @@ public class BinarySpectrumTest {
                 .precursorMZ((int)spectrum.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum.getPrecursorCharge())
                 .build();
-        Assert.assertTrue(binarySpectrum.getPrecursorCharge() == 2);
+        Assert.assertEquals(2, binarySpectrum.getPrecursorCharge());
 
 
     }

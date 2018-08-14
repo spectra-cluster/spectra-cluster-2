@@ -5,18 +5,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
-import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -50,7 +43,7 @@ public class MzSpectraReaderTest {
             Assert.assertTrue(binaryIter.next().getIntensityVector().length > 0);
             count++;
         }
-        Assert.assertTrue(count == 2);
+        Assert.assertEquals(2, count);
 
 
     }

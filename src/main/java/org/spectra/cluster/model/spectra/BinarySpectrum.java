@@ -1,6 +1,5 @@
 package org.spectra.cluster.model.spectra;
 
-import jdk.nashorn.internal.runtime.BitVector;
 import lombok.Builder;
 import lombok.Data;
 

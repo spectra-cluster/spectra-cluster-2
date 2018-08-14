@@ -2,7 +2,6 @@ package org.spectra.cluster.io;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.spectra.cluster.model.commons.Converter;
 import org.spectra.cluster.model.commons.IteratorConverter;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -23,9 +22,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -112,7 +111,7 @@ public class MzSpectraReader {
             else if(isValidmzXML(file))
                 jMzReader = new MzXMLFile(file);
         }catch (JMzReaderException e){
-            String message = "The file type provided is not support -- " + MzFileType.values() ;
+            String message = "The file type provided is not support -- " + Arrays.toString(MzFileType.values());
             log.error(message);
             throw new Exception(message);
         }
@@ -138,7 +137,7 @@ public class MzSpectraReader {
      * @return Iterator of {@link BinarySpectrum} spectra
      */
     public Iterator<IBinarySpectrum> readBinarySpectraIterator() {
-        Iterator<IBinarySpectrum> binaryIter = new IteratorConverter<>(jMzReader.getSpectrumIterator(),
+        return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
                 spectrum -> BinarySpectrum.builder()
                         .precursorCharge(spectrum.getPrecursorCharge())
                         .precursorMZ((int) spectrum.getPrecursorMZ().doubleValue())
@@ -147,7 +146,6 @@ public class MzSpectraReader {
                         .intensityPeaksVector(intensityBinner.binDoubles(spectrum.getPeakList()
                                 .entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
                         .build());
-        return binaryIter;
     }
 
     /**

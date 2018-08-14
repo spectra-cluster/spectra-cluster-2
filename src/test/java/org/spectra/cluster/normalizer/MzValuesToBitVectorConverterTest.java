@@ -33,7 +33,7 @@ public class MzValuesToBitVectorConverterTest {
     }
 
     @Test
-    public void testManualBinning() throws Exception {
+    public void testManualBinning() {
         double[] valuesToBin = {0.12, 1.19, 10, 100.0, 2010};
         List<Double> doubleList = Arrays.stream(valuesToBin).boxed().collect(Collectors.toList());
 

@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.normalizer.LSHBinner;
-import org.spectra.cluster.normalizer.MzPeaksBinnedNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;

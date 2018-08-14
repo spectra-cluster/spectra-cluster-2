@@ -6,6 +6,7 @@ import java.util.List;
 /**
  * A collection of helper functions to work with primitives
  */
+@Deprecated
 public class ListUtils {
     /**
      * Convert a list of Integers to a primitive array of int.

@@ -29,7 +29,7 @@ public class KendallsCorrelationTest {
     }
 
     @Test
-    public void testCorrelation() throws Exception {
+    public void testCorrelation() {
         KendallsCorrelation myKendall = new KendallsCorrelation();
         org.apache.commons.math3.stat.correlation.KendallsCorrelation orgKendall = new org.apache.commons.math3.stat.correlation.KendallsCorrelation();
         IIntegerNormalizer normalizer = new SequestBinner();
