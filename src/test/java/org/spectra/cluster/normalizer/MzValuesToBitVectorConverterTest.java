@@ -118,6 +118,6 @@ public class MzValuesToBitVectorConverterTest {
         long timeUsed = System.currentTimeMillis() - timeStart;
 
         // must take under 4 sec
-        Assert.assertTrue(String.format("%d mil sec used", timeUsed), timeUsed < 4000);
+        Assert.assertTrue(String.format("%d mil sec used", timeUsed), timeUsed < 5000);
     }
 }

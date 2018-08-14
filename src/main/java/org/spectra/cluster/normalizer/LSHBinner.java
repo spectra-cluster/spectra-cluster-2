@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class LSHBinner implements IIntegerNormalizer{
 
     IIntegerNormalizer firstBinner;
-    public final static Integer NUMBER_KERNELS = 99;
+    public final static Integer NUMBER_KERNELS = 25;
     public final static Integer DICTIONARY = 2;
     public Integer numberKernels;
     public Integer numberPeaksInKernel;
