@@ -1,5 +1,6 @@
 package org.spectra.cluster.normalizer;
 
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -10,15 +11,16 @@ import java.util.*;
  * @author ypriverol
  */
 @Slf4j
-public class MzPeaksBinnedNormalizer {
+public class MzPeaksBinnedNormalizer implements IIntegerNormalizer{
 
     private static  float MIN_MZ = 70F;
 
     private static  float MAX_MZ = 5000F;
     private static  double HIG_RES_INTERVAL = 1.0F;
 
-    public static int[] binnedHighResMzPeaks(Collection<Double> mzPeaks){
-        Iterator<Double> peakIt = mzPeaks.stream().sorted().iterator();
+    @Override
+    public int[] binDoubles(List<Double> valuesToBin) {
+        Iterator<Double> peakIt = valuesToBin.stream().sorted().iterator();
         int currentPeak = (int) peakIt.next().floatValue();
         Integer currentMZ = (int) MIN_MZ;
         int[] intervals = new int[(int) (MAX_MZ - MIN_MZ / HIG_RES_INTERVAL)];

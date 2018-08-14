@@ -29,12 +29,15 @@ public class JaccardComparatorTest {
 
     Iterator<Spectrum> specIt;
     Iterator<Spectrum> specItSequence;
+    MzPeaksBinnedNormalizer binnerNormalizer = new MzPeaksBinnedNormalizer();
+
 
     @Before
     public void setUp() throws JMzReaderException, URISyntaxException {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         MgfFile mgfFile = new MgfFile(new File(uri));
+
         specIt = mgfFile.getSpectrumIterator();
 
         spectrum1 = specIt.next();
@@ -42,8 +45,8 @@ public class JaccardComparatorTest {
         binarySpectrum1 = BinarySpectrum.builder()
                 .precursortMZ((int)spectrum1.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum1.getPrecursorCharge())
-                .mzPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
-                .intensityPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
+                .mzPeaksVector(binnerNormalizer.binDoubles(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
+                .intensityPeaksVector(binnerNormalizer.binDoubles(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
                 .build();
 
         spectrum2 = specIt.next();
@@ -51,8 +54,8 @@ public class JaccardComparatorTest {
         binarySpectrum2 = BinarySpectrum.builder()
                 .precursortMZ((int)spectrum2.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum2.getPrecursorCharge())
-                .mzPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
-                .intensityPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
+                .mzPeaksVector(binnerNormalizer.binDoubles(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
+                .intensityPeaksVector(binnerNormalizer.binDoubles(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
                 .build();
 
         /** Read the Spectra from similar files **/
@@ -79,8 +82,8 @@ public class JaccardComparatorTest {
     @Test
     public void computeSparseMatrixJaccard() {
 
-        SparseDoubleMatrix1D sparseMatrix1 = new SparseDoubleMatrix1D(Arrays.stream(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()))).asDoubleStream().toArray());
-        SparseDoubleMatrix1D sparseMatrix2 = new SparseDoubleMatrix1D(Arrays.stream(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()))).asDoubleStream().toArray());
+        SparseDoubleMatrix1D sparseMatrix1 = new SparseDoubleMatrix1D(Arrays.stream(binnerNormalizer.binDoubles(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()))).asDoubleStream().toArray());
+        SparseDoubleMatrix1D sparseMatrix2 = new SparseDoubleMatrix1D(Arrays.stream(binnerNormalizer.binDoubles(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()))).asDoubleStream().toArray());
 
         double similarity = JaccardComparator.computeSparseMatrixJaccard(sparseMatrix1, sparseMatrix2);
 
@@ -116,8 +119,8 @@ public class JaccardComparatorTest {
                     .precursortMZ((int) spec.getPrecursorMZ().doubleValue())
                     .precursorCharge(spec.getPrecursorCharge())
                     .uui(UUID.nameUUIDFromBytes(spec.getId().getBytes()).getMostSignificantBits())
-                    .mzPeaksVector((MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spec.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()))))
-                    .intensityPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spec.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
+                    .mzPeaksVector(binnerNormalizer.binDoubles(spec.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
+                    .intensityPeaksVector(binnerNormalizer.binDoubles(spec.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
                     .build()
             );
         }
