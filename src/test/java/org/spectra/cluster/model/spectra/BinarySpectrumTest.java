@@ -12,7 +12,6 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
-import java.util.UUID;
 
 public class BinarySpectrumTest {
 
@@ -33,9 +32,8 @@ public class BinarySpectrumTest {
 
         Spectrum spectrum = specIt.next();
         BinarySpectrum binarySpectrum = BinarySpectrum.builder()
-                .precursortMZ((int)spectrum.getPrecursorMZ().doubleValue())
+                .precursorMZ((int)spectrum.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum.getPrecursorCharge())
-                .uui(UUID.randomUUID().toString())
                 .build();
         Assert.assertTrue(binarySpectrum.getPrecursorCharge() == 2);
 

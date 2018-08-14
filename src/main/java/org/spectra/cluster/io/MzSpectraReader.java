@@ -140,9 +140,8 @@ public class MzSpectraReader {
     public Iterator<IBinarySpectrum> readBinarySpectraIterator() {
         Iterator<IBinarySpectrum> binaryIter = new IteratorConverter<>(jMzReader.getSpectrumIterator(),
                 spectrum -> BinarySpectrum.builder()
-                        .uui(UUID.randomUUID().toString())
                         .precursorCharge(spectrum.getPrecursorCharge())
-                        .precursortMZ((int) spectrum.getPrecursorMZ().doubleValue())
+                        .precursorMZ((int) spectrum.getPrecursorMZ().doubleValue())
                         .mzPeaksVector(mzBinner.binDoubles(spectrum.getPeakList()
                                 .entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
                         .intensityPeaksVector(intensityBinner.binDoubles(spectrum.getPeakList()

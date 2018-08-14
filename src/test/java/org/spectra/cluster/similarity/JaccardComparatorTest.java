@@ -46,7 +46,7 @@ public class JaccardComparatorTest {
         spectrum1 = specIt.next();
 
         binarySpectrum1 = BinarySpectrum.builder()
-                .precursortMZ((int)spectrum1.getPrecursorMZ().doubleValue())
+                .precursorMZ((int)spectrum1.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum1.getPrecursorCharge())
                 .mzPeaksVector(binnerNormalizer.binDoubles(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
                 .intensityPeaksVector(binnerNormalizer.binDoubles(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
@@ -55,7 +55,7 @@ public class JaccardComparatorTest {
         spectrum2 = specIt.next();
 
         binarySpectrum2 = BinarySpectrum.builder()
-                .precursortMZ((int)spectrum2.getPrecursorMZ().doubleValue())
+                .precursorMZ((int)spectrum2.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum2.getPrecursorCharge())
                 .mzPeaksVector(binnerNormalizer.binDoubles(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
                 .intensityPeaksVector(binnerNormalizer.binDoubles(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
@@ -119,9 +119,8 @@ public class JaccardComparatorTest {
             Spectrum spec = it.next();
             binarySpectrumList.add(BinarySpectrum
                     .builder()
-                    .precursortMZ((int) spec.getPrecursorMZ().doubleValue())
+                    .precursorMZ((int) spec.getPrecursorMZ().doubleValue())
                     .precursorCharge(spec.getPrecursorCharge())
-                    .uui(UUID.randomUUID().toString())
                     .mzPeaksVector(binnerNormalizer.binDoubles(spec.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
                     .intensityPeaksVector(binnerNormalizer.binDoubles(spec.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
                     .build()

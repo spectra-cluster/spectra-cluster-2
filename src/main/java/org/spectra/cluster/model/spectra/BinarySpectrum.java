@@ -1,5 +1,6 @@
 package org.spectra.cluster.model.spectra;
 
+import jdk.nashorn.internal.runtime.BitVector;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,13 +10,14 @@ import java.util.UUID;
 @Data
 @Builder
 public class BinarySpectrum implements IBinarySpectrum {
+    private final String uui = UUID.randomUUID().toString();
+    private final int precursorMZ;
+    private final int precursorCharge;
+    private final int[] mzPeaksVector;
+    private final int[] intensityPeaksVector;
 
-    String uui = UUID.randomUUID().toString();
-    int precursortMZ;
-    int precursorCharge;
-
-    private int[] mzPeaksVector;
-    private int[] intensityPeaksVector;
+    // this is intended for later use
+    // private final BitVector lowResMzBitVector;
 
     @Override
     public String getUUI() {
@@ -37,7 +39,7 @@ public class BinarySpectrum implements IBinarySpectrum {
 
     @Override
     public int getPrecursorMz() {
-        return precursortMZ;
+        return precursorMZ;
     }
 
     @Override
