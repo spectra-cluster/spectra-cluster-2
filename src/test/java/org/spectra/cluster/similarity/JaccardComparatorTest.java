@@ -38,7 +38,7 @@ public class JaccardComparatorTest {
         spectrum1 = specIt.next();
 
         binarySpectrum1 = BinarySpectrum.builder()
-                .precursortMZ((int)spectrum1.getPrecursorMZ().doubleValue())
+                .precursorMZ((int)spectrum1.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum1.getPrecursorCharge())
                 .mzPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum1.getPeakList().entrySet().stream().map(x->x.getKey()).collect(Collectors.toList())))
                 .intensityPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum1.getPeakList().entrySet().stream().map(x->x.getValue()).collect(Collectors.toList())))
@@ -47,7 +47,7 @@ public class JaccardComparatorTest {
         spectrum2 = specIt.next();
 
         binarySpectrum2 = BinarySpectrum.builder()
-                .precursortMZ((int)spectrum2.getPrecursorMZ().doubleValue())
+                .precursorMZ((int)spectrum2.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum2.getPrecursorCharge())
                 .mzPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum2.getPeakList().entrySet().stream().map(x->x.getKey()).collect(Collectors.toList())))
                 .intensityPeaksVector(MzPeaksBinnedNormalizer.binnedHighResMzPeaks(spectrum2.getPeakList().entrySet().stream().map(x->x.getValue()).collect(Collectors.toList())))

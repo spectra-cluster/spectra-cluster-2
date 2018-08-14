@@ -55,6 +55,6 @@ public interface IBinarySpectrum {
      * Get the Unique identifier
      * @return identifier
      */
-    long getUUI();
+    String getUUI();
 
 }

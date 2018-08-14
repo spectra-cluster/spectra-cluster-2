@@ -32,9 +32,8 @@ public class BinarySpectrumTest {
 
         Spectrum spectrum = specIt.next();
         BinarySpectrum binarySpectrum = BinarySpectrum.builder()
-                .precursortMZ((int)spectrum.getPrecursorMZ().doubleValue())
+                .precursorMZ((int)spectrum.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum.getPrecursorCharge())
-                .uui(spectrum.hashCode())
                 .build();
         Assert.assertTrue(binarySpectrum.getPrecursorCharge() == 2);
 
