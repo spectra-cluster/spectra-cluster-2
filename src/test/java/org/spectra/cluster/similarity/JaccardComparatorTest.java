@@ -148,7 +148,7 @@ public class JaccardComparatorTest {
                 int[] vector2 = lshBinner.binVector(binarySpectrumList.get(y).getMzPeaksVector());
 
                 log.info("Spectrum: " + binarySpectrumList.get(x).getUUI() + " and Spectrum: " + binarySpectrumList.get(y).getUUI() + " SparseJaccard: " +
-                        JaccardComparator.computeSparseMatrixJaccard(sparseX, sparseY) + " Jaccard: " + JaccardComparator.computeVectorJaccard(binarySpectrumList.get(x).getMzPeaksVector(), binarySpectrumList.get(y).getMzPeaksVector()) + " LSH Jaccard: "
+                        JaccardComparator.computeSparseMatrixJaccard(sparseX, sparseY) + " Jaccard: " + MinHash.jaccardIndex(Arrays.stream(binarySpectrumList.get(x).getMzPeaksVector()).boxed().collect(Collectors.toSet()), Arrays.stream(binarySpectrumList.get(y).getMzPeaksVector()).boxed().collect(Collectors.toSet())) + " LSH Jaccard: "
                         + MinHash.jaccardIndex(Arrays.stream(vector1).boxed().collect(Collectors.toSet()), Arrays.stream(vector2).boxed().collect(Collectors.toSet())));
             }
         }

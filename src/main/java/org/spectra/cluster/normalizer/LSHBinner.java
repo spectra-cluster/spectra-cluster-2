@@ -35,7 +35,7 @@ public class LSHBinner implements IIntegerNormalizer{
     public LSHBinner(){
         this.firstBinner = new SequestBinner();
         this.numberKernels = NUMBER_KERNELS;
-        this.numberPeaksInKernel = numberKernels;
+        this.numberPeaksInKernel = DICTIONARY;
     }
 
     @Override
