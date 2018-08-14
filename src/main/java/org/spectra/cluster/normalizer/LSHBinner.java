@@ -1,6 +1,7 @@
 package org.spectra.cluster.normalizer;
 
 import info.debatty.java.lsh.MinHash;
+import info.debatty.java.lsh.SuperBit;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
  *
  * @author ypriverol on 14/08/2018.
  */
+@Deprecated
 public class LSHBinner implements IIntegerNormalizer{
 
     IIntegerNormalizer firstBinner;
@@ -56,10 +58,10 @@ public class LSHBinner implements IIntegerNormalizer{
     /**
      * This function generates the LSH Vector for a Vector of integers using {@link MinHash}
      * @param vector original vector to be transform
-     * @return resturn hash vector
+     * @return returns hash vector
      */
     private int[] LSHBinner(int[] vector){
-        MinHash minhash = new MinHash(numberKernels, numberKernels);
+        MinHash minhash = new MinHash(numberPeaksInKernel, numberKernels);
         return minhash.signature(new TreeSet<>(Arrays.stream(vector).boxed().collect(Collectors.toList())));
     }
 }

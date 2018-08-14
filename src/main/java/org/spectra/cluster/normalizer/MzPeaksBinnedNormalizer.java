@@ -17,12 +17,30 @@ public class MzPeaksBinnedNormalizer implements IIntegerNormalizer{
     private static  float MAX_MZ = 5000F;
     private static  double HIG_RES_INTERVAL = 1.0F;
 
+    private double binValue;
+
+    /**
+     * Default constructor use 1.0F resolution
+     * for the binning process.
+     */
+    public MzPeaksBinnedNormalizer(){
+        this.binValue = HIG_RES_INTERVAL;
+    }
+
+    /**
+     * Constructor with binValue.
+     * @param binValue Binning Value
+     */
+    public MzPeaksBinnedNormalizer(double binValue){
+        this.binValue = binValue;
+    }
+
     @Override
     public int[] binDoubles(List<Double> valuesToBin) {
         Iterator<Double> peakIt = valuesToBin.stream().sorted().iterator();
         int currentPeak = (int) peakIt.next().floatValue();
         Integer currentMZ = (int) MIN_MZ;
-        int[] intervals = new int[(int) (MAX_MZ - MIN_MZ / HIG_RES_INTERVAL)];
+        int[] intervals = new int[(int) (MAX_MZ - MIN_MZ / binValue)];
 
         while(currentPeak < currentMZ && peakIt.hasNext())
             currentPeak = (int) peakIt.next().floatValue();

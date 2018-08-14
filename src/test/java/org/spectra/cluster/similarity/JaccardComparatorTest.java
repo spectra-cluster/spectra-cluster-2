@@ -121,7 +121,7 @@ public class JaccardComparatorTest {
                     .builder()
                     .precursortMZ((int) spec.getPrecursorMZ().doubleValue())
                     .precursorCharge(spec.getPrecursorCharge())
-                    .uui(UUID.nameUUIDFromBytes(spec.getId().getBytes()).getMostSignificantBits())
+                    .uui(UUID.randomUUID().toString())
                     .mzPeaksVector(binnerNormalizer.binDoubles(spec.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
                     .intensityPeaksVector(binnerNormalizer.binDoubles(spec.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
                     .build()

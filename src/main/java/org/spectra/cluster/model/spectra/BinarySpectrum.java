@@ -3,12 +3,14 @@ package org.spectra.cluster.model.spectra;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 
 @Data
 @Builder
 public class BinarySpectrum implements IBinarySpectrum {
 
-    long uui;
+    String uui = UUID.randomUUID().toString();
     int precursortMZ;
     int precursorCharge;
 
@@ -16,7 +18,7 @@ public class BinarySpectrum implements IBinarySpectrum {
     private int[] intensityPeaksVector;
 
     @Override
-    public long getUUI() {
+    public String getUUI() {
         return uui;
     }
 

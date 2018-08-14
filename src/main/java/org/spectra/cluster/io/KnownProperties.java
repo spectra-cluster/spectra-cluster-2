@@ -1,4 +1,4 @@
-package org.spectra.cluster.utils.io;
+package org.spectra.cluster.io;
 
 import java.util.*;
 

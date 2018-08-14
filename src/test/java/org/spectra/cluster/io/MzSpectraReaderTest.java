@@ -1,11 +1,11 @@
-package org.spectra.cluster.normalizer;
+package org.spectra.cluster.io;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
+import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
@@ -29,27 +29,29 @@ import static org.junit.Assert.*;
  *
  * @author ypriverol on 14/08/2018.
  */
-public class LSHBinnerTest {
+public class MzSpectraReaderTest {
 
-    Iterator<Spectrum> specIt = null;
+    MzSpectraReader spectraReader;
 
     @Before
-    public void setUp() throws JMzReaderException, URISyntaxException {
+    public void setUp() throws Exception {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MgfFile mgfFile = new MgfFile(new File(uri));
-        specIt = mgfFile.getSpectrumIterator();
-
+        File mgfFile = new File(uri);
+        spectraReader = new MzSpectraReader(mgfFile);
     }
 
     @Test
-    public void LSHBinner() {
+    public void readBinarySpectraIterator() {
 
-        Spectrum spectrum = specIt.next();
-        LSHBinner binner = new LSHBinner();
+        Iterator<IBinarySpectrum> binaryIter = spectraReader.readBinarySpectraIterator();
+        int count = 0;
+        while(binaryIter.hasNext()){
+            Assert.assertTrue(binaryIter.next().getIntensityVector().length > 0);
+            count++;
+        }
+        Assert.assertTrue(count == 2);
 
-        int[] values = binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
-        Assert.assertEquals(2, values.length);
 
     }
 }
