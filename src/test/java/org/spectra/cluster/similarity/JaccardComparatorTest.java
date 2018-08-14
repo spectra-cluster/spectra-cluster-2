@@ -2,12 +2,15 @@ package org.spectra.cluster.similarity;
 
 
 import cern.colt.matrix.impl.SparseDoubleMatrix1D;
+import info.debatty.java.lsh.MinHash;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
+import org.spectra.cluster.normalizer.LSHBinner;
 import org.spectra.cluster.normalizer.MzPeaksBinnedNormalizer;
+import org.spectra.cluster.normalizer.SequestBinner;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
@@ -29,7 +32,7 @@ public class JaccardComparatorTest {
 
     Iterator<Spectrum> specIt;
     Iterator<Spectrum> specItSequence;
-    MzPeaksBinnedNormalizer binnerNormalizer = new MzPeaksBinnedNormalizer();
+    SequestBinner binnerNormalizer = new SequestBinner();
 
 
     @Before
@@ -133,6 +136,7 @@ public class JaccardComparatorTest {
      * @param binarySpectrumList List of {@link BinarySpectrum}
      */
     private void printSimilarityJaccard(List<BinarySpectrum> binarySpectrumList){
+        LSHBinner lshBinner = new LSHBinner();
         for(int x = 0; x < binarySpectrumList.size(); x++){
             for(int y= x+1; y < binarySpectrumList.size(); y++){
 
@@ -140,8 +144,12 @@ public class JaccardComparatorTest {
                 SparseDoubleMatrix1D sparseX = new SparseDoubleMatrix1D(Arrays.stream(binarySpectrumList.get(x).getMzPeaksVector()).asDoubleStream().toArray());
                 SparseDoubleMatrix1D sparseY = new SparseDoubleMatrix1D(Arrays.stream(binarySpectrumList.get(y).getMzPeaksVector()).asDoubleStream().toArray());
 
+                int[] vector1 = lshBinner.binVector(binarySpectrumList.get(x).getMzPeaksVector());
+                int[] vector2 = lshBinner.binVector(binarySpectrumList.get(y).getMzPeaksVector());
+
                 log.info("Spectrum: " + binarySpectrumList.get(x).getUUI() + " and Spectrum: " + binarySpectrumList.get(y).getUUI() + " SparseJaccard: " +
-                        JaccardComparator.computeSparseMatrixJaccard(sparseX, sparseY) + " Jaccard: " + JaccardComparator.computeVectorJaccard(binarySpectrumList.get(x).getMzPeaksVector(), binarySpectrumList.get(y).getMzPeaksVector()));
+                        JaccardComparator.computeSparseMatrixJaccard(sparseX, sparseY) + " Jaccard: " + JaccardComparator.computeVectorJaccard(binarySpectrumList.get(x).getMzPeaksVector(), binarySpectrumList.get(y).getMzPeaksVector()) + " LSH Jaccard: "
+                        + MinHash.jaccardIndex(Arrays.stream(vector1).boxed().collect(Collectors.toSet()), Arrays.stream(vector2).boxed().collect(Collectors.toSet())));
             }
         }
     }

@@ -48,6 +48,13 @@
             <artifactId>jmzreader</artifactId>
             <version>${jmzreader.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>info.debatty</groupId>
+            <artifactId>java-lsh</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+
     </dependencies>
 
     <build>
