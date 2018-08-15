@@ -18,31 +18,39 @@ import java.util.stream.Collectors;
  *
  * @author ypriverol on 14/08/2018.
  */
-@Deprecated
+
 public class LSHBinner implements IIntegerNormalizer{
 
     IIntegerNormalizer firstBinner;
-    public final static Integer NUMBER_KERNELS = 25;
-    public final static Integer DICTIONARY = 2;
+    public final static Integer NUMBER_KERNELS = 10;
+    public final static Integer DICTIONARY = 10;
     public Integer numberKernels;
     public Integer numberPeaksInKernel;
+    public Integer VECTOR_SIZE = 2500;
+    public Integer vectorSize;
 
-    public LSHBinner(IIntegerNormalizer firstBinner, int numberKernels, int numberPeaksInKernel){
+    private final MinHash minHashInstance;
+
+    public LSHBinner(IIntegerNormalizer firstBinner, int numberKernels, int numberPeaksInKernel, int vector_size){
         this.firstBinner = firstBinner;
         this.numberKernels = numberKernels;
         this.numberPeaksInKernel = numberPeaksInKernel;
+        minHashInstance = new MinHash(numberKernels, numberPeaksInKernel, vector_size);
     }
 
     public LSHBinner(){
         this.firstBinner = new SequestBinner();
         this.numberKernels = NUMBER_KERNELS;
         this.numberPeaksInKernel = DICTIONARY;
+        this.vectorSize = VECTOR_SIZE;
+        minHashInstance = new MinHash(numberKernels, numberPeaksInKernel, vectorSize);
+
     }
 
     @Override
     public int[] binDoubles(List<Double> valuesToBin) {
         int [] vector = firstBinner.binDoubles(valuesToBin);
-        return LSHBinner(vector);
+        return lshbinner(vector);
     }
 
     /**
@@ -51,7 +59,7 @@ public class LSHBinner implements IIntegerNormalizer{
      * @return Vector of LSH values
      */
     public int[] binVector(int[] valuesToBin) {
-        return LSHBinner(valuesToBin);
+        return lshbinner(valuesToBin);
     }
 
     /**
@@ -59,8 +67,7 @@ public class LSHBinner implements IIntegerNormalizer{
      * @param vector original vector to be transform
      * @return returns hash vector
      */
-    private int[] LSHBinner(int[] vector){
-        MinHash minhash = new MinHash(numberPeaksInKernel, numberKernels);
-        return minhash.signature(new TreeSet<>(Arrays.stream(vector).boxed().collect(Collectors.toList())));
+    private int[] lshbinner(int[] vector){
+        return minHashInstance.signature(new TreeSet<>(Arrays.stream(vector).boxed().collect(Collectors.toList())));
     }
 }

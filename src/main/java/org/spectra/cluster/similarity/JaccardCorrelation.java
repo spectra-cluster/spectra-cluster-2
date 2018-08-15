@@ -1,9 +1,7 @@
 package org.spectra.cluster.similarity;
 
-import cern.colt.matrix.impl.SparseDoubleMatrix1D;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.spectra.cluster.utils.math.Matrix2DUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +9,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class JaccardComparator {
+public class JaccardCorrelation implements ISimilarityFunction{
 
     /**
      * This method computes Jaccard coefficient for neighbors of a given
@@ -20,7 +18,8 @@ public class JaccardComparator {
      * @param secondCollection Second Collection to Compare
      * @return The similarity score between both collections.
      */
-    public static double computeVectorJaccard(int[] firstCollection,
+    @Override
+    public double correlation(int[] firstCollection,
                                               int[]  secondCollection) {
         List<Integer> coll1 =  Arrays.stream(firstCollection).boxed().filter(x -> x > 0 ).collect(Collectors.toList());
         List<Integer> coll2 =  Arrays.stream(secondCollection).boxed().filter(x -> x > 0 ).collect(Collectors.toList());
@@ -35,28 +34,29 @@ public class JaccardComparator {
         return (double) intersection / union;
     }
 
-    /**
-     * Compute the jaccard score for two sparse matrices
-     * @param firstCollection first collection to compare
-     * @param secondCollection second collection to compare
-     * @return similarity score.
-     */
-    public static double computeSparseMatrixJaccard(SparseDoubleMatrix1D firstCollection, SparseDoubleMatrix1D secondCollection)
-    {
-        double sim = -1;
-        if(firstCollection.size() != secondCollection.size())
-            return sim;
-        double num;
-        double den;
-        num = Matrix2DUtils.productQuick(firstCollection, secondCollection);
-        den = Matrix2DUtils.getSqrSum(firstCollection) + Matrix2DUtils.getSqrSum(secondCollection);
-
-
-        if((den-num) == 0)
-            return 0;
-        sim = num/(den - num);
-        return sim;
-    }
+//    /**
+//     * Compute the jaccard score for two sparse matrices
+//     * @param firstCollection first collection to compare
+//     * @param secondCollection second collection to compare
+//     * @return similarity score.
+//     */
+//    @Deprecated
+//    public static double computeSparseMatrixJaccard(SparseDoubleMatrix1D firstCollection, SparseDoubleMatrix1D secondCollection)
+//    {
+//        double sim = -1;
+//        if(firstCollection.size() != secondCollection.size())
+//            return sim;
+//        double num;
+//        double den;
+//        num = Matrix2DUtils.productQuick(firstCollection, secondCollection);
+//        den = Matrix2DUtils.getSqrSum(firstCollection) + Matrix2DUtils.getSqrSum(secondCollection);
+//
+//
+//        if((den-num) == 0)
+//            return 0;
+//        sim = num/(den - num);
+//        return sim;
+//    }
 
 
 }

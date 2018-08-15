@@ -47,7 +47,7 @@ public class LSHBinnerTest {
         LSHBinner binner = new LSHBinner();
 
         int[] values = binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
-        Assert.assertEquals(2, values.length);
+        Assert.assertEquals(10, values.length);
 
     }
 }

@@ -70,7 +70,7 @@ import java.util.function.Function;
  *
  * @since 3.3
  */
-public class KendallsCorrelation {
+public class KendallsCorrelation implements ISimilarityFunction{
     /**
      * Computes the Kendall's Tau rank correlation coefficient between the two arrays.
      *
@@ -79,6 +79,8 @@ public class KendallsCorrelation {
      * @return Returns Kendall's Tau rank correlation coefficient for the two arrays
      * @throws DimensionMismatchException if the arrays lengths do not match
      */
+
+    @Override
     public double correlation(final int[] xArray, final int[] yArray)
             throws DimensionMismatchException {
 
