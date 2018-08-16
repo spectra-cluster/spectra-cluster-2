@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.model.commons.IteratorConverter;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.IIntegerNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
 import uk.ac.ebi.pride.tools.apl_parser.AplFile;
@@ -87,12 +88,17 @@ public class MzSpectraReader {
     @Setter
     private IIntegerNormalizer intensityBinner;
 
+    @Setter
+    private BasicIntegerNormalizer precursorNormalizer;
+
     /**
      * Create a Reader from a file. The file type accepted are mgf or mzml
      * @param file File to be read
      * @throws Exception File not supported
      */
-    public  MzSpectraReader(File file, IIntegerNormalizer mzBinner, IIntegerNormalizer intensityBinner) throws Exception {
+    public  MzSpectraReader(File file, IIntegerNormalizer mzBinner,
+                            IIntegerNormalizer intensityBinner,
+                            BasicIntegerNormalizer precursorNormalizer) throws Exception {
         try{
             Class<?> peakListclass = isValidPeakListFile(file);
             if( peakListclass != null){
@@ -118,16 +124,16 @@ public class MzSpectraReader {
 
         this.mzBinner = mzBinner;
         this.intensityBinner = intensityBinner;
+        this.precursorNormalizer = precursorNormalizer;
     }
 
     /**
      * Default constructor use as a MzBinner the {@link org.spectra.cluster.normalizer.SequestBinner} and as
-     * intensity binner the
-     * //Todo: Intensity Binner
+     * intensity binner the.
      * @param file File
      */
     public MzSpectraReader(File file) throws Exception {
-        this(file, new SequestBinner(), new SequestBinner());
+        this(file, new SequestBinner(), new SequestBinner(), new BasicIntegerNormalizer());
     }
 
     /**
@@ -140,7 +146,7 @@ public class MzSpectraReader {
         return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
                 spectrum -> BinarySpectrum.builder()
                         .precursorCharge(spectrum.getPrecursorCharge())
-                        .precursorMZ((int) spectrum.getPrecursorMZ().doubleValue())
+                        .precursorMZ(precursorNormalizer.binValue(spectrum.getPrecursorMZ()))
                         .mzPeaksVector(mzBinner.binDoubles(spectrum.getPeakList()
                                 .entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
                         .intensityPeaksVector(intensityBinner.binDoubles(spectrum.getPeakList()

@@ -38,7 +38,7 @@ public class BasicBinnerTest {
         BasicBinner binner = new BasicBinner();
 
         int[] values = binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
-        Assert.assertEquals(4930, values.length);
+        Assert.assertEquals(88, values.length);
 
     }
 }

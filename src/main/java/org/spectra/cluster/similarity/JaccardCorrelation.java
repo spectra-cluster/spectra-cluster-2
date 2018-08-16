@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class JaccardCorrelation implements ISimilarityFunction{
+public class JaccardCorrelation implements ISimilarity {
 
     /**
      * This method computes Jaccard coefficient for neighbors of a given
@@ -33,30 +33,4 @@ public class JaccardCorrelation implements ISimilarityFunction{
 
         return (double) intersection / union;
     }
-
-//    /**
-//     * Compute the jaccard score for two sparse matrices
-//     * @param firstCollection first collection to compare
-//     * @param secondCollection second collection to compare
-//     * @return similarity score.
-//     */
-//    @Deprecated
-//    public static double computeSparseMatrixJaccard(SparseDoubleMatrix1D firstCollection, SparseDoubleMatrix1D secondCollection)
-//    {
-//        double sim = -1;
-//        if(firstCollection.size() != secondCollection.size())
-//            return sim;
-//        double num;
-//        double den;
-//        num = Matrix2DUtils.productQuick(firstCollection, secondCollection);
-//        den = Matrix2DUtils.getSqrSum(firstCollection) + Matrix2DUtils.getSqrSum(secondCollection);
-//
-//
-//        if((den-num) == 0)
-//            return 0;
-//        sim = num/(den - num);
-//        return sim;
-//    }
-
-
 }

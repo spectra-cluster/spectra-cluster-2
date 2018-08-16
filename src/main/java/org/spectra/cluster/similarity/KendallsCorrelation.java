@@ -70,7 +70,7 @@ import java.util.function.Function;
  *
  * @since 3.3
  */
-public class KendallsCorrelation implements ISimilarityFunction{
+public class KendallsCorrelation implements ISimilarity {
     /**
      * Computes the Kendall's Tau rank correlation coefficient between the two arrays.
      *

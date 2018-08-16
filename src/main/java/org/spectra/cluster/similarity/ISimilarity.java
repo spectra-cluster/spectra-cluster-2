@@ -2,7 +2,7 @@ package org.spectra.cluster.similarity;
 
 import java.io.Serializable;
 
-public interface ISimilarityFunction extends Serializable {
+public interface ISimilarity extends Serializable {
 
     /**
      * This method compare two vectors with some similarity function, see for implementations {@link KendallsCorrelation}
