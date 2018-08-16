@@ -42,7 +42,7 @@ public class LSHBinner implements IIntegerNormalizer{
     @Override
     public int[] binDoubles(List<Double> valuesToBin) {
         int [] vector = firstBinner.binDoubles(valuesToBin);
-        return LSHBinner(vector);
+        return binIntegers(vector);
     }
 
     /**
@@ -51,7 +51,7 @@ public class LSHBinner implements IIntegerNormalizer{
      * @return Vector of LSH values
      */
     public int[] binVector(int[] valuesToBin) {
-        return LSHBinner(valuesToBin);
+        return binIntegers(valuesToBin);
     }
 
     /**
@@ -59,7 +59,7 @@ public class LSHBinner implements IIntegerNormalizer{
      * @param vector original vector to be transform
      * @return returns hash vector
      */
-    private int[] LSHBinner(int[] vector){
+    private int[] binIntegers(int[] vector){
         MinHash minhash = new MinHash(numberPeaksInKernel, numberKernels);
         return minhash.signature(new TreeSet<>(Arrays.stream(vector).boxed().collect(Collectors.toList())));
     }

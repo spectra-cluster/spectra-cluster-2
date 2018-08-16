@@ -94,7 +94,7 @@ public class MzSpectraReader {
      */
     public  MzSpectraReader(File file, IIntegerNormalizer mzBinner, IIntegerNormalizer intensityBinner) throws Exception {
         try{
-            Class<? extends Object> peakListclass = isValidPeakListFile(file);
+            Class<?> peakListclass = isValidPeakListFile(file);
             if( peakListclass != null){
                 if(peakListclass == MgfFile.class)
                     jMzReader = new MgfFile(file);
@@ -153,7 +153,7 @@ public class MzSpectraReader {
      * @param file File to be read
      * @return Class Reader {@link JMzReader} Adapter
      */
-    private Class<? extends Object> isValidPeakListFile(File file){
+    private Class<?> isValidPeakListFile(File file){
 
         String filename = file.getName().toLowerCase();
 
@@ -194,11 +194,11 @@ public class MzSpectraReader {
     }
 
     /**
-     * This fucntion check if an
-     * @param file
-     * @param pattern
-     * @param fileType
-     * @return
+     * This function check if the file is a proper XML (mzML or mzXML )
+     * @param file File to be check
+     * @param pattern Pattern of the file header
+     * @param fileType File Type mzXML or mzML to check the extension.
+     * @return True is the file type correspond to the file content
      */
     private boolean checkXMLValidFile(File file, Pattern pattern, MzFileType fileType){
         boolean valid = false;
