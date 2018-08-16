@@ -33,7 +33,7 @@ public class MzValuesToBitVectorConverterTest {
     }
 
     @Test
-    public void testManualBinning() throws Exception {
+    public void testManualBinning() {
         double[] valuesToBin = {0.12, 1.19, 10, 100.0, 2010};
         List<Double> doubleList = Arrays.stream(valuesToBin).boxed().collect(Collectors.toList());
 
@@ -94,30 +94,5 @@ public class MzValuesToBitVectorConverterTest {
         for (int bin : orgBins) {
             Assert.assertTrue(vector.get(bin - 150));
         }
-    }
-
-    @Test
-    public void testBenchmark() {
-        List<Double> doubleList = new ArrayList<>(testSpectrum.getPeakList().keySet());
-        MzValuesToBitVectorConverter converter = new MzValuesToBitVectorConverter(new SequestBinner());
-
-        // create 1M vectors
-        int nInstances = 1000000;
-
-        // test how long it takes for 1M vectors
-        long timeStart = System.currentTimeMillis();
-
-        List<BitVector> vectors = new ArrayList<>(nInstances);
-
-        for (int i = 0; i < nInstances; i++) {
-            BitVector v = converter.mzToBitVector(doubleList);
-            vectors.add(v);
-        }
-
-        // get the memory now
-        long timeUsed = System.currentTimeMillis() - timeStart;
-
-        // must take under 4 sec
-        Assert.assertTrue(String.format("%d mil sec used", timeUsed), timeUsed < 4000);
     }
 }

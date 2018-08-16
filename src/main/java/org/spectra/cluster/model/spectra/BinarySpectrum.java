@@ -1,6 +1,5 @@
 package org.spectra.cluster.model.spectra;
 
-import jdk.nashorn.internal.runtime.BitVector;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,7 +12,6 @@ public class BinarySpectrum implements IBinarySpectrum {
     private final String uui = UUID.randomUUID().toString();
     private final int precursorMZ;
     private final int precursorCharge;
-
     private final int[] mzPeaksVector;
     private final int[] intensityPeaksVector;
 

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  * vector.
  */
 public class MzValuesToBitVectorConverter {
+
     public static final double DEFAULT_MIN_MZ = 0;
     public static final double DEFAULT_MAX_MZ = 2001.18;
 
