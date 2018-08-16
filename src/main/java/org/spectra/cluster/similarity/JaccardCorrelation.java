@@ -27,7 +27,7 @@ public class JaccardCorrelation implements ISimilarityFunction{
         if(coll1 == null || coll2 == null || coll1.isEmpty() || coll2.isEmpty())
             log.error("One of the peak Lists is empty -- ");
 
-        int intersection = CollectionUtils.intersection(Objects.requireNonNull(coll1), coll2)
+        int intersection = CollectionUtils.intersection(Objects.requireNonNull(coll1), Objects.requireNonNull(coll2))
                 .size();
         int union = CollectionUtils.union(coll1, coll2).size();
 
