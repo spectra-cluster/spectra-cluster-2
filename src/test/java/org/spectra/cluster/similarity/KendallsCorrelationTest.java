@@ -16,6 +16,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 public class KendallsCorrelationTest {
+
     List<Spectrum> spectra = new ArrayList<>();
 
     @Before
