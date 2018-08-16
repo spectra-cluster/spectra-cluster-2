@@ -1,5 +1,7 @@
 package org.spectra.cluster.model.spectra;
 
+import java.io.Serializable;
+
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
@@ -16,7 +18,7 @@ package org.spectra.cluster.model.spectra;
  * @author ypriverol on 09/08/2018.
  */
 
-public interface IBinarySpectrum {
+public interface IBinarySpectrum extends Serializable, Cloneable {
 
 
     /**

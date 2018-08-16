@@ -10,7 +10,7 @@ import java.util.*;
  * @author ypriverol
  */
 @Slf4j
-public class MzPeaksBinnedNormalizer implements IIntegerNormalizer{
+public class BasicBinner implements IIntegerNormalizer{
 
     private static  float MIN_MZ = 70F;
 
@@ -23,7 +23,7 @@ public class MzPeaksBinnedNormalizer implements IIntegerNormalizer{
      * Default constructor use 1.0F resolution
      * for the binning process.
      */
-    public MzPeaksBinnedNormalizer(){
+    public BasicBinner(){
         this.binValue = HIG_RES_INTERVAL;
     }
 
@@ -31,7 +31,7 @@ public class MzPeaksBinnedNormalizer implements IIntegerNormalizer{
      * Constructor with binValue.
      * @param binValue Binning Value
      */
-    public MzPeaksBinnedNormalizer(double binValue){
+    public BasicBinner(double binValue){
         this.binValue = binValue;
     }
 

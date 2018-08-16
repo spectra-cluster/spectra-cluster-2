@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class MzPeaksBinnedNormalizerTest {
+public class BasicBinnerTest {
 
     Iterator<Spectrum> specIt = null;
 
@@ -35,7 +35,7 @@ public class MzPeaksBinnedNormalizerTest {
 
         Spectrum spectrum = specIt.next();
 
-        MzPeaksBinnedNormalizer binner = new MzPeaksBinnedNormalizer();
+        BasicBinner binner = new BasicBinner();
 
         int[] values = binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
         Assert.assertEquals(4930, values.length);

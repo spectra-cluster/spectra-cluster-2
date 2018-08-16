@@ -194,11 +194,12 @@ public class MzSpectraReader {
     }
 
     /**
-     * This function check if the file is a proper XML (mzML or mzXML )
-     * @param file File to be check
-     * @param pattern Pattern of the file header
-     * @param fileType File Type mzXML or mzML to check the extension.
-     * @return True is the file type correspond to the file content
+     * This function that check if the first lines of an XML file contains an specific
+     * Pattern. It also validates that the file extension correspond to the {@link MzFileType}
+     * @param file File
+     * @param pattern Pattern to be search
+     * @param fileType {@link MzFileType}
+     * @return True if the extension and the pattern match .
      */
     private boolean checkXMLValidFile(File file, Pattern pattern, MzFileType fileType){
         boolean valid = false;

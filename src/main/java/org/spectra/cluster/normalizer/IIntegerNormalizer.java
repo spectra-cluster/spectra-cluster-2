@@ -1,5 +1,6 @@
 package org.spectra.cluster.normalizer;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * integers.
  * @author jg
  */
-public interface IIntegerNormalizer {
+public interface IIntegerNormalizer extends Serializable, Cloneable {
     /**
      * Convert a list of doubles to an array of ints by
      * binning them. The integer array then only contains
@@ -17,5 +18,5 @@ public interface IIntegerNormalizer {
      * @return An integer array containing the values' indexes
      *         based on the binning procedure.
      */
-    public int[] binDoubles(List<Double> valuesToBin);
+    int[] binDoubles(List<Double> valuesToBin);
 }

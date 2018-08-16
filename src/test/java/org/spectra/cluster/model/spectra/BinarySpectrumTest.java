@@ -27,7 +27,6 @@ public class BinarySpectrumTest {
 
     }
 
-
     @Test
     public void readBinarySpectrum() {
 
