@@ -10,6 +10,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class BinarySpectrum implements IBinarySpectrum {
+
     private final String uui = UUID.randomUUID().toString();
     private final int precursorMZ;
     private final int precursorCharge;
