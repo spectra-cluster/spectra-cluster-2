@@ -1,10 +1,8 @@
 package org.spectra.cluster.normalizer;
 
 import info.debatty.java.lsh.MinHash;
-import org.spectra.cluster.filter.IFilter;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 

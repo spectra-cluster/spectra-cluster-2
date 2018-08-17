@@ -1,7 +1,5 @@
 package org.spectra.cluster.normalizer;
 
-import lombok.Data;
-
 import java.util.List;
 
 /**

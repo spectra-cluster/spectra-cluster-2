@@ -1,8 +1,5 @@
 package org.spectra.cluster.normalizer;
 
-import org.spectra.cluster.model.commons.Tuple;
-import org.spectra.cluster.model.spectra.BinaryPeak;
-
 import java.io.Serializable;
 import java.util.List;
 
