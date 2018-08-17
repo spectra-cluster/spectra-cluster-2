@@ -1,13 +1,13 @@
 package org.spectra.cluster.similarity;
 
 
-import cern.colt.matrix.impl.SparseDoubleMatrix1D;
-import info.debatty.java.lsh.MinHash;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
+import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
+import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.LSHBinner;
 import org.spectra.cluster.normalizer.SequestBinner;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
@@ -30,11 +30,11 @@ public class JaccardCorrelationTest {
     Spectrum spectrum2 = null;
 
     Iterator<Spectrum> specIt;
-    SequestBinner binnerNormalizer = new SequestBinner();
+    FactoryNormalizer binnerNormalizer = new FactoryNormalizer(new SequestBinner(), new BasicIntegerNormalizer());
 
 
     @Before
-    public void setUp() throws JMzReaderException, URISyntaxException {
+    public void setUp() throws Exception {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         MgfFile mgfFile = new MgfFile(new File(uri));
@@ -46,8 +46,7 @@ public class JaccardCorrelationTest {
         binarySpectrum1 = BinarySpectrum.builder()
                 .precursorMZ((int)spectrum1.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum1.getPrecursorCharge())
-                .mzPeaksVector(binnerNormalizer.binDoubles(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
-                .intensityPeaksVector(binnerNormalizer.binDoubles(spectrum1.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
+                .peaks(binnerNormalizer.normalizePeaks(spectrum1.getPeakList()))
                 .build();
 
         spectrum2 = specIt.next();
@@ -55,8 +54,7 @@ public class JaccardCorrelationTest {
         binarySpectrum2 = BinarySpectrum.builder()
                 .precursorMZ((int)spectrum2.getPrecursorMZ().doubleValue())
                 .precursorCharge(spectrum2.getPrecursorCharge())
-                .mzPeaksVector(binnerNormalizer.binDoubles(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
-                .intensityPeaksVector(binnerNormalizer.binDoubles(spectrum2.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList())))
+                .peaks(binnerNormalizer.normalizePeaks(spectrum1.getPeakList()))
                 .build();
 
         /** Read the Spectra from similar files **/
@@ -72,7 +70,8 @@ public class JaccardCorrelationTest {
 
         JaccardCorrelation correlation = new JaccardCorrelation();
 
-        double similarity = correlation.correlation(binarySpectrum1.getMzPeaksVector(), binarySpectrum2.getMzPeaksVector());
+        double similarity = correlation.correlation(binarySpectrum1.getMzVector(),
+                binarySpectrum2.getMzVector());
         Assert.assertTrue(similarity - 0.99f < 0.1);
     }
 
@@ -81,8 +80,8 @@ public class JaccardCorrelationTest {
         LSHBinner lshBinner = new LSHBinner();
         JaccardCorrelation correlation = new JaccardCorrelation();
 
-        int[] vector1 = lshBinner.binVector(binarySpectrum1.getMzPeaksVector());
-        int[] vector2 = lshBinner.binVector(binarySpectrum2.getMzPeaksVector());
+        int[] vector1 = lshBinner.binVector(binarySpectrum1.getMzVector());
+        int[] vector2 = lshBinner.binVector(binarySpectrum2.getMzVector());
 
         double similarity = correlation.correlation(vector1, vector2);
         Assert.assertTrue(similarity - 0.99f < 0.1);

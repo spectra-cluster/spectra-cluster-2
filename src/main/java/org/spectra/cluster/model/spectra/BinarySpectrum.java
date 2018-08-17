@@ -3,6 +3,7 @@ package org.spectra.cluster.model.spectra;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 
@@ -12,11 +13,8 @@ public class BinarySpectrum implements IBinarySpectrum {
     private final String uui = UUID.randomUUID().toString();
     private final int precursorMZ;
     private final int precursorCharge;
-    private final int[] mzPeaksVector;
-    private final int[] intensityPeaksVector;
 
-    // this is intended for later use
-    // private final BitVector lowResMzBitVector;
+    private BinaryPeak[] peaks;
 
     @Override
     public String getUUI() {
@@ -24,10 +22,15 @@ public class BinarySpectrum implements IBinarySpectrum {
     }
 
     @Override
+    public BinaryPeak[] getPeaks() {
+        return peaks;
+    }
+
+    @Override
     public int getNumberOfPeaks() {
         int count = 0 ;
-        if(mzPeaksVector != null)
-            count = mzPeaksVector.length;
+        if(peaks != null)
+            count = peaks.length;
         return count;
     }
 
@@ -43,12 +46,12 @@ public class BinarySpectrum implements IBinarySpectrum {
 
     @Override
     public int[] getMzVector() {
-        return mzPeaksVector;
+        return Arrays.stream(peaks).mapToInt(BinaryPeak::getMz).toArray();
     }
 
     @Override
     public int[] getIntensityVector() {
-        return intensityPeaksVector;
+        return Arrays.stream(peaks).mapToInt(BinaryPeak::getIntensity).toArray();
     }
 
 

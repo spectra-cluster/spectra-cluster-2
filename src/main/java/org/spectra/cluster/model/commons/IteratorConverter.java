@@ -32,7 +32,12 @@ public class IteratorConverter<F, T> implements Iterator<T> {
     }
 
     public T next() {
-        return converter.convert(iterator.next());
+        try {
+            return converter.convert(iterator.next());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void remove() {

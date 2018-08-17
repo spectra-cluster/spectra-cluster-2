@@ -1,6 +1,8 @@
 package org.spectra.cluster.normalizer;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spectra.cluster.model.commons.Tuple;
+import org.spectra.cluster.model.spectra.BinaryPeak;
 
 import java.util.*;
 
@@ -10,7 +12,7 @@ import java.util.*;
  * @author ypriverol
  */
 @Slf4j
-public class BasicBinner implements IIntegerNormalizer{
+public class BasicMzBinner implements IIntegerNormalizer{
 
     private static  double HIG_RES_INTERVAL = 1.0F;
     private double binnerValue;
@@ -19,7 +21,7 @@ public class BasicBinner implements IIntegerNormalizer{
      * Default constructor use 1.0F resolution
      * for the binning process.
      */
-    public BasicBinner(){
+    public BasicMzBinner(){
         this.binnerValue = HIG_RES_INTERVAL;
     }
 
@@ -27,7 +29,7 @@ public class BasicBinner implements IIntegerNormalizer{
      * Constructor with binValue.
      * @param binValue Binning Value
      */
-    public BasicBinner(double binValue){
+    public BasicMzBinner(double binValue){
         this.binnerValue = binValue;
     }
 
@@ -48,4 +50,6 @@ public class BasicBinner implements IIntegerNormalizer{
         }
         return binIndexes;
     }
+
+
 }

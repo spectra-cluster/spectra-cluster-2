@@ -3,9 +3,11 @@ package org.spectra.cluster.io;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.model.commons.IteratorConverter;
+import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
+import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.IIntegerNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
 import uk.ac.ebi.pride.tools.apl_parser.AplFile;
@@ -25,6 +27,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,11 +88,9 @@ public class MzSpectraReader {
     @Setter
     private IIntegerNormalizer mzBinner;
 
-    @Setter
-    private IIntegerNormalizer intensityBinner;
+    private FactoryNormalizer factory;
 
-    @Setter
-    private BasicIntegerNormalizer precursorNormalizer;
+    private IIntegerNormalizer precursorNormalizer;
 
     /**
      * Create a Reader from a file. The file type accepted are mgf or mzml
@@ -122,9 +123,8 @@ public class MzSpectraReader {
             throw new Exception(message);
         }
 
-        this.mzBinner = mzBinner;
-        this.intensityBinner = intensityBinner;
         this.precursorNormalizer = precursorNormalizer;
+        this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
     }
 
     /**
@@ -146,13 +146,11 @@ public class MzSpectraReader {
         return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
                 spectrum -> BinarySpectrum.builder()
                         .precursorCharge(spectrum.getPrecursorCharge())
-                        .precursorMZ(precursorNormalizer.binValue(spectrum.getPrecursorMZ()))
-                        .mzPeaksVector(mzBinner.binDoubles(spectrum.getPeakList()
-                                .entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
-                        .intensityPeaksVector(intensityBinner.binDoubles(spectrum.getPeakList()
-                                .entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())))
+                        .precursorMZ(((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()))
+                        .peaks(factory.normalizePeaks(spectrum.getPeakList()))
                         .build());
     }
+
 
     /**
      * Get the Class for the specific Peak List reader

@@ -1,5 +1,8 @@
 package org.spectra.cluster.normalizer;
 
+import org.spectra.cluster.model.commons.Tuple;
+import org.spectra.cluster.model.spectra.BinaryPeak;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -28,4 +31,5 @@ public interface IIntegerNormalizer extends Serializable, Cloneable {
      *         based on the binning procedure.
      */
     int[] binDoubles(List<Double> valuesToBin);
+
 }

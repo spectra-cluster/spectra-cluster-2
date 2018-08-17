@@ -59,4 +59,10 @@ public interface IBinarySpectrum extends Serializable, Cloneable {
      */
     String getUUI();
 
+    /**
+     * The List of peaks for the Spectrum
+     * @return
+     */
+    BinaryPeak[] getPeaks();
+
 }

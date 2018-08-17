@@ -44,9 +44,11 @@ public class LSHBinnerTest {
     public void LSHBinner() {
 
         Spectrum spectrum = specIt.next();
-        LSHBinner binner = new LSHBinner();
+        LSHBinner kernelsHLS = LSHBinner.getInstance();
 
-        int[] values = binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+        SequestBinner binner = new SequestBinner();
+
+        int[] values = kernelsHLS.getKernels(binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())));
         Assert.assertEquals(10, values.length);
 
     }

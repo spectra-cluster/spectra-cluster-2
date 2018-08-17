@@ -1,4 +1,8 @@
-package org.spectra.cluster.model.commons;
+package org.spectra.cluster.filter;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -9,9 +13,12 @@ package org.spectra.cluster.model.commons;
  * <p>
  * ==Overview==
  *
- * @author ypriverol on 14/08/2018.
+ * @author ypriverol on 16/08/2018.
  */
+public class HighestIntensityNPeaksFilterTest {
 
-public interface Converter<F, T> {
-    T convert(F object) throws Exception;
+    @Test
+    public void filter() {
+
+    }
 }
