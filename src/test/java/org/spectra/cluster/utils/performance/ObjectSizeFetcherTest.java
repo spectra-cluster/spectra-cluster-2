@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 public class ObjectSizeFetcherTest {
 
     List<Spectrum> spectrumList;
-    List<BinarySpectrum> binarySpectrumList;
+    BinarySpectrum[] binarySpectrumList;
 
 
     @Before
@@ -43,18 +43,20 @@ public class ObjectSizeFetcherTest {
         MgfFile mgfFile = new MgfFile(new File(uri));
         Iterator<Spectrum> specIt = mgfFile.getSpectrumIterator();
         spectrumList = new ArrayList<>();
-        binarySpectrumList = new ArrayList<>();
+        binarySpectrumList = new BinarySpectrum[2];
         BasicIntegerNormalizer precursorNormalizer = new BasicIntegerNormalizer();
         FactoryNormalizer factory = new FactoryNormalizer(new SequestBinner(), new BasicIntegerNormalizer());
+        int count = 0;
         while(specIt.hasNext()){
             Spectrum spec = specIt.next();
             spectrumList.add(spec);
-            binarySpectrumList.add(BinarySpectrum.builder()
+            binarySpectrumList[count] = BinarySpectrum.builder()
                     .precursorCharge(spec.getPrecursorCharge())
                     .precursorMZ((precursorNormalizer)
                             .binValue(spec.getPrecursorMZ()))
                     .peaks(factory.normalizePeaks(spec.getPeakList()))
-                    .build());
+                    .build();
+            count++;
         }
     }
 
@@ -64,7 +66,27 @@ public class ObjectSizeFetcherTest {
         long size = sizeOf.deepSizeOf(spectrumList);
         long binarySize = sizeOf.deepSizeOf(binarySpectrumList);
 
-        Assert.assertTrue(binarySize * 2 < size);
+        Assert.assertTrue(binarySize * 3 < size);
+
+    }
+
+    @Test
+    public void getExpectedObjectSizeMillion() {
+
+        List<Spectrum> millionSpectra = new ArrayList<>(1000000);
+        BinarySpectrum[] millionBinarySpectrum = new BinarySpectrum[1000000];
+        for(int i= 0; i < 500000; i++){
+            millionSpectra.add(spectrumList.get(0));
+            millionSpectra.add(spectrumList.get(1));
+            millionBinarySpectrum[i] = binarySpectrumList[0];
+            millionBinarySpectrum[i+1] = binarySpectrumList[1];
+        }
+
+        SizeOf sizeOf = SizeOf.newInstance();
+        long size = sizeOf.deepSizeOf(millionSpectra);
+        long binarySize = sizeOf.deepSizeOf(millionBinarySpectrum);
+
+        Assert.assertTrue(binarySize * 100 < size);
 
     }
 }
