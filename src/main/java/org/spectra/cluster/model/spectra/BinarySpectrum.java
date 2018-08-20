@@ -8,13 +8,36 @@ import java.util.UUID;
 
 
 @Data
-@Builder
 public class BinarySpectrum implements IBinarySpectrum {
     private final String uui;
     private final int precursorMZ;
     private final int precursorCharge;
 
     private BinaryPeak[] peaks;
+
+    /**
+     * Create a binary spectrum object.
+     * @param uui The (unique) id to use
+     * @param precursorMZ The precursor m/z as integer
+     * @param precursorCharge The precursor charge
+     * @param peaks The peaklist
+     */
+    public BinarySpectrum(String uui, int precursorMZ, int precursorCharge, BinaryPeak[] peaks) {
+        this.uui = uui;
+        this.precursorMZ = precursorMZ;
+        this.precursorCharge = precursorCharge;
+        this.peaks = Arrays.copyOf(peaks, peaks.length);
+    }
+
+    /**
+     * Create a binary spectrum object.
+     * @param precursorMZ The precursor m/z as integer
+     * @param precursorCharge The precursor charge
+     * @param peaks The peaklist
+     */
+    public BinarySpectrum(int precursorMZ, int precursorCharge, BinaryPeak[] peaks) {
+        this(UUID.randomUUID().toString(), precursorMZ, precursorCharge, peaks);
+    }
 
     /**
      * Creates a new binary spectrum based on an existing one

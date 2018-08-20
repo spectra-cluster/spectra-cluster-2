@@ -17,10 +17,7 @@ import java.util.Objects;
 public class BinarySpectrumTest {
 
     Iterator<Spectrum> specIt = null;
-    IBinarySpectrum binarySpectrum = BinarySpectrum.builder()
-            .precursorMZ(345567)
-            .precursorCharge(2)
-            .peaks(new BinaryPeak[6]).build();
+    IBinarySpectrum binarySpectrum = new BinarySpectrum(345567, 2, new BinaryPeak[6]);
 
 
     @Before
@@ -36,10 +33,7 @@ public class BinarySpectrumTest {
     public void readBinarySpectrum() {
 
         Spectrum spectrum = specIt.next();
-        BinarySpectrum binarySpectrum = BinarySpectrum.builder()
-                .precursorMZ((int)spectrum.getPrecursorMZ().doubleValue())
-                .precursorCharge(spectrum.getPrecursorCharge())
-                .build();
+        BinarySpectrum binarySpectrum = new BinarySpectrum((int)spectrum.getPrecursorMZ().doubleValue(), spectrum.getPrecursorCharge(), new BinaryPeak[0]);
         Assert.assertEquals(2, binarySpectrum.getPrecursorCharge());
 
     }

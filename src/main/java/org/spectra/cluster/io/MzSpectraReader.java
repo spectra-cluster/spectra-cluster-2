@@ -146,11 +146,10 @@ public class MzSpectraReader {
     public Iterator<IBinarySpectrum> readBinarySpectraIterator() {
         return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
                 spectrum -> {
-            IBinarySpectrum s = BinarySpectrum.builder()
-                            .precursorCharge(spectrum.getPrecursorCharge())
-                            .precursorMZ(((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()))
-                            .peaks(factory.normalizePeaks(spectrum.getPeakList()))
-                            .build();
+            IBinarySpectrum s = new BinarySpectrum(
+                    ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
+                    spectrum.getPrecursorCharge(),
+                    factory.normalizePeaks(spectrum.getPeakList()));
             return peaksPerMzWindowFilter.filter(s);
         });
     }

@@ -18,6 +18,11 @@ public class HighestPeakPerBinFilter implements IFilter {
     @Override
     public IBinarySpectrum filter(IBinarySpectrum binarySpectrum) {
         BinaryPeak[] orgPeaks = binarySpectrum.getPeaks();
+
+        if (orgPeaks.length < 1) {
+            return binarySpectrum;
+        }
+
         List<BinaryPeak> filteredPeaks = new ArrayList<>(orgPeaks.length);
 
         BinaryPeak highestPeakInCurrentWindow = null;
@@ -40,18 +45,9 @@ public class HighestPeakPerBinFilter implements IFilter {
             }
         }
 
-        if (highestPeakInCurrentWindow != null) {
-            filteredPeaks.add(highestPeakInCurrentWindow);
-        }
+        filteredPeaks.add(highestPeakInCurrentWindow);
 
         // create a copy
-        BinarySpectrum filtered = BinarySpectrum.builder()
-                .precursorCharge(binarySpectrum.getPrecursorCharge())
-                .precursorMZ(binarySpectrum.getPrecursorMz())
-                .uui(binarySpectrum.getUUI())
-                .peaks(filteredPeaks.toArray(new BinaryPeak[filteredPeaks.size()]))
-                .build();
-
-        return filtered;
+        return new BinarySpectrum(binarySpectrum, filteredPeaks.toArray(new BinaryPeak[0]));
     }
 }
