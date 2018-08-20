@@ -1,6 +1,7 @@
 package org.spectra.cluster.filter;
 
 import org.spectra.cluster.model.spectra.BinaryPeak;
+import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
 import java.util.Arrays;
@@ -37,8 +38,8 @@ public class HighestIntensityNPeaksFilter implements IFilter {
 
         Arrays.parallelSort(binarySpectrum.getPeaks(), (o1, o2) -> Integer.compare(o2.getIntensity(), o1.getIntensity()));
         BinaryPeak[] peaks = Arrays.copyOfRange(binarySpectrum.getPeaks(), 0, numberOfPeaks );
-        binarySpectrum.setPeaks(peaks);
+        IBinarySpectrum filteredSpectrum = new BinarySpectrum(binarySpectrum, peaks);
 
-        return binarySpectrum;
+        return filteredSpectrum;
     }
 }
