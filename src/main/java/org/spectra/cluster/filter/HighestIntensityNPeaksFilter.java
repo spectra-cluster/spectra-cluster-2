@@ -5,6 +5,7 @@ import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -38,6 +39,10 @@ public class HighestIntensityNPeaksFilter implements IFilter {
 
         Arrays.parallelSort(binarySpectrum.getPeaks(), (o1, o2) -> Integer.compare(o2.getIntensity(), o1.getIntensity()));
         BinaryPeak[] peaks = Arrays.copyOfRange(binarySpectrum.getPeaks(), 0, numberOfPeaks );
+
+        // sort according to m/z again
+        Arrays.sort(peaks, Comparator.comparingInt(BinaryPeak::getMz));
+
         IBinarySpectrum filteredSpectrum = new BinarySpectrum(binarySpectrum, peaks);
 
         return filteredSpectrum;
