@@ -34,7 +34,7 @@ public class HighestPeakPerBinFilterTest {
             IBinarySpectrum s = allSpectra.get(i);
             IBinarySpectrum filtered = filter.filter(s);
 
-            Assert.assertTrue(filtered.getPeaks().length < s.getPeaks().length);
+            Assert.assertTrue(filtered.getPeaks().length <= s.getPeaks().length);
 
             // make sure there are no duplicate m/z
             int[] mz = filtered.getMzVector();
