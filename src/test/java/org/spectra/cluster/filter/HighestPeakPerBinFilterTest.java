@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
-import org.spectra.cluster.similarity.CombinedFisherIntensityTestTest;
 
 import java.io.File;
 import java.util.*;
@@ -14,7 +13,7 @@ public class HighestPeakPerBinFilterTest {
     @Test
     public void testFilter() throws Exception {
         // get the spectra
-        File peakList = new File(CombinedFisherIntensityTestTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        File peakList = new File(HighestPeakPerBinFilterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(peakList);
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> allSpectra = new ArrayList<>();
