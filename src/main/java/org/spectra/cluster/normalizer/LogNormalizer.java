@@ -17,6 +17,6 @@ public class LogNormalizer implements IIntegerNormalizer {
      */
     @Override
     public int[] binDoubles(List<Double> valuesToBin) {
-        return valuesToBin.stream().map(Math::log).mapToInt(x-> (int) (x.doubleValue() * precision)).toArray();
+        return valuesToBin.stream().map(Math::log).mapToInt(x-> (int) Math.round(x * precision)).toArray();
     }
 }

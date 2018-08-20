@@ -35,21 +35,37 @@ public class BinarySpectrum implements IBinarySpectrum {
         return count;
     }
 
+    /**
+     * Return the precursor charge
+     * @return precursor charge
+     */
     @Override
     public int getPrecursorCharge() {
         return precursorCharge;
     }
 
+    /**
+     * Get the precursor mz
+     * @return precursor mz
+     */
     @Override
     public int getPrecursorMz() {
         return precursorMZ;
     }
 
+    /**
+     * Get a COPY of the peak mz values as an array.
+     * @return Array of peaks mz values
+     */
     @Override
     public int[] getMzVector() {
         return Arrays.stream(peaks).mapToInt(BinaryPeak::getMz).toArray();
     }
 
+    /**
+     * Get a COPY of the peak intensity values as an array.
+     * @return Array of peaks intensity values
+     */
     @Override
     public int[] getIntensityVector() {
         return Arrays.stream(peaks).mapToInt(BinaryPeak::getIntensity).toArray();
