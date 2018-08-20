@@ -13,7 +13,7 @@ import java.io.Serializable;
  *
  * This interface provides the functionality to filter {@link org.spectra.cluster.model.spectra.IBinarySpectrum}
  * with different functions. This Interface Filter information out of the spectra. As a result a new Spectrum is
- * created.
+ * created. The original spectrum object will not be changed.
  *
  *
  * @author ypriverol on 16/08/2018.

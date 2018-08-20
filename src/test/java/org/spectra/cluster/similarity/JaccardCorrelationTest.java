@@ -43,19 +43,13 @@ public class JaccardCorrelationTest {
 
         spectrum1 = specIt.next();
 
-        binarySpectrum1 = BinarySpectrum.builder()
-                .precursorMZ((int)spectrum1.getPrecursorMZ().doubleValue())
-                .precursorCharge(spectrum1.getPrecursorCharge())
-                .peaks(binnerNormalizer.normalizePeaks(spectrum1.getPeakList()))
-                .build();
+        binarySpectrum1 = new BinarySpectrum((int)spectrum1.getPrecursorMZ().doubleValue(), spectrum1.getPrecursorCharge(),
+                binnerNormalizer.normalizePeaks(spectrum1.getPeakList()));
 
         spectrum2 = specIt.next();
 
-        binarySpectrum2 = BinarySpectrum.builder()
-                .precursorMZ((int)spectrum2.getPrecursorMZ().doubleValue())
-                .precursorCharge(spectrum2.getPrecursorCharge())
-                .peaks(binnerNormalizer.normalizePeaks(spectrum1.getPeakList()))
-                .build();
+        binarySpectrum2 = new BinarySpectrum((int)spectrum2.getPrecursorMZ().doubleValue(), spectrum2.getPrecursorCharge(),
+                binnerNormalizer.normalizePeaks(spectrum1.getPeakList()));
 
         /** Read the Spectra from similar files **/
         uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("most_similar_1.mgf")).toURI();

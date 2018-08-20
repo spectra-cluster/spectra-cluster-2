@@ -1,7 +1,8 @@
 package org.spectra.cluster.io;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.spectra.cluster.filter.HighestPeakPerBinFilter;
+import org.spectra.cluster.filter.IFilter;
 import org.spectra.cluster.model.commons.IteratorConverter;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -81,10 +82,12 @@ public class MzSpectraReader {
 
     private JMzReader jMzReader;
 
-    @Setter
-    private IIntegerNormalizer mzBinner;
-
     private FactoryNormalizer factory;
+    /**
+     * This filter is used to remove / join multiple peaks per
+     * m/z window.
+     */
+    private IFilter peaksPerMzWindowFilter;
 
     private IIntegerNormalizer precursorNormalizer;
 
@@ -95,7 +98,8 @@ public class MzSpectraReader {
      */
     public  MzSpectraReader(File file, IIntegerNormalizer mzBinner,
                             IIntegerNormalizer intensityBinner,
-                            BasicIntegerNormalizer precursorNormalizer) throws Exception {
+                            BasicIntegerNormalizer precursorNormalizer,
+                            IFilter peaksPerMzWindowFilter) throws Exception {
         try{
             Class<?> peakListclass = isValidPeakListFile(file);
             if( peakListclass != null){
@@ -120,6 +124,7 @@ public class MzSpectraReader {
         }
 
         this.precursorNormalizer = precursorNormalizer;
+        this.peaksPerMzWindowFilter = peaksPerMzWindowFilter;
         this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
     }
 
@@ -129,7 +134,7 @@ public class MzSpectraReader {
      * @param file File
      */
     public MzSpectraReader(File file) throws Exception {
-        this(file, new SequestBinner(), new SequestBinner(), new BasicIntegerNormalizer());
+        this(file, new SequestBinner(), new SequestBinner(), new BasicIntegerNormalizer(), new HighestPeakPerBinFilter());
     }
 
     /**
@@ -140,11 +145,13 @@ public class MzSpectraReader {
      */
     public Iterator<IBinarySpectrum> readBinarySpectraIterator() {
         return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
-                spectrum -> BinarySpectrum.builder()
-                        .precursorCharge(spectrum.getPrecursorCharge())
-                        .precursorMZ(((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()))
-                        .peaks(factory.normalizePeaks(spectrum.getPeakList()))
-                        .build());
+                spectrum -> {
+            IBinarySpectrum s = new BinarySpectrum(
+                    ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
+                    spectrum.getPrecursorCharge(),
+                    factory.normalizePeaks(spectrum.getPeakList()));
+            return peaksPerMzWindowFilter.filter(s);
+        });
     }
 
 

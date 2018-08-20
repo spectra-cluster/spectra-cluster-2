@@ -3,6 +3,8 @@ package org.spectra.cluster.normalizer;
 import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,6 +57,9 @@ public class FactoryNormalizer {
         BinaryPeak[] peaks = new BinaryPeak[intensityValues.length];
         for(int i = 0; i < mzValues.length; i++)
             peaks[i] = new BinaryPeak(mzValues[i], intensityValues[i]);
+
+        // sort the peaks
+        Arrays.sort(peaks, Comparator.comparingInt(BinaryPeak::getMz));
 
         return peaks;
     }

@@ -50,12 +50,10 @@ public class ObjectSizeFetcherTest {
         while(specIt.hasNext()){
             Spectrum spec = specIt.next();
             spectrumList.add(spec);
-            binarySpectrumList[count] = BinarySpectrum.builder()
-                    .precursorCharge(spec.getPrecursorCharge())
-                    .precursorMZ((precursorNormalizer)
-                            .binValue(spec.getPrecursorMZ()))
-                    .peaks(factory.normalizePeaks(spec.getPeakList()))
-                    .build();
+            binarySpectrumList[count] = new BinarySpectrum(
+                    (precursorNormalizer).binValue(spec.getPrecursorMZ()),
+                    spec.getPrecursorCharge(),
+                    factory.normalizePeaks(spec.getPeakList()));
             count++;
         }
     }
