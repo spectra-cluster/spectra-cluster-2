@@ -25,10 +25,9 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.Pair;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
+import java.util.function.Function;
 
 /**
  * Implementation of Kendall's Tau-b rank correlation</a>.
@@ -71,7 +70,7 @@ import java.util.List;
  *
  * @since 3.3
  */
-public class KendallsCorrelation {
+public class KendallsCorrelation implements ISimilarity {
     /**
      * Computes the Kendall's Tau rank correlation coefficient between the two arrays.
      *
@@ -80,6 +79,8 @@ public class KendallsCorrelation {
      * @return Returns Kendall's Tau rank correlation coefficient for the two arrays
      * @throws DimensionMismatchException if the arrays lengths do not match
      */
+
+    @Override
     public double correlation(final int[] xArray, final int[] yArray)
             throws DimensionMismatchException {
 
@@ -93,10 +94,10 @@ public class KendallsCorrelation {
         @SuppressWarnings("unchecked")
         Pair<Integer, Integer>[] pairs = new Pair[n];
         for (int i = 0; i < n; i++) {
-            pairs[i] = new Pair<Integer, Integer>(xArray[i], yArray[i]);
+            pairs[i] = new Pair<>(xArray[i], yArray[i]);
         }
 
-        Arrays.sort(pairs, Comparator.comparing((Pair<Integer, Integer> pair) -> pair.getFirst()).thenComparing((Pair<Integer, Integer> pair) -> pair.getSecond()));
+        Arrays.sort(pairs, Comparator.comparing((Function<Pair<Integer, Integer>, Integer>) Pair::getFirst).thenComparing(Pair::getSecond));
 
         long tiedXPairs = 0;
         long tiedXYPairs = 0;
@@ -190,7 +191,7 @@ public class KendallsCorrelation {
      * @return the sum of the number from 1 to n
      */
     private static long sum(long n) {
-        return n * (n + 1) / 2l;
+        return n * (n + 1) / 2L;
     }
 }
 

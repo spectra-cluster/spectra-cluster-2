@@ -5,7 +5,7 @@ import cern.colt.list.IntArrayList;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.impl.SparseDoubleMatrix1D;
 
-
+@Deprecated
 public class Matrix2DUtils {
 
     static public double product(DoubleMatrix1D v1, DoubleMatrix1D v2) {

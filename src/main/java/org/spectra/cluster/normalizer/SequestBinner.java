@@ -11,6 +11,7 @@ import java.util.List;
  * @author jg
  */
 public class SequestBinner implements IIntegerNormalizer {
+
     @Override
     public int[] binDoubles(List<Double> valuesToBin) {
         // allocate the memory for the index
