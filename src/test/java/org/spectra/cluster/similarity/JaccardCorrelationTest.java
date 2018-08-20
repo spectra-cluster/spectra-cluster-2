@@ -77,11 +77,11 @@ public class JaccardCorrelationTest {
 
     @Test
     public void lshBinnerJaccardCorrelationTest(){
-        LSHBinner lshBinner = new LSHBinner();
+        LSHBinner lshBinner = LSHBinner.getInstance();
         JaccardCorrelation correlation = new JaccardCorrelation();
 
-        int[] vector1 = lshBinner.binVector(binarySpectrum1.getMzVector());
-        int[] vector2 = lshBinner.binVector(binarySpectrum2.getMzVector());
+        int[] vector1 = lshBinner.getKernels(binarySpectrum1.getMzVector());
+        int[] vector2 = lshBinner.getKernels(binarySpectrum2.getMzVector());
 
         double similarity = correlation.correlation(vector1, vector2);
         Assert.assertTrue(similarity - 0.99f < 0.1);
