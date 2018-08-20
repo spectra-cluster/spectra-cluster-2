@@ -29,7 +29,7 @@ public class SequestBinnerTest {
     }
 
     @Test
-    public void testManualBinning() throws Exception {
+    public void testManualBinning() {
         double[] doublesToBin = {0.01, 1.18, 1.19, 18.9};
         List<Double> doubleList = Arrays.stream(doublesToBin).boxed().collect(Collectors.toList());
         SequestBinner binner = new SequestBinner();

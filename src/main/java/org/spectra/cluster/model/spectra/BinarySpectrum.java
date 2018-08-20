@@ -1,9 +1,9 @@
 package org.spectra.cluster.model.spectra;
 
-import jdk.nashorn.internal.runtime.BitVector;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 
@@ -14,11 +14,7 @@ public class BinarySpectrum implements IBinarySpectrum {
     private final int precursorMZ;
     private final int precursorCharge;
 
-    private final int[] mzPeaksVector;
-    private final int[] intensityPeaksVector;
-
-    // this is intended for later use
-    // private final BitVector lowResMzBitVector;
+    private BinaryPeak[] peaks;
 
     @Override
     public String getUUI() {
@@ -26,31 +22,52 @@ public class BinarySpectrum implements IBinarySpectrum {
     }
 
     @Override
+    public BinaryPeak[] getPeaks() {
+        return peaks;
+    }
+
+    @Override
     public int getNumberOfPeaks() {
         int count = 0 ;
-        if(mzPeaksVector != null)
-            count = mzPeaksVector.length;
+        if(peaks != null)
+            count = peaks.length;
         return count;
     }
 
+    /**
+     * Return the precursor charge
+     * @return precursor charge
+     */
     @Override
     public int getPrecursorCharge() {
         return precursorCharge;
     }
 
+    /**
+     * Get the precursor mz
+     * @return precursor mz
+     */
     @Override
     public int getPrecursorMz() {
         return precursorMZ;
     }
 
+    /**
+     * Get a COPY of the peak mz values as an array.
+     * @return Array of peaks mz values
+     */
     @Override
     public int[] getMzVector() {
-        return mzPeaksVector;
+        return Arrays.stream(peaks).mapToInt(BinaryPeak::getMz).toArray();
     }
 
+    /**
+     * Get a COPY of the peak intensity values as an array.
+     * @return Array of peaks intensity values
+     */
     @Override
     public int[] getIntensityVector() {
-        return intensityPeaksVector;
+        return Arrays.stream(peaks).mapToInt(BinaryPeak::getIntensity).toArray();
     }
 
 
