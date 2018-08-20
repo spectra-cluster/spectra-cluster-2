@@ -1,6 +1,9 @@
 package org.spectra.cluster.filter;
 
+import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+
+import java.util.Arrays;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -16,12 +19,26 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
  *
  * @author ypriverol on 16/08/2018.
  */
+
 public class HighestIntensityNPeaksFilter implements IFilter {
 
-    public static int DEFAULT_N_PEAKS = 50;
+    public int numberOfPeaks;
+
+    /**
+     * Constructor with the Number of highestPeaks
+     * @param numberOfPeaks number of peaks to keep
+     */
+    public HighestIntensityNPeaksFilter(int numberOfPeaks) {
+        this.numberOfPeaks = numberOfPeaks;
+    }
 
     @Override
     public IBinarySpectrum filter(IBinarySpectrum binarySpectrum) {
+
+        Arrays.parallelSort(binarySpectrum.getPeaks(), (o1, o2) -> Integer.compare(o2.getIntensity(), o1.getIntensity()));
+        BinaryPeak[] peaks = Arrays.copyOfRange(binarySpectrum.getPeaks(), 0, numberOfPeaks );
+        binarySpectrum.setPeaks(peaks);
+
         return binarySpectrum;
     }
 }

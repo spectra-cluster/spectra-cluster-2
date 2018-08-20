@@ -9,7 +9,8 @@ import lombok.Data;
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- * ==Overview==
+ *
+ *  Peaks can be define as a combination of an intensity value and mz value.
  *
  * @author ypriverol on 16/08/2018.
  */

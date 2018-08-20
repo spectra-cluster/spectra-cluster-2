@@ -17,6 +17,11 @@ import java.util.Objects;
 public class BinarySpectrumTest {
 
     Iterator<Spectrum> specIt = null;
+    IBinarySpectrum binarySpectrum = BinarySpectrum.builder()
+            .precursorMZ(345567)
+            .precursorCharge(2)
+            .peaks(new BinaryPeak[6]).build();
+
 
     @Before
     public void setUp() throws JMzReaderException, URISyntaxException {
@@ -37,6 +42,33 @@ public class BinarySpectrumTest {
                 .build();
         Assert.assertEquals(2, binarySpectrum.getPrecursorCharge());
 
-
     }
+
+    @Test
+    public void getUUI() {
+        Assert.assertTrue(!binarySpectrum.getUUI().isEmpty());
+    }
+
+    @Test
+    public void getPeaks() {
+        Assert.assertTrue(binarySpectrum.getPeaks().length == 6);
+    }
+
+    @Test
+    public void getNumberOfPeaks() {
+        Assert.assertTrue(binarySpectrum.getPeaks().length == 6);
+    }
+
+    @Test
+    public void getPrecursorCharge() {
+        Assert.assertTrue(binarySpectrum.getPrecursorCharge() == 2);
+    }
+
+    @Test
+    public void getPrecursorMz() {
+        Assert.assertTrue(binarySpectrum.getPrecursorMz() == 345567);
+    }
+
+
+
 }

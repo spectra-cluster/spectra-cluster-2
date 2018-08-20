@@ -1,8 +1,6 @@
 package org.spectra.cluster.normalizer;
 
 import lombok.extern.slf4j.Slf4j;
-import org.spectra.cluster.model.commons.Tuple;
-import org.spectra.cluster.model.spectra.BinaryPeak;
 
 import java.util.*;
 

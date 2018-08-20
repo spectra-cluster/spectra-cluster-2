@@ -3,7 +3,6 @@ package org.spectra.cluster.io;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.model.commons.IteratorConverter;
-import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
@@ -27,11 +26,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -157,7 +153,7 @@ public class MzSpectraReader {
      * @param file File to be read
      * @return Class Reader {@link JMzReader} Adapter
      */
-    private Class<?> isValidPeakListFile(File file){
+    private static Class<?> isValidPeakListFile(File file){
 
         String filename = file.getName().toLowerCase();
 
@@ -182,7 +178,7 @@ public class MzSpectraReader {
      * @param file File to be processed
      * @return True if is a valide mzML
      */
-    private boolean isValidMzML(File file){
+    private static boolean isValidMzML(File file){
         return checkXMLValidFile(file, mzMLHeaderPattern, MzFileType.MZML);
     }
 
@@ -193,7 +189,7 @@ public class MzSpectraReader {
      * @param file File to be processed
      * @return True if is a valide mzXML
      */
-    private boolean isValidmzXML(File file){
+    private static boolean isValidmzXML(File file){
         return checkXMLValidFile(file, mzXmlHeaderPattern, MzFileType.MZXML);
     }
 
@@ -205,7 +201,7 @@ public class MzSpectraReader {
      * @param fileType {@link MzFileType}
      * @return True if the extension and the pattern match .
      */
-    private boolean checkXMLValidFile(File file, Pattern pattern, MzFileType fileType){
+    private static boolean checkXMLValidFile(File file, Pattern pattern, MzFileType fileType){
         boolean valid = false;
         String filename = file.getName().toLowerCase();
         if(filename.endsWith(fileType.getExtension())){
