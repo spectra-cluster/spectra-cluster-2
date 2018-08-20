@@ -16,6 +16,19 @@ public class BinarySpectrum implements IBinarySpectrum {
 
     private BinaryPeak[] peaks;
 
+    /**
+     * Creates a new binary spectrum based on an existing one
+     * with a different peak list.
+     * @param spectrum The IBinarySpectrum to copy the properties from.
+     * @param peakList The new peaklist to use. The spectrum object will create a copy of this peaklist.
+     */
+    public BinarySpectrum(IBinarySpectrum spectrum, BinaryPeak[] peakList) {
+        this.uui = spectrum.getUUI();
+        this.precursorMZ = spectrum.getPrecursorMz();
+        this.precursorCharge = spectrum.getPrecursorCharge();
+        this.peaks = Arrays.copyOf(peakList, peakList.length);
+    }
+
     @Override
     public String getUUI() {
         return uui;
