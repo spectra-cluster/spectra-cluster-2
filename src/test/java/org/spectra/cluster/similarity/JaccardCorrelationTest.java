@@ -10,15 +10,12 @@ import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.LSHBinner;
 import org.spectra.cluster.normalizer.SequestBinner;
-import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class JaccardCorrelationTest {
@@ -51,7 +48,7 @@ public class JaccardCorrelationTest {
         binarySpectrum2 = new BinarySpectrum((int)spectrum2.getPrecursorMZ().doubleValue(), spectrum2.getPrecursorCharge(),
                 binnerNormalizer.normalizePeaks(spectrum1.getPeakList()));
 
-        /** Read the Spectra from similar files **/
+        /* Read the Spectra from similar files **/
         uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("most_similar_1.mgf")).toURI();
         mgfFile = new MgfFile(new File(uri));
         specIt = mgfFile.getSpectrumIterator();

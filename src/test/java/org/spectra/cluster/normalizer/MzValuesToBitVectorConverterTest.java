@@ -10,10 +10,7 @@ import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MzValuesToBitVectorConverterTest {
@@ -21,7 +18,7 @@ public class MzValuesToBitVectorConverterTest {
 
     @Before
     public void setUp() throws Exception {
-        URI uri = BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf").toURI();
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         MgfFile mgfFile = new MgfFile(new File(uri));
         Iterator<Spectrum> specIt = mgfFile.getSpectrumIterator();
 
@@ -51,7 +48,7 @@ public class MzValuesToBitVectorConverterTest {
     }
 
     @Test
-    public void testFirstSpectrum() throws Exception {
+    public void testFirstSpectrum() {
         List<Double> doubleList = new ArrayList<>(testSpectrum.getPeakList().keySet());
         MzValuesToBitVectorConverter converter = new MzValuesToBitVectorConverter(new SequestBinner());
 

@@ -13,7 +13,7 @@ public class HighestPeakPerBinFilterTest {
     @Test
     public void testFilter() throws Exception {
         // get the spectra
-        File peakList = new File(HighestPeakPerBinFilterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        File peakList = new File(Objects.requireNonNull(HighestPeakPerBinFilterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
         MzSpectraReader reader = new MzSpectraReader(peakList);
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> allSpectra = new ArrayList<>();

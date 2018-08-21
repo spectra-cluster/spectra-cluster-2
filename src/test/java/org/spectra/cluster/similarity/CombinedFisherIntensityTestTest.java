@@ -23,7 +23,7 @@ public class CombinedFisherIntensityTestTest {
     @Test
     public void testScoreGeneration() throws Exception {
         // read the original scores
-        URI uri = BinarySpectrum.class.getClassLoader().getResource("same_sequence_cluster_scores.tsv").toURI();
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("same_sequence_cluster_scores.tsv")).toURI();
         Stream <String> scoreLineStream = Files.lines(Paths.get(uri));
         List<Double> scores = scoreLineStream.map(Double::new).collect(Collectors.toList());
 

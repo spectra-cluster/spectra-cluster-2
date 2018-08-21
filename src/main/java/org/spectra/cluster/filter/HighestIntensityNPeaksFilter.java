@@ -43,8 +43,6 @@ public class HighestIntensityNPeaksFilter implements IFilter {
         // sort according to m/z again
         Arrays.sort(peaks, Comparator.comparingInt(BinaryPeak::getMz));
 
-        IBinarySpectrum filteredSpectrum = new BinarySpectrum(binarySpectrum, peaks);
-
-        return filteredSpectrum;
+        return new BinarySpectrum(binarySpectrum, peaks);
     }
 }

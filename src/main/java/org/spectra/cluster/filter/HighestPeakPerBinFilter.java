@@ -15,6 +15,9 @@ import java.util.List;
  * @author jg
  */
 public class HighestPeakPerBinFilter implements IFilter {
+
+
+
     @Override
     public IBinarySpectrum filter(IBinarySpectrum binarySpectrum) {
         BinaryPeak[] orgPeaks = binarySpectrum.getPeaks();

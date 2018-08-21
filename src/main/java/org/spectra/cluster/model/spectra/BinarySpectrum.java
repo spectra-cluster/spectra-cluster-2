@@ -1,6 +1,5 @@
 package org.spectra.cluster.model.spectra;
 
-import lombok.Builder;
 import lombok.Data;
 
 import java.util.Arrays;

@@ -37,7 +37,7 @@ public class FactoryNormalizer {
      * This function normalize the spectrum peaks to an Array of {@link BinaryPeak}
      * @param peakList Map<{@link Double} map of double, double of peaks
      * @return Array of BinaryPeak
-     * @throws Exception
+     * @throws Exception Exception if normalization breaks the integrity of the spectra.
      */
     public BinaryPeak[] normalizePeaks(Map<Double, Double> peakList) throws Exception {
         int[] mzValues = mzBinner.binDoubles(peakList

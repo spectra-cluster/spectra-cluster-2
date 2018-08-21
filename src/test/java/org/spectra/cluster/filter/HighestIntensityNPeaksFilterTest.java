@@ -7,17 +7,12 @@ import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Objects;
-
-import static org.junit.Assert.*;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -51,7 +46,7 @@ public class HighestIntensityNPeaksFilterTest {
         while(specIt.hasNext()){
             IBinarySpectrum spec = specIt.next();
             spec = highestIntensityNPeaksFilter.filter(spec);
-            Assert.assertTrue(spec.getPeaks().length == 40);
+            Assert.assertEquals(40, spec.getPeaks().length);
             Assert.assertTrue(spec.getPeaks()[0].getIntensity() > spec.getPeaks()[39].getIntensity());
         }
 

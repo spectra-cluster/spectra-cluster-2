@@ -17,7 +17,7 @@ public class SequestBinnerTest {
 
     @Before
     public void setUp() throws Exception {
-        URI uri = BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf").toURI();
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         MgfFile mgfFile = new MgfFile(new File(uri));
         Iterator<Spectrum> specIt = mgfFile.getSpectrumIterator();
 
@@ -44,7 +44,7 @@ public class SequestBinnerTest {
     }
 
     @Test
-    public void testBinFirstPeaks() throws Exception {
+    public void testBinFirstPeaks() {
         List<Double> doubleList = new ArrayList<>(testSpectrum.getPeakList().keySet());
         Collections.sort(doubleList);
         SequestBinner binner = new SequestBinner();
