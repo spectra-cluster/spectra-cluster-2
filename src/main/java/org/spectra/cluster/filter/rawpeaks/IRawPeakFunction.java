@@ -1,7 +1,5 @@
 package org.spectra.cluster.filter.rawpeaks;
 
-import org.spectra.cluster.model.spectra.IBinarySpectrum;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Function;

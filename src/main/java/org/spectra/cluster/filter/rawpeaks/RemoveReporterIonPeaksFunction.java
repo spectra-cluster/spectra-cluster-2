@@ -66,8 +66,8 @@ public class RemoveReporterIonPeaksFunction implements IRawPeakFunction{
     /**
      * Returns the m/z values for the reporter ions relevant
      * to the passed reporterType.
-     * @param reporterType
-     * @return
+     * @param reporterType Type of ION Reporter to Remove @{@link REPORTER_TYPE}
+     * @return List of Double mz
      */
     private Double[] getReporterMz(REPORTER_TYPE reporterType) {
         switch (reporterType) {

@@ -41,14 +41,13 @@ public interface IConsensusSpectrumBuilder {
 
     /**
      * Returns the number of spectra making up the consensus spectrum.
-     *
-     * @return
+     * @return Number of Spectra in the consensus cluster
      */
     int getSpectraCount();
 
     /**
      * Used to merge two consensus spectra
-     * @param consensusSpectrumToAdd
+     * @param consensusSpectrumToAdd Add a ConsensusSpectrum
      */
     void addConsensusSpectrum(IConsensusSpectrumBuilder consensusSpectrumToAdd);
 
