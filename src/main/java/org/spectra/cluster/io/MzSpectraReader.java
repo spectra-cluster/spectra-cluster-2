@@ -1,8 +1,8 @@
 package org.spectra.cluster.io;
 
 import lombok.extern.slf4j.Slf4j;
-import org.spectra.cluster.filter.HighestPeakPerBinFilter;
-import org.spectra.cluster.filter.IFilter;
+import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.model.commons.IteratorConverter;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -84,7 +84,7 @@ public class MzSpectraReader {
      * This filter is used to remove / join multiple peaks per
      * m/z window.
      */
-    private IFilter peaksPerMzWindowFilter;
+    private IBinarySpectrumFunction peaksPerMzWindowFilter;
 
     private IIntegerNormalizer precursorNormalizer;
 
@@ -96,7 +96,7 @@ public class MzSpectraReader {
     public  MzSpectraReader(File file, IIntegerNormalizer mzBinner,
                             IIntegerNormalizer intensityBinner,
                             BasicIntegerNormalizer precursorNormalizer,
-                            IFilter peaksPerMzWindowFilter) throws Exception {
+                            IBinarySpectrumFunction peaksPerMzWindowFilter) throws Exception {
         try{
             Class<?> peakListclass = isValidPeakListFile(file);
             if( peakListclass != null){
@@ -131,7 +131,7 @@ public class MzSpectraReader {
      * @param file File
      */
     public MzSpectraReader(File file) throws Exception {
-        this(file, new SequestBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFilter());
+        this(file, new SequestBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());
     }
 
     /**
@@ -147,7 +147,7 @@ public class MzSpectraReader {
                     ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
                     spectrum.getPrecursorCharge(),
                     factory.normalizePeaks(spectrum.getPeakList()));
-            return peaksPerMzWindowFilter.filter(s);
+            return peaksPerMzWindowFilter.apply(s);
         });
     }
 
