@@ -6,10 +6,7 @@ import org.spectra.cluster.filter.IFilter;
 import org.spectra.cluster.model.commons.IteratorConverter;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
-import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.FactoryNormalizer;
-import org.spectra.cluster.normalizer.IIntegerNormalizer;
-import org.spectra.cluster.normalizer.SequestBinner;
+import org.spectra.cluster.normalizer.*;
 import uk.ac.ebi.pride.tools.apl_parser.AplFile;
 import uk.ac.ebi.pride.tools.dta_parser.DtaFile;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReader;
@@ -134,7 +131,7 @@ public class MzSpectraReader {
      * @param file File
      */
     public MzSpectraReader(File file) throws Exception {
-        this(file, new SequestBinner(), new SequestBinner(), new BasicIntegerNormalizer(), new HighestPeakPerBinFilter());
+        this(file, new SequestBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFilter());
     }
 
     /**
