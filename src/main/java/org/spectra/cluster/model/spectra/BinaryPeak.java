@@ -17,6 +17,6 @@ import lombok.Data;
 
 @Data
 public class BinaryPeak {
-    private final int mz;
-    private final int intensity;
+    protected final int mz;
+    protected final int intensity;
 }
