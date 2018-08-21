@@ -12,7 +12,7 @@ public class BasicIntegerNormalizerTest {
         double[] doublesToConvert = {0.1552, 100.2523, 5000.125, 299.99};
         BasicIntegerNormalizer normalizer = new BasicIntegerNormalizer(BasicIntegerNormalizer.MZ_CONSTANT);
 
-        int[] convertedValues = normalizer.binDoubles(Arrays.stream(doublesToConvert).mapToObj(Double::new).collect(Collectors.toList()));
+        int[] convertedValues = normalizer.binDoubles(Arrays.stream(doublesToConvert).boxed().collect(Collectors.toList()));
 
         Assert.assertEquals(4, convertedValues.length);
         Assert.assertEquals(15520, convertedValues[0]);

@@ -12,7 +12,7 @@ import java.util.*;
 @Slf4j
 public class BasicMzBinner implements IIntegerNormalizer{
 
-    private static  double HIG_RES_INTERVAL = 1.0F;
+    public static double HIG_RES_INTERVAL = 1.0F;
     private double binnerValue;
 
     /**

@@ -21,7 +21,7 @@ public class KendallsCorrelationTest {
 
     @Before
     public void setUp() throws JMzReaderException, URISyntaxException {
-        URI uri = BinarySpectrum.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI();
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI();
         MgfFile mgfFile = new MgfFile(new File(uri));
         Iterator<Spectrum> spectrumIterator = mgfFile.getSpectrumIterator();
         while (spectrumIterator.hasNext()) {

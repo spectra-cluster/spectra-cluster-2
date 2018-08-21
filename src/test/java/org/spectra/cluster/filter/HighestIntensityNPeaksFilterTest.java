@@ -3,21 +3,18 @@ package org.spectra.cluster.filter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
+import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Objects;
-
-import static org.junit.Assert.*;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -39,22 +36,25 @@ public class HighestIntensityNPeaksFilterTest {
     public void setUp() throws Exception {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MzSpectraReader parser = new MzSpectraReader(new File(uri), new SequestBinner(), new BasicIntegerNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFilter());
+        MzSpectraReader parser = new MzSpectraReader(new File(uri), new SequestBinner(), new BasicIntegerNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());
         specIt = parser.readBinarySpectraIterator();
 
     }
 
     @Test
     public void filter() {
-        HighestIntensityNPeaksFilter highestIntensityNPeaksFilter = new HighestIntensityNPeaksFilter(40);
+        HighestIntensityNPeaksFunction highestIntensityNPeaksFilter = new HighestIntensityNPeaksFunction(40);
 
         while(specIt.hasNext()){
             IBinarySpectrum spec = specIt.next();
-            spec = highestIntensityNPeaksFilter.filter(spec);
-            Assert.assertTrue(spec.getPeaks().length == 40);
+            spec = highestIntensityNPeaksFilter.apply(spec);
+            Assert.assertEquals(40, spec.getPeaks().length);
             Assert.assertTrue(spec.getPeaks()[0].getIntensity() > spec.getPeaks()[39].getIntensity());
         }
 
     }
+
+
+
 
 }

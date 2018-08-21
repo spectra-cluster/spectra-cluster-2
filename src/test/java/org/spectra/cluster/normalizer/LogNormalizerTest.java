@@ -13,9 +13,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
 
 public class LogNormalizerTest {
 
@@ -23,7 +22,7 @@ public class LogNormalizerTest {
 
     @Before
     public void setUp() throws Exception {
-        URI uri = BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf").toURI();
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         MgfFile mgfFile = new MgfFile(new File(uri));
         Iterator<Spectrum> specIt = mgfFile.getSpectrumIterator();
 
@@ -38,7 +37,7 @@ public class LogNormalizerTest {
     public void binDoubles() {
         LogNormalizer normalizer = new LogNormalizer(100000);
         int[] intensityPeaks = normalizer.binDoubles(testSpectrum.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
-        Assert.assertTrue(intensityPeaks.length == testSpectrum.getPeakList().size());
+        Assert.assertEquals(intensityPeaks.length, testSpectrum.getPeakList().size());
     }
 
     @Test
@@ -48,8 +47,8 @@ public class LogNormalizerTest {
         int[] logPeaks = logNormalizer.binDoubles(testSpectrum.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
         int[] intPeaks = integerNormalizer.binDoubles(testSpectrum.getPeakList().entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
 
-        Assert.assertTrue(logPeaks.length == testSpectrum.getPeakList().size());
-        Assert.assertTrue(logPeaks.length == intPeaks.length);
+        Assert.assertEquals(logPeaks.length, testSpectrum.getPeakList().size());
+        Assert.assertEquals(logPeaks.length, intPeaks.length);
 
         Variance variance = new Variance();
         double logVariance = variance.evaluate(Arrays.stream(logPeaks).asDoubleStream().toArray());

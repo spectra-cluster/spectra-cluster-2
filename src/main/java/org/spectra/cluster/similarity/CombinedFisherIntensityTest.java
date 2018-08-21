@@ -67,9 +67,8 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
                 sharedIntensitySpec2.stream().mapToInt(Integer::intValue).toArray());
 
         // combine the two
-        double combinedP = combineProbabilities(hgtScore, kendallP);
 
-        return combinedP;
+        return combineProbabilities(hgtScore, kendallP);
     }
 
     /**

@@ -1,7 +1,11 @@
 package org.spectra.cluster.filter;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
+import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -10,12 +14,40 @@ import java.io.File;
 import java.util.*;
 
 public class HighestPeakPerBinFilterTest {
-    @Test
-    public void testFilter() throws Exception {
-        // get the spectra
-        File peakList = new File(HighestPeakPerBinFilterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+
+
+    Iterator<IBinarySpectrum> spectrumIterator;
+
+    @Before
+    public void setUp() throws Exception {
+        File peakList = new File(Objects.requireNonNull(HighestPeakPerBinFilterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
         MzSpectraReader reader = new MzSpectraReader(peakList);
-        Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
+        spectrumIterator = reader.readBinarySpectraIterator();
+    }
+
+    @Test
+    public void testFilter() {
+        // get the spectra
+
+        List<IBinarySpectrum> allSpectra = new ArrayList<>();
+        while (spectrumIterator.hasNext()) {
+            IBinarySpectrum s = spectrumIterator.next();
+
+            // sort the peaks
+            Arrays.parallelSort(s.getPeaks(), Comparator.comparingInt(BinaryPeak::getMz));
+
+            allSpectra.add(s);
+        }
+
+        // filter the spectra
+        IBinarySpectrumFunction filter = new HighestPeakPerBinFunction();
+        applyFilters(allSpectra, filter);
+    }
+
+
+    @Test
+    public void testcombinedFilter() {
+        // get the spectra
         List<IBinarySpectrum> allSpectra = new ArrayList<>();
 
         while (spectrumIterator.hasNext()) {
@@ -28,11 +60,18 @@ public class HighestPeakPerBinFilterTest {
         }
 
         // filter the spectra
-        IFilter filter = new HighestPeakPerBinFilter();
+        IBinarySpectrumFunction filter = new HighestPeakPerBinFunction();
+        filter.andThen(new HighestIntensityNPeaksFunction(50));
+
+        applyFilters(allSpectra, filter);
+
+    }
+
+    private void applyFilters(List<IBinarySpectrum> allSpectra, IBinarySpectrumFunction filter){
 
         for (int i = 0; i < allSpectra.size(); i++) {
             IBinarySpectrum s = allSpectra.get(i);
-            IBinarySpectrum filtered = filter.filter(s);
+            IBinarySpectrum filtered = filter.apply(s);
 
             Assert.assertTrue(filtered.getPeaks().length <= s.getPeaks().length);
 

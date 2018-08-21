@@ -1,4 +1,4 @@
-package org.spectra.cluster.filter;
+package org.spectra.cluster.filter.binaryspectrum;
 
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
@@ -14,9 +14,11 @@ import java.util.List;
  *
  * @author jg
  */
-public class HighestPeakPerBinFilter implements IFilter {
+public class HighestPeakPerBinFunction implements IBinarySpectrumFunction {
+
+
     @Override
-    public IBinarySpectrum filter(IBinarySpectrum binarySpectrum) {
+    public IBinarySpectrum apply(IBinarySpectrum binarySpectrum) {
         BinaryPeak[] orgPeaks = binarySpectrum.getPeaks();
 
         if (orgPeaks.length < 1) {

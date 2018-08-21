@@ -1,4 +1,4 @@
-package org.spectra.cluster.filter;
+package org.spectra.cluster.filter.binaryspectrum;
 
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
@@ -22,7 +22,7 @@ import java.util.Comparator;
  * @author ypriverol on 16/08/2018.
  */
 
-public class HighestIntensityNPeaksFilter implements IFilter {
+public class HighestIntensityNPeaksFunction implements IBinarySpectrumFunction {
 
     public int numberOfPeaks;
 
@@ -30,12 +30,12 @@ public class HighestIntensityNPeaksFilter implements IFilter {
      * Constructor with the Number of highestPeaks
      * @param numberOfPeaks number of peaks to keep
      */
-    public HighestIntensityNPeaksFilter(int numberOfPeaks) {
+    public HighestIntensityNPeaksFunction(int numberOfPeaks) {
         this.numberOfPeaks = numberOfPeaks;
     }
 
     @Override
-    public IBinarySpectrum filter(IBinarySpectrum binarySpectrum) {
+    public IBinarySpectrum apply(IBinarySpectrum binarySpectrum) {
 
         Arrays.parallelSort(binarySpectrum.getPeaks(), (o1, o2) -> Integer.compare(o2.getIntensity(), o1.getIntensity()));
         BinaryPeak[] peaks = Arrays.copyOfRange(binarySpectrum.getPeaks(), 0, numberOfPeaks );
@@ -43,8 +43,6 @@ public class HighestIntensityNPeaksFilter implements IFilter {
         // sort according to m/z again
         Arrays.sort(peaks, Comparator.comparingInt(BinaryPeak::getMz));
 
-        IBinarySpectrum filteredSpectrum = new BinarySpectrum(binarySpectrum, peaks);
-
-        return filteredSpectrum;
+        return new BinarySpectrum(binarySpectrum, peaks);
     }
 }

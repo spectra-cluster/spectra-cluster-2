@@ -4,8 +4,8 @@ import cern.jet.random.HyperGeometric;
 import cern.jet.random.engine.RandomEngine;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spectra.cluster.filter.HighestIntensityNPeaksFilter;
-import org.spectra.cluster.filter.IFilter;
+import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
@@ -23,12 +23,12 @@ public class CombinedFisherIntensityTestTest {
     @Test
     public void testScoreGeneration() throws Exception {
         // read the original scores
-        URI uri = BinarySpectrum.class.getClassLoader().getResource("same_sequence_cluster_scores.tsv").toURI();
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("same_sequence_cluster_scores.tsv")).toURI();
         Stream <String> scoreLineStream = Files.lines(Paths.get(uri));
         List<Double> scores = scoreLineStream.map(Double::new).collect(Collectors.toList());
 
         // get the spectra
-        File peakList = new File(CombinedFisherIntensityTestTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        File peakList = new File(Objects.requireNonNull(CombinedFisherIntensityTestTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
         MzSpectraReader reader = new MzSpectraReader(peakList);
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> allSpectra = new ArrayList<>();
@@ -45,12 +45,12 @@ public class CombinedFisherIntensityTestTest {
         IBinarySpectrumSimilarity similarity = new CombinedFisherIntensityTest();
 
         IBinarySpectrum s1 = allSpectra.get(0);
-        IFilter peakFilter = new HighestIntensityNPeaksFilter(20);
-        s1 = peakFilter.filter(s1);
+        IBinarySpectrumFunction peakFilter = new HighestIntensityNPeaksFunction(20);
+        s1 = peakFilter.apply(s1);
 
         // do the comparison
         for (int i = 1; i < allSpectra.size(); i++) {
-            IBinarySpectrum s2 = peakFilter.filter(allSpectra.get(i));
+            IBinarySpectrum s2 = peakFilter.apply(allSpectra.get(i));
 
             double score = similarity.correlation(s1, s2);
             double orgScore = scores.get(i - 1);

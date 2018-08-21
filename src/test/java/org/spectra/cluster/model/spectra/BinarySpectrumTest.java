@@ -45,22 +45,22 @@ public class BinarySpectrumTest {
 
     @Test
     public void getPeaks() {
-        Assert.assertTrue(binarySpectrum.getPeaks().length == 6);
+        Assert.assertEquals(6, binarySpectrum.getPeaks().length);
     }
 
     @Test
     public void getNumberOfPeaks() {
-        Assert.assertTrue(binarySpectrum.getPeaks().length == 6);
+        Assert.assertEquals(6, binarySpectrum.getPeaks().length);
     }
 
     @Test
     public void getPrecursorCharge() {
-        Assert.assertTrue(binarySpectrum.getPrecursorCharge() == 2);
+        Assert.assertEquals(2, binarySpectrum.getPrecursorCharge());
     }
 
     @Test
     public void getPrecursorMz() {
-        Assert.assertTrue(binarySpectrum.getPrecursorMz() == 345567);
+        Assert.assertEquals(345567, binarySpectrum.getPrecursorMz());
     }
 
 
