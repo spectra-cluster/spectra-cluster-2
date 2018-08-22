@@ -287,6 +287,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     /**
      * Adapt the peak intensities in consensusPeaks using the following formula:
      * I = I * (0.95 + 0.05 * (1 + pi)^5)
+     * //TOdo : @jgriss where this came from.
      * where pi is the peaks probability
      */
     protected static BinaryConsensusPeak[] adaptPeakIntensities(BinaryConsensusPeak[] peaks, int nSpectra) {

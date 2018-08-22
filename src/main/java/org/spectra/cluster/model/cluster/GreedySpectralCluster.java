@@ -103,11 +103,12 @@ public class GreedySpectralCluster implements ICluster {
 
         // make sure no duplicate spectra exist
         Set<String> duplicateIds = new HashSet<>();
-        for (IBinarySpectrum spectrum : spectraToAdd) {
-            if (clusteredSpectraIds.contains(spectrum.getUUI())) {
-                duplicateIds.add(spectrum.getUUI());
-            }
-        }
+        //Todo: to be replace with lambda expression Yasset
+
+        duplicateIds = Arrays.stream(spectraToAdd)
+                .filter(x -> clusteredSpectraIds.contains(x.getUUI()))
+                .map(IBinarySpectrum::getUUI)
+                .collect(Collectors.toSet());
 
         // this should generally not happen
         if (!duplicateIds.isEmpty()) {
@@ -131,7 +132,9 @@ public class GreedySpectralCluster implements ICluster {
         // only add the spectra to the consensus spectrum
         consensusSpectrumBuilder.addSpectra(spectraToAdd);
         // add all spectrum ids
-        clusteredSpectraIds.addAll(Arrays.stream(spectraToAdd).map(IBinarySpectrum::getUUI).collect(Collectors.toList()));
+        clusteredSpectraIds.addAll(Arrays.stream(spectraToAdd)
+                .map(IBinarySpectrum::getUUI)
+                .collect(Collectors.toSet()));
     }
 
     /**

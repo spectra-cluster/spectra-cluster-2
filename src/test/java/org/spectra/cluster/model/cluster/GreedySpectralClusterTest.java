@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class GreedySpectralClusterTest {
@@ -37,7 +38,7 @@ public class GreedySpectralClusterTest {
 
     @Test
     public void testAddingSpectra() throws Exception {
-        File testFile = new File(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
         MzSpectraReader reader = new MzSpectraReader(testFile);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
