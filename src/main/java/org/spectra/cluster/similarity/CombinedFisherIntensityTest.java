@@ -18,6 +18,7 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
     private final KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
     protected final ChiSquaredDistribution chiSquaredDistribution = new ChiSquaredDistribution(4); // always 4 degrees of freedom
     protected final static RandomEngine RANDOM_ENGINE = RandomEngine.makeDefault();
+    public final double MAX_SCORE = 200;
 
     @Override
     public double correlation(IBinarySpectrum spectrum1, IBinarySpectrum spectrum2) {
@@ -55,7 +56,15 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
         int minBin = Math.min(peaks1[0].getMz(), peaks2[0].getMz());
         int maxBin = Math.max(peaks1[peaks1.length - 1].getMz(), peaks2[peaks2.length - 1].getMz());
 
-        double hgtScore = new HyperGeometric(maxBin - minBin, peaks1.length, peaks2.length, RANDOM_ENGINE).pdf(sharedIntensitySpec1.size());
+        int morePeaks = peaks1.length;
+        int lessPeaks = peaks2.length;
+
+        if (morePeaks < lessPeaks) {
+            morePeaks = peaks2.length;
+            lessPeaks = peaks1.length;
+        }
+
+        double hgtScore = new HyperGeometric(maxBin - minBin, morePeaks, lessPeaks, RANDOM_ENGINE).pdf(sharedIntensitySpec1.size());
 
         if (hgtScore == 0) {
             hgtScore = 1;
@@ -90,6 +99,11 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
         else
             pValue = chiSquaredDistribution.density(combined);
 
+        // return a very high score if the p-value is 0
+        if (pValue == 0) {
+            return MAX_SCORE;
+        }
+
         return -Math.log(pValue);
     }
 
@@ -105,7 +119,7 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
 
         // map to p-value
         // if the correlation cannot be calculated, assume that there is none
-        if (Double.isNaN(correlation)) {
+        if (Double.isNaN(correlation) || correlation == 0) {
             return 1;
         }
 
