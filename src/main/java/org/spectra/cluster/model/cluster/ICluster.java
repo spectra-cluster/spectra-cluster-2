@@ -1,0 +1,78 @@
+package org.spectra.cluster.model.cluster;
+
+
+import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
+import org.spectra.cluster.model.spectra.IBinarySpectrum;
+
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Interface describing a cluster
+ *
+ * @author jg
+ */
+public interface ICluster {
+
+    /**
+     * Returns the cluster's id. This is identical with the cluster's consensus spectrum's id.
+     * @return The cluster's id as String.
+     */
+    String getId();
+
+    /**
+     * Returns the cluster's (average) precursor m/z
+     *
+     * @return The cluster's precursor m/z
+     */
+    int getPrecursorMz();
+
+    /**
+     * The cluster's consensus spectrum's charge
+     *
+     * @return The charge
+     */
+    int getPrecursorCharge();
+
+    /**
+     * Get consensus spectrum
+     */
+    IBinarySpectrum getConsensusSpectrum();
+
+    /**
+     * Returns the ids of the clustered spectra. The
+     * actual spectra are not stored
+     * @return The list of clustered spectra ids.
+     */
+    Set<String> getClusteredSpectraIds();
+
+    /**
+     * The number of clustered spectra
+     * @return The number of clustered spectra.
+     */
+    int getClusteredSpectraCount();
+
+    /**
+     * Adds spectra to the cluster
+     * @param spectra The IBinarySpectrum objects to add
+     */
+    void addSpectra(IBinarySpectrum... spectra);
+
+    /**
+     * Merges the cluster with this one. The id of this cluster will be
+     * adapted to the added one in case the added cluster is larger
+     * than the current one.
+     * @param clusterToMerge The cluster to merge.
+     */
+    void mergeCluster(ICluster clusterToMerge);
+
+    IConsensusSpectrumBuilder getConsensusSpectrumBuilder();
+
+    /**
+     * The results of the last N comparisons.
+     * @return A list of ComparisonMatchS
+     */
+    List<ComparisonMatch> getComparisonMatches();
+
+    boolean isKnownComparisonMatch(String clusterId);
+}

@@ -45,7 +45,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     /**
      * Peaks of the actual consensusSpectrum
      */
-    private BinaryConsensusPeak[] consensusPeaks;
+    private BinaryConsensusPeak[] consensusPeaks = new BinaryConsensusPeak[0];
 
 
     /**
@@ -191,7 +191,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
                 break;
             }
 
-            if (indexAllPeaks >= existingPeaks.length) {
+            if (indexAllPeaks >= existingPeaks.length && indexToAdd < peaksToAdd.length) {
                 if (peaksToAdd[indexToAdd] instanceof BinaryConsensusPeak)
                     newPeaks.add(new BinaryConsensusPeak((BinaryConsensusPeak) peaksToAdd[indexToAdd]));
                 else
