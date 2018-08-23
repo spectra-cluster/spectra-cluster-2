@@ -13,7 +13,10 @@ import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 public class KendallsCorrelationTest {
 

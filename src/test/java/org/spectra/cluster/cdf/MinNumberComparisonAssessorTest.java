@@ -2,9 +2,6 @@ package org.spectra.cluster.cdf;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.spectra.cluster.model.cluster.GreedySpectralCluster;
-import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 
 public class MinNumberComparisonAssessorTest {
     @Test
