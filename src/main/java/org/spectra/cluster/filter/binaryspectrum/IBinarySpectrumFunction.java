@@ -1,6 +1,7 @@
 package org.spectra.cluster.filter.binaryspectrum;
 
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Function;

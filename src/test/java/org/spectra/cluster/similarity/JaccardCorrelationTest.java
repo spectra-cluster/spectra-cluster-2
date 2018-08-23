@@ -15,7 +15,8 @@ import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Objects;
 
 @Slf4j
 public class JaccardCorrelationTest {

@@ -2,7 +2,7 @@ package org.spectra.cluster.normalizer;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * This class take a list of Peaks mz values and normalize them into a vector of doubles.
