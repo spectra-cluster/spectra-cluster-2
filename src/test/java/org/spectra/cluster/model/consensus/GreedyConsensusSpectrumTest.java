@@ -10,10 +10,7 @@ import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class GreedyConsensusSpectrumTest {
 
@@ -123,8 +120,7 @@ public class GreedyConsensusSpectrumTest {
     }
 
     /**
-     * Tests whether the consensus spectrum of the first 10 test spectra (all from the
-     * same peptide) are similar to the consensus.
+     * Tests whether the consensus spectrum of the first 10 test spectra (all from the same peptide) are similar to the consensus.
      * @throws Exception
      */
     @Test
@@ -143,11 +139,18 @@ public class GreedyConsensusSpectrumTest {
             spectra.add(spectrumIterator.next());
         }
 
+        long currentTime = System.currentTimeMillis();
+
         GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("Test");
         consensusSpectrum.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
+        currentTime = System.currentTimeMillis();
         IBinarySpectrumSimilarity similarity = new CombinedFisherIntensityTest();
+
         IBinarySpectrum consensus = consensusSpectrum.getConsensusSpectrum();
+        long timeDifference = (System.currentTimeMillis() - currentTime);
+        System.out.println("Time Consensus Spectra Generation: " + timeDifference + " Spectrum Peaks Size: " + consensus.getPeaks().length);
+
 
         int counter = 0;
 
