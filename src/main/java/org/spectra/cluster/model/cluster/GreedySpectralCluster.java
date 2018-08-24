@@ -9,11 +9,12 @@ import java.util.stream.Collectors;
 
 
 /**
- * This implementation if ICluster only supports the addition of
- * spectra. It does not keep the actual spectra after they were added but
- * only their ids.
+ * The {@link GreedySpectralCluster} implements the clustering process and creates a {@link org.spectra.cluster.model.consensus.GreedyConsensusSpectrum}. This implementation if ICluster only supports the addition of
+ * spectra. It does not keep the actual spectra after they were added to the {@link org.spectra.cluster.model.consensus.GreedyConsensusSpectrum} but only their ids.
  *
  * @author Johannes Griss
+ * @author ypriverol
+ *
  */
 @Slf4j
 public class GreedySpectralCluster implements ICluster {
@@ -104,9 +105,7 @@ public class GreedySpectralCluster implements ICluster {
         // make sure no duplicate spectra exist
         Set<String> duplicateIds;
 
-        duplicateIds = Arrays.stream(spectraToAdd)
-                .filter(x -> clusteredSpectraIds.contains(x.getUUI()))
-                .map(IBinarySpectrum::getUUI)
+        duplicateIds = Arrays.stream(spectraToAdd).filter(x -> clusteredSpectraIds.contains(x.getUUI())).map(IBinarySpectrum::getUUI)
                 .collect(Collectors.toSet());
 
         // this should generally not happen
