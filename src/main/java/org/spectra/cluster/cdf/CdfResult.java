@@ -13,7 +13,7 @@ public class CdfResult {
     private long totalComparisons = 0;
 
     private final double scoreIncrements;
-    private List<Long> lowerPeptidesPerScoreIncrement = new ArrayList<Long>();
+    private List<Long> lowerPeptidesPerScoreIncrement = new ArrayList<>();
 
     /**
      * Creates a new CdfResult class based on the defined scoreIncrements. These score
@@ -67,9 +67,7 @@ public class CdfResult {
 
         double doubleBin = score / scoreIncrements;
 
-        int bin = (int) Math.floor(doubleBin);
-
-        return bin;
+        return (int) Math.floor(doubleBin);
     }
 
     /**

@@ -36,7 +36,7 @@ public class GreedySpectralCluster implements ICluster {
     private final IConsensusSpectrumBuilder consensusSpectrumBuilder;
 
     public GreedySpectralCluster(IConsensusSpectrumBuilder consensusSpectrumBuilder) {
-        this.id = consensusSpectrumBuilder.getConsensusSpectrum().getUUI();
+        this.id = consensusSpectrumBuilder.getUUI();
         this.consensusSpectrumBuilder = consensusSpectrumBuilder;
     }
 
@@ -70,7 +70,7 @@ public class GreedySpectralCluster implements ICluster {
             return -1;
         }
 
-        return consensusSpectrumBuilder.getConsensusSpectrum().getPrecursorMz();
+        return consensusSpectrumBuilder.getPrecursorMz();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class GreedySpectralCluster implements ICluster {
             return -1;
         }
 
-        return consensusSpectrumBuilder.getConsensusSpectrum().getPrecursorCharge();
+        return consensusSpectrumBuilder.getPrecursorCharge();
     }
 
     @Override
@@ -102,8 +102,7 @@ public class GreedySpectralCluster implements ICluster {
         }
 
         // make sure no duplicate spectra exist
-        Set<String> duplicateIds = new HashSet<>();
-        //Todo: to be replace with lambda expression Yasset
+        Set<String> duplicateIds;
 
         duplicateIds = Arrays.stream(spectraToAdd)
                 .filter(x -> clusteredSpectraIds.contains(x.getUUI()))

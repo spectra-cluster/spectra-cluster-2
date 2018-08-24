@@ -25,7 +25,7 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
  *
  * @author jg
  */
-public interface IConsensusSpectrumBuilder {
+public interface IConsensusSpectrumBuilder extends IBinarySpectrum{
 
     /**
      * return the current spectrum represented as the data in the stored spectra

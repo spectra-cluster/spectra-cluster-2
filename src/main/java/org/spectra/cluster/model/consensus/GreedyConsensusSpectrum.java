@@ -8,9 +8,17 @@ import java.util.*;
 import java.util.stream.Stream;
 
 /**
- * This is a greedy version of the FrankEtAlConsensusSpectrumBuilder. It only
- * supports the addition of spectra but not their removal. Thereby, the original
- * peaks do not have to be kept.
+ * This is a greedy version of the FrankEtAlConsensusSpectrumBuilder. It only supports the addition of spectra but not their removal.
+ * Thereby, the original peaks do not have to be kept. This implementation of {@link IConsensusSpectrumBuilder} contains in the
+ * allPeaksInCluster property all the peaks of the spectra that belongs to the cluster.
+ *
+ * allPeaksInCluster: Contains all the peaks of the {@link IBinarySpectrum} that belong to the Cluster. All peaks of the spectra that belongs to
+ * the Cluster needs to be keep to accurately compute the ConsensusPeaks each time is needed.
+ *
+ * consensusPeaks: This is the Array of @{@link BinaryPeak} of a clean @{@link GreedyConsensusSpectrum}.
+ *
+ * isDirty: This variable is used to notice the algorithm each time the consensusPeaks are generated from the allPeaksInCluster. This variable is important because
+ * the class only will update the consensusPeaks when is needed.
  *
  * @author Johannes Griss
  */
@@ -26,26 +34,32 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     public static final int MIN_PEAKS_TO_KEEP = 50;
 
-    /**
-     * The m/z threshold to consider two peaks identical
-     */
+    //Id of the GreedyConsensusSpectrum
     private final String id;
-    private int nSpectra;
-    private int averagePrecursorMz;
-    private long sumPrecursorMz;
-    private int averageCharge;
-    private int sumCharge;
-    private IBinarySpectrum consensusSpectrum;
-    private final int minPeaksToKeep;
-    private final int peaksPerWindowToKeep;
-    private final int windowSize;
+
+    // The peaks of the GreedyConsensusSpectrum
+    private BinaryPeak[]  consensusPeaks;
+
+    // All peaks in the Cluster
+    private BinaryConsensusPeak[] allPeaksInCluster = new BinaryConsensusPeak[0];
 
     private boolean isDirty = true;
 
-    /**
-     * Peaks of the actual consensusSpectrum
-     */
-    private BinaryConsensusPeak[] consensusPeaks = new BinaryConsensusPeak[0];
+    // Number of the spectra in the Cluster.
+    private int nSpectra;
+
+    // Mz of the consensus spectra.
+    private int averagePrecursorMz;
+
+    // Charge of the consensus spectra.
+    private int averageCharge;
+
+    private long sumPrecursorMz;
+    private int sumCharge;
+
+    private final int minPeaksToKeep;
+    private final int peaksPerWindowToKeep;
+    private final int windowSize;
 
 
     /**
@@ -73,14 +87,23 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         this(UUID.randomUUID().toString());
     }
 
+    /**
+     * This function will add to the allPeaksInCluster, the peaks from the newSpectra.
+     *
+     * Any clustering process will compute the similarity between spectra and try to add the similar spectra to the {@link GreedyConsensusSpectrum}.
+     * This method only add the peaks of the spetra to allPeaksInCluster and declare the Consensus Spectrum as Dirty. The algorithm loop the list of {@link IBinarySpectrum} and
+     * add the {@link BinaryPeak} o the allPeaksInCluster property.
+     *
+     * @param newSpectra List of Spectra to be added to the {@link GreedyConsensusSpectrum}
+     */
     @Override
     public void addSpectra(IBinarySpectrum... newSpectra) {
         if (newSpectra.length < 1)
             return;
 
         for (IBinarySpectrum spectrum : newSpectra) {
-            // peaks are added but no additional transformation is done
-            consensusPeaks = addPeaksToConsensus(consensusPeaks, spectrum.getPeaks());
+
+            allPeaksInCluster = addPeaksToConsensus(allPeaksInCluster, spectrum.getPeaks());
 
             sumCharge += spectrum.getPrecursorCharge();
             sumPrecursorMz += spectrum.getPrecursorMz();
@@ -100,7 +123,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             return;
 
         // add the peaks like in a "normal" spectrum - the peak count's are preserved
-        consensusPeaks = addPeaksToConsensus(consensusPeaks, consensusSpectrumToAdd.getConsensusSpectrum().getPeaks());
+        allPeaksInCluster = addPeaksToConsensus(allPeaksInCluster, consensusSpectrumToAdd.getPeaks());
 
         // update the general properties
         sumCharge += consensusSpectrumToAdd.getSummedCharge();
@@ -120,7 +143,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     protected void updateConsensusSpectrum() {
         if (isDirty()) {
             // update the actual consensus spectrum
-            consensusSpectrum = generateConsensusSpectrum();
+            generateConsensusSpectrum();
             setIsDirty(false);
         }
     }
@@ -212,8 +235,8 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     }
 
     /**
-     * Updates all properties of the consensus spectrum as well as the actual consensus
-     * spectrum.
+     * Updates all properties of the consensus spectrum as well as the actual consensus spectrum.
+     * Aver
      */
     protected void updateProperties() {
         if (nSpectra > 0) {
@@ -226,24 +249,23 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     }
 
     /**
-     * Calls the required functions to do normalization and
-     * noise filtering that result in the actual consensus
+     * Calls the required functions to do normalization and noise filtering that result in the actual consensus
      * spectrum.
      *
      * @return !null The generated IBinarySpectrum object
      */
-    private IBinarySpectrum generateConsensusSpectrum() {
-        if (consensusPeaks.length < 1) {
-            return new BinarySpectrum(this.id, averagePrecursorMz, averageCharge, new BinaryPeak[0]);
+    private void generateConsensusSpectrum() {
+        if (allPeaksInCluster.length < 1) {
+            consensusPeaks = new BinaryPeak[0];
         }
 
         // Step 2: adapt the peak intensities based on the probability that the peak has been observed
-        BinaryConsensusPeak[] adaptedPeakIntensities = adaptPeakIntensities(consensusPeaks, nSpectra);
+        BinaryConsensusPeak[] adaptedPeakIntensities = adaptPeakIntensities(allPeaksInCluster, nSpectra);
 
         // Step 3: filter the spectrum
         BinaryConsensusPeak[] filteredPeaks = filterNoise(adaptedPeakIntensities);
 
-        return new BinarySpectrum(this.id, averagePrecursorMz, averageCharge, filteredPeaks);
+        consensusPeaks = filteredPeaks;
     }
 
     /**
@@ -285,7 +307,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     }
 
     /**
-     * Adapt the peak intensities in consensusPeaks using the following formula:
+     * Adapt the peak intensities in allPeaksInCluster using the following formula:
      * I = I * (0.95 + 0.05 * (1 + pi)^5)
      * //TOdo : @jgriss where this came from.
      * where pi is the peaks probability
@@ -304,10 +326,15 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         return adaptedPeaks;
     }
 
+    /**
+     * This function retrieve the current {@link IBinarySpectrum}.
+     * @return binaryConsensusSpectrum
+     */
     @Override
     public IBinarySpectrum getConsensusSpectrum() {
-        updateConsensusSpectrum();
-        return consensusSpectrum;
+        if(isDirty)
+            generateConsensusSpectrum();
+        return this;
     }
 
     @Override
@@ -316,7 +343,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         sumPrecursorMz = 0;
         nSpectra = 0;
 
-        consensusPeaks = new BinaryConsensusPeak[0];
+        allPeaksInCluster = new BinaryConsensusPeak[0];
         setIsDirty(true);
     }
 
@@ -341,5 +368,45 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     @Override
     public int getSummedCharge() {
         return sumCharge;
+    }
+
+    @Override
+    public int getPrecursorMz() {
+        return averagePrecursorMz;
+    }
+
+    @Override
+    public int getPrecursorCharge() {
+        return averageCharge;
+    }
+
+    @Override
+    public int[] getMzVector() {
+        return Arrays.stream(consensusPeaks).mapToInt(BinaryPeak::getMz).toArray();
+    }
+
+    @Override
+    public int[] getIntensityVector() {
+        return Arrays.stream(consensusPeaks).mapToInt(BinaryPeak::getIntensity).toArray();
+    }
+
+    @Override
+    public int getNumberOfPeaks() {
+        return consensusPeaks.length;
+    }
+
+    @Override
+    public String getUUI() {
+        return id;
+    }
+
+    @Override
+    public BinaryPeak[] getPeaks() {
+        return consensusPeaks;
+    }
+
+    @Override
+    public void setPeaks(BinaryPeak[] peaks) {
+        consensusPeaks = peaks;
     }
 }

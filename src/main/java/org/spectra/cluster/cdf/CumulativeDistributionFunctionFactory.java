@@ -5,6 +5,7 @@ import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 /**
  * Created by jg on 05.05.15.
@@ -48,7 +49,7 @@ public class CumulativeDistributionFunctionFactory {
      * @throws Exception
      */
     private static CumulativeDistributionFunction getCumulativeDistributionFunctionForResource(String resource) throws Exception {
-        Path resourcePath = Paths.get(CumulativeDistributionFunctionFactory.class.getClassLoader().getResource(resource).toURI());
+        Path resourcePath = Paths.get(Objects.requireNonNull(CumulativeDistributionFunctionFactory.class.getClassLoader().getResource(resource)).toURI());
 
         StringBuilder definitionString = new StringBuilder();
         Files.lines(resourcePath).forEach(s -> definitionString.append(s).append("\n"));
