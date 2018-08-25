@@ -37,6 +37,9 @@ public class HighestIntensityNPeaksFunction implements IBinarySpectrumFunction {
     @Override
     public IBinarySpectrum apply(IBinarySpectrum binarySpectrum) {
 
+        if(binarySpectrum.getPeaks().length < numberOfPeaks)
+            return binarySpectrum;
+
         Arrays.parallelSort(binarySpectrum.getPeaks(), (o1, o2) -> Integer.compare(o2.getIntensity(), o1.getIntensity()));
         BinaryPeak[] peaks = Arrays.copyOfRange(binarySpectrum.getPeaks(), 0, numberOfPeaks );
 

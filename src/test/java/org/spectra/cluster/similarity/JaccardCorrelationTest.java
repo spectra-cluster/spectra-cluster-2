@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -98,8 +99,10 @@ public class JaccardCorrelationTest {
             spectra.add(specIt.next());
             numSpectra++;
         }
+
         LSHBinner lshBinner = LSHBinner.getInstance();
         JaccardCorrelation correlation = new JaccardCorrelation();
+        HighestIntensityNPeaksFunction functionNpeaks = new HighestIntensityNPeaksFunction(100);
 
 
 
@@ -110,14 +113,22 @@ public class JaccardCorrelationTest {
 
                 int[] vector1 = lshBinner.getKernels(spectra.get(i).getMzVector());
                 int[] vector2 = lshBinner.getKernels(spectra.get(j).getMzVector());
-                double similarityLSH = correlation.correlation(vector1,
-                        vector2);
+                double similarityLSH = correlation.correlation(vector1, vector2);
 
+                System.out.println("New Comparison");
                 log.info("The Jaccard for Spectrum: " + i + " and " + j + " is: " + similarity + " and LSH Score is: " + similarityLSH + " Difference: " + (similarity - similarityLSH));
                 Assert.assertTrue(Math.abs(similarity - similarityLSH) < 1);
 
 
+                similarity = correlation.correlation(functionNpeaks.apply(spectra.get(i)).getMzVector(),
+                        functionNpeaks.apply(spectra.get(j)).getMzVector());
 
+                vector1 = lshBinner.getKernels(functionNpeaks.apply(spectra.get(i)).getMzVector());
+                vector2 = lshBinner.getKernels(functionNpeaks.apply(spectra.get(j)).getMzVector());
+                similarityLSH = correlation.correlation(vector1, vector2);
+
+                log.info("The Jaccard for 100 Intensity Peaks: " + i + " and " + j + " is: " + similarity + " and LSH Score is: " + similarityLSH + " Difference: " + (similarity - similarityLSH));
+                Assert.assertTrue(Math.abs(similarity - similarityLSH) < 1);
             }
         }
 
