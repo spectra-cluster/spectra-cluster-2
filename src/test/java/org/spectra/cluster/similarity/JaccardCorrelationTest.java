@@ -5,17 +5,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
+import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
+import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.LSHBinner;
 import org.spectra.cluster.normalizer.SequestBinner;
+import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -77,6 +84,56 @@ public class JaccardCorrelationTest {
 
         double similarity = correlation.correlation(vector1, vector2);
         Assert.assertTrue(similarity - 0.99f < 0.1);
+
+    }
+
+    @Test
+    public void testJaccardInSyntheticPeptides() throws Exception {
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("synthetic_first_pool_3xHCD_R1.mgf")).toURI();
+        MzSpectraReader reader = new MzSpectraReader(new File(uri));
+
+        Iterator<IBinarySpectrum> specIt = reader.readBinarySpectraIterator();
+        List<IBinarySpectrum> spectra = new ArrayList<>();
+        int numSpectra = 0;
+        while (specIt.hasNext() && numSpectra < 11){
+            spectra.add(specIt.next());
+            numSpectra++;
+        }
+
+        LSHBinner lshBinner = LSHBinner.getInstance();
+        JaccardCorrelation correlation = new JaccardCorrelation();
+        HighestIntensityNPeaksFunction functionNpeaks = new HighestIntensityNPeaksFunction(100);
+
+
+
+        for(int i = 0; i < spectra.size(); i++){
+            for(int j = i+1; j < spectra.size(); j++){
+                double similarity = correlation.correlation(spectra.get(i).getMzVector(),
+                        spectra.get(j).getMzVector());
+
+                int[] vector1 = lshBinner.getKernels(spectra.get(i).getMzVector());
+                int[] vector2 = lshBinner.getKernels(spectra.get(j).getMzVector());
+                double similarityLSH = correlation.correlation(vector1, vector2);
+
+                System.out.println("New Comparison");
+                log.info("The Jaccard for Spectrum: " + i + " and " + j + " is: " + similarity + " and LSH Score is: " + similarityLSH + " Difference: " + (similarity - similarityLSH));
+                Assert.assertTrue(Math.abs(similarity - similarityLSH) < 1);
+
+
+                similarity = correlation.correlation(functionNpeaks.apply(spectra.get(i)).getMzVector(),
+                        functionNpeaks.apply(spectra.get(j)).getMzVector());
+
+                vector1 = lshBinner.getKernels(functionNpeaks.apply(spectra.get(i)).getMzVector());
+                vector2 = lshBinner.getKernels(functionNpeaks.apply(spectra.get(j)).getMzVector());
+                similarityLSH = correlation.correlation(vector1, vector2);
+
+                log.info("The Jaccard for 100 Intensity Peaks: " + i + " and " + j + " is: " + similarity + " and LSH Score is: " + similarityLSH + " Difference: " + (similarity - similarityLSH));
+                Assert.assertTrue(Math.abs(similarity - similarityLSH) < 1);
+            }
+        }
+
+
+
 
     }
 

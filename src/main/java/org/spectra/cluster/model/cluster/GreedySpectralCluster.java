@@ -9,11 +9,12 @@ import java.util.stream.Collectors;
 
 
 /**
- * This implementation if ICluster only supports the addition of
- * spectra. It does not keep the actual spectra after they were added but
- * only their ids.
+ * The {@link GreedySpectralCluster} implements the clustering process and creates a {@link org.spectra.cluster.model.consensus.GreedyConsensusSpectrum}. This implementation if ICluster only supports the addition of
+ * spectra. It does not keep the actual spectra after they were added to the {@link org.spectra.cluster.model.consensus.GreedyConsensusSpectrum} but only their ids.
  *
  * @author Johannes Griss
+ * @author ypriverol
+ *
  */
 @Slf4j
 public class GreedySpectralCluster implements ICluster {
@@ -36,7 +37,7 @@ public class GreedySpectralCluster implements ICluster {
     private final IConsensusSpectrumBuilder consensusSpectrumBuilder;
 
     public GreedySpectralCluster(IConsensusSpectrumBuilder consensusSpectrumBuilder) {
-        this.id = consensusSpectrumBuilder.getConsensusSpectrum().getUUI();
+        this.id = consensusSpectrumBuilder.getUUI();
         this.consensusSpectrumBuilder = consensusSpectrumBuilder;
     }
 
@@ -70,7 +71,7 @@ public class GreedySpectralCluster implements ICluster {
             return -1;
         }
 
-        return consensusSpectrumBuilder.getConsensusSpectrum().getPrecursorMz();
+        return consensusSpectrumBuilder.getPrecursorMz();
     }
 
     @Override
@@ -79,7 +80,7 @@ public class GreedySpectralCluster implements ICluster {
             return -1;
         }
 
-        return consensusSpectrumBuilder.getConsensusSpectrum().getPrecursorCharge();
+        return consensusSpectrumBuilder.getPrecursorCharge();
     }
 
     @Override
@@ -102,12 +103,10 @@ public class GreedySpectralCluster implements ICluster {
         }
 
         // make sure no duplicate spectra exist
-        Set<String> duplicateIds = new HashSet<>();
-        for (IBinarySpectrum spectrum : spectraToAdd) {
-            if (clusteredSpectraIds.contains(spectrum.getUUI())) {
-                duplicateIds.add(spectrum.getUUI());
-            }
-        }
+        Set<String> duplicateIds;
+
+        duplicateIds = Arrays.stream(spectraToAdd).filter(x -> clusteredSpectraIds.contains(x.getUUI())).map(IBinarySpectrum::getUUI)
+                .collect(Collectors.toSet());
 
         // this should generally not happen
         if (!duplicateIds.isEmpty()) {
@@ -131,7 +130,9 @@ public class GreedySpectralCluster implements ICluster {
         // only add the spectra to the consensus spectrum
         consensusSpectrumBuilder.addSpectra(spectraToAdd);
         // add all spectrum ids
-        clusteredSpectraIds.addAll(Arrays.stream(spectraToAdd).map(IBinarySpectrum::getUUI).collect(Collectors.toList()));
+        clusteredSpectraIds.addAll(Arrays.stream(spectraToAdd)
+                .map(IBinarySpectrum::getUUI)
+                .collect(Collectors.toSet()));
     }
 
     /**

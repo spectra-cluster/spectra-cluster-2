@@ -15,9 +15,12 @@ import java.util.List;
  * is used by the spectra-cluster v1 algorithm.
  */
 public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
+
     private final KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
     protected final ChiSquaredDistribution chiSquaredDistribution = new ChiSquaredDistribution(4); // always 4 degrees of freedom
+
     protected final static RandomEngine RANDOM_ENGINE = RandomEngine.makeDefault();
+
     public final double MAX_SCORE = 200;
 
     @Override

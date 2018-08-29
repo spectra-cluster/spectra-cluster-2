@@ -126,9 +126,12 @@ public class MzSpectraReader {
     }
 
     /**
-     * Default constructor use as a MzBinner the {@link org.spectra.cluster.normalizer.SequestBinner} and as
-     * intensity binner the.
-     * @param file File
+     * Default constructor for MzSpectraReader. This implementation uses for Normalization the following Normalizer Helpers:
+     * - mz values are normalized using the {@link org.spectra.cluster.normalizer.SequestBinner}.
+     * - precursor mz is normalized using the {@link BasicIntegerNormalizer}.
+     * - intensity values are normalized using the {@link MaxPeakNormalizer}.
+     *
+     * @param file Spectra file to read.
      */
     public MzSpectraReader(File file) throws Exception {
         this(file, new SequestBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());

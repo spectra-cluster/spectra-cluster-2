@@ -1,19 +1,23 @@
 package org.spectra.cluster.model.consensus;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
+import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralClusterTest;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
+import org.spectra.cluster.normalizer.CumulativeIntensityNormalizer;
+import org.spectra.cluster.normalizer.SequestBinner;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
+@Slf4j
 public class GreedyConsensusSpectrumTest {
 
     @Test
@@ -122,13 +126,12 @@ public class GreedyConsensusSpectrumTest {
     }
 
     /**
-     * Tests whether the consensus spectrum of the first 10 test spectra (all from the
-     * same peptide) are similar to the consensus.
+     * Tests whether the consensus spectrum of the first 10 test spectra (all from the same peptide) are similar to the consensus.
      * @throws Exception
      */
     @Test
     public void testGeneratesSimilarSpectrum() throws Exception {
-        File testFile = new File(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
         MzSpectraReader reader = new MzSpectraReader(testFile);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
@@ -142,12 +145,17 @@ public class GreedyConsensusSpectrumTest {
             spectra.add(spectrumIterator.next());
         }
 
+        long currentTime = System.currentTimeMillis();
+
         GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("Test");
         consensusSpectrum.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
+        currentTime = System.currentTimeMillis();
         IBinarySpectrumSimilarity similarity = new CombinedFisherIntensityTest();
-        IBinarySpectrum consensus = consensusSpectrum.getConsensusSpectrum();
 
+        IBinarySpectrum consensus = consensusSpectrum.getConsensusSpectrum();
+        long timeDifference = (System.currentTimeMillis() - currentTime);
+        System.out.println("Time Consensus Spectra Generation: " + timeDifference + " Spectrum Peaks Size: " + consensus.getPeaks().length);
         int counter = 0;
 
         for (IBinarySpectrum s : spectra) {
@@ -155,6 +163,110 @@ public class GreedyConsensusSpectrumTest {
             counter++;
 
             Assert.assertTrue(String.format("Bad correlation score %d: %.2f", counter, score), score > 100);
+            log.info("The similarity between the Spectrum: " + s.getUUI() + "and the Consensus is: " + score);
+        }
+    }
+
+
+    /**
+     * Tests whether the consensus spectrum of the first 10 test spectra (all from the same peptide) are similar to the consensus.
+     * @throws Exception
+     */
+    @Test
+    public void tesBenchaMarkPeakIntesityNormalization() throws Exception {
+        File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
+        MzSpectraReader readerCummulative = new MzSpectraReader(testFile,new SequestBinner(), new CumulativeIntensityNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());
+
+        Iterator<IBinarySpectrum> spectrumIterator = readerCummulative.readBinarySpectraIterator();
+        List<IBinarySpectrum> spectraCummulative = new ArrayList<>();
+        while (spectrumIterator.hasNext()) {
+            if (spectraCummulative.size() > 10) {
+                break;
+            }
+            spectraCummulative.add(spectrumIterator.next());
+        }
+
+        GreedyConsensusSpectrum consesusCumulative = new GreedyConsensusSpectrum("Test");
+        consesusCumulative.addSpectra(spectraCummulative.toArray(new IBinarySpectrum[0]));
+        IBinarySpectrum consensusCumulative = consesusCumulative.getConsensusSpectrum();
+
+
+        MzSpectraReader reader = new MzSpectraReader(testFile);
+        spectrumIterator = reader.readBinarySpectraIterator();
+        List<IBinarySpectrum> spectra = new ArrayList<>();
+        while (spectrumIterator.hasNext()) {
+            if (spectra.size() > 10) {
+                break;
+            }
+            spectra.add(spectrumIterator.next());
+        }
+
+        GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("Test");
+        consensusSpectrum.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
+        IBinarySpectrum consensus = consensusSpectrum.getConsensusSpectrum();
+
+        IBinarySpectrumSimilarity similarity = new CombinedFisherIntensityTest();
+
+        for(int i = 0; i < 10; i++){
+            double scoreCumulative  = similarity.correlation(consensusCumulative, spectraCummulative.get(i));
+            double score = similarity.correlation(consensus, spectra.get(i));
+            Assert.assertTrue(score > 100);
+            Assert.assertTrue(scoreCumulative > 100);
+            log.info("Spectrum: " + spectra.get(i).getUUI() + " CumulativeIntesity Score -  MaxIntensityScore: " + (scoreCumulative - score));
+
+        }
+    }
+
+
+    /**
+     * This test compare the {@link CumulativeIntensityNormalizer} and the {@link org.spectra.cluster.normalizer.MaxPeakNormalizer} to check who is producing better
+     * results during the clustering process. The synthetic_first_pool_3xHCD_R1 file is used to retrieve the first 10 spectra associated with the PeptideSequence
+     * AAAFYVR .
+     *
+     * Todo: The current score for the Consensus Cluster compare with each Spectra is always lower than 80. Is that ok. ?
+     *
+     * @throws Exception
+     */
+    @Test
+    public void tesBenchaMarkPeakIntesityNormalizationSytentic() throws Exception {
+        File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("synthetic_first_pool_3xHCD_R1.mgf")).toURI());
+        MzSpectraReader readerCumulative = new MzSpectraReader(testFile,new SequestBinner(), new CumulativeIntensityNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());
+
+        Iterator<IBinarySpectrum> spectrumIterator = readerCumulative.readBinarySpectraIterator();
+        List<IBinarySpectrum> spectraCummulative = new ArrayList<>();
+        while (spectrumIterator.hasNext()) {
+            if (spectraCummulative.size() > 10) {
+                break;
+            }
+            spectraCummulative.add(spectrumIterator.next());
+        }
+
+        GreedyConsensusSpectrum consesusCumulative = new GreedyConsensusSpectrum("Test");
+        consesusCumulative.addSpectra(spectraCummulative.toArray(new IBinarySpectrum[0]));
+        IBinarySpectrum consensusCumulative = consesusCumulative.getConsensusSpectrum();
+
+
+        MzSpectraReader reader = new MzSpectraReader(testFile);
+        spectrumIterator = reader.readBinarySpectraIterator();
+        List<IBinarySpectrum> spectra = new ArrayList<>();
+        while (spectrumIterator.hasNext()) {
+            if (spectra.size() > 10) {
+                break;
+            }
+            spectra.add(spectrumIterator.next());
+        }
+
+        GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("Test");
+        consensusSpectrum.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
+        IBinarySpectrum consensus = consensusSpectrum.getConsensusSpectrum();
+
+        IBinarySpectrumSimilarity similarity = new CombinedFisherIntensityTest();
+
+        for(int i = 0; i < 10; i++){
+            double scoreCumulative  = similarity.correlation(consensusCumulative, spectraCummulative.get(i));
+            double score = similarity.correlation(consensus, spectra.get(i));
+            log.info("Spectrum: " + spectra.get(i).getUUI() + " score: " + score + " cumulative score: " + scoreCumulative + " CumulativeIntensity Score -  MaxIntensityScore: " + (scoreCumulative - score));
+
         }
     }
 }
