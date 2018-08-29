@@ -65,11 +65,5 @@ public interface IBinarySpectrum extends Serializable, Cloneable {
      */
     BinaryPeak[] getPeaks();
 
-    /**
-     * Set the {@link BinaryPeak} Array
-     */
-    void setPeaks(BinaryPeak[] peaks);
-
-
 
 }

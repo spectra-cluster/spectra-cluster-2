@@ -416,26 +416,36 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     @Override
     public int getPrecursorMz() {
+        if(isDirty())
+            generateConsensusSpectrum();
         return averagePrecursorMz;
     }
 
     @Override
     public int getPrecursorCharge() {
+        if(isDirty())
+            generateConsensusSpectrum();
         return averageCharge;
     }
 
     @Override
     public int[] getMzVector() {
+        if(isDirty())
+            generateConsensusSpectrum();
         return Arrays.stream(consensusPeaks).mapToInt(BinaryPeak::getMz).toArray();
     }
 
     @Override
     public int[] getIntensityVector() {
+        if(isDirty())
+            generateConsensusSpectrum();
         return Arrays.stream(consensusPeaks).mapToInt(BinaryPeak::getIntensity).toArray();
     }
 
     @Override
     public int getNumberOfPeaks() {
+        if(isDirty())
+            generateConsensusSpectrum();
         return consensusPeaks.length;
     }
 
@@ -446,11 +456,8 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     @Override
     public BinaryPeak[] getPeaks() {
+        if(isDirty())
+            generateConsensusSpectrum();
         return consensusPeaks;
-    }
-
-    @Override
-    public void setPeaks(BinaryPeak[] peaks) {
-        consensusPeaks = peaks;
     }
 }
