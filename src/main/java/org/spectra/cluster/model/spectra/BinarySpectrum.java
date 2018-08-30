@@ -62,6 +62,11 @@ public class BinarySpectrum implements IBinarySpectrum {
     }
 
     @Override
+    public BinaryPeak[] getCopyPeaks() {
+        return Arrays.copyOf(peaks, peaks.length);
+    }
+
+    @Override
     public int getNumberOfPeaks() {
         int count = 0 ;
         if(peaks != null)
@@ -92,7 +97,7 @@ public class BinarySpectrum implements IBinarySpectrum {
      * @return Array of peaks mz values
      */
     @Override
-    public int[] getMzVector() {
+    public int[] getCopyMzVector() {
         return Arrays.stream(peaks).mapToInt(BinaryPeak::getMz).toArray();
     }
 
@@ -101,7 +106,7 @@ public class BinarySpectrum implements IBinarySpectrum {
      * @return Array of peaks intensity values
      */
     @Override
-    public int[] getIntensityVector() {
+    public int[] getCopyIntensityVector() {
         return Arrays.stream(peaks).mapToInt(BinaryPeak::getIntensity).toArray();
     }
 

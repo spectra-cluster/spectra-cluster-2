@@ -76,7 +76,7 @@ public class HighestPeakPerBinFilterTest {
             Assert.assertTrue(filtered.getPeaks().length <= s.getPeaks().length);
 
             // make sure there are no duplicate m/z
-            int[] mz = filtered.getMzVector();
+            int[] mz = filtered.getCopyMzVector();
             Set<Integer> uniqueMz = new HashSet<>();
             for (int m : mz) {
                 uniqueMz.add(m);

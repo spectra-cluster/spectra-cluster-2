@@ -3,6 +3,7 @@ package org.spectra.cluster.io;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
@@ -40,11 +41,29 @@ public class MzSpectraReaderTest {
         Iterator<IBinarySpectrum> binaryIter = spectraReader.readBinarySpectraIterator();
         int count = 0;
         while(binaryIter.hasNext()){
-            Assert.assertTrue(binaryIter.next().getIntensityVector().length > 0);
+            Assert.assertTrue(binaryIter.next().getCopyIntensityVector().length > 0);
             count++;
         }
         Assert.assertEquals(2, count);
 
 
+    }
+
+    @Test
+    public void testNoNullSpectra() throws Exception {
+        File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        MzSpectraReader reader = new MzSpectraReader(testFile);
+        Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
+
+        while (iterator.hasNext()) {
+            IBinarySpectrum spectrum = iterator.next();
+
+            // make sure there are no null peaks
+            BinaryPeak[] peaks = spectrum.getPeaks();
+
+            for (BinaryPeak peak : peaks) {
+                Assert.assertNotNull(peak);
+            }
+        }
     }
 }
