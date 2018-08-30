@@ -32,7 +32,7 @@ public class ShareHighestPeaksPredicateTest {
 
     @Test
     public void testShareHighestPeaks() throws Exception {
-        IBinarySpectrumComparisonPredicate comparisonPredicate = new ShareHighestPeaksPredicate(5);
+        IComparisonPredicate<IBinarySpectrum> comparisonPredicate = new ShareHighestPeaksPredicate(5);
         BinaryPeak[] wrongPeaks = {
                 new BinaryPeak(1, 1),
                 new BinaryPeak(2, 3),
@@ -44,13 +44,13 @@ public class ShareHighestPeaksPredicateTest {
 
         Assert.assertFalse(comparisonPredicate.test(spectra.get(0), wrongSpec));
 
-        IBinarySpectrumComparisonPredicate falsePredicate = comparisonPredicate.and((s1, s2) -> false);
+        IComparisonPredicate<IBinarySpectrum> falsePredicate = comparisonPredicate.and((s1, s2) -> false);
         Assert.assertFalse(falsePredicate.test(spectra.get(0), spectra.get(1)));
 
-        IBinarySpectrumComparisonPredicate truePredicate = comparisonPredicate.or((s1, s2) -> false);
+        IComparisonPredicate<IBinarySpectrum> truePredicate = comparisonPredicate.or((s1, s2) -> false);
         Assert.assertTrue(truePredicate.test(spectra.get(0), spectra.get(1)));
 
-        IBinarySpectrumComparisonPredicate anotherFalsePredicate = comparisonPredicate.negate();
+        IComparisonPredicate<IBinarySpectrum> anotherFalsePredicate = comparisonPredicate.negate();
         Assert.assertFalse(anotherFalsePredicate.test(spectra.get(0), spectra.get(1)));
     }
 }

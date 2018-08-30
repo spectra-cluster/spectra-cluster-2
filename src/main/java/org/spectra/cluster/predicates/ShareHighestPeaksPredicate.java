@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * This predicate tests whether the two spectra share any of the N highest peaks.
  */
 @Data
-public class ShareHighestPeaksPredicate implements IBinarySpectrumComparisonPredicate {
+public class ShareHighestPeaksPredicate implements IComparisonPredicate<IBinarySpectrum> {
     private final int nHighestPeaks;
 
     @Override
