@@ -18,11 +18,7 @@ public interface IComparisonPredicate<T> {
             if (!this.test(o1, o2)) {
                 return false;
             }
-            if (!other.test(o1, o2)) {
-                return false;
-            }
-
-            return true;
+            return other.test(o1, o2);
         };
     }
 
@@ -31,11 +27,8 @@ public interface IComparisonPredicate<T> {
             if (this.test(o1, o2)) {
                 return true;
             }
-            if (other.test(o1, o2)) {
-                return true;
-            }
+            return other.test(o1, o2);
 
-            return false;
         };
     }
 }

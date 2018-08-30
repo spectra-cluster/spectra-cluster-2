@@ -7,8 +7,6 @@ import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
-import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
@@ -25,7 +23,7 @@ public class GreedyClusteringEngineTest {
 
     @Before
     public void setUp() throws Exception {
-        File mgfFile = new File(GreedyClusteringEngineTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        File mgfFile = new File(Objects.requireNonNull(GreedyClusteringEngineTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
         MzSpectraReader reader = new MzSpectraReader(mgfFile);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
 
@@ -37,12 +35,12 @@ public class GreedyClusteringEngineTest {
 
         // get the spectra ids
         String[] ids = spectra.stream().map(IBinarySpectrum::getUUI).toArray(String[]::new);
-        Double[] precursors = Files.lines(Paths.get(GreedyClusteringEngineTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI()))
+        Double[] precursors = Files.lines(Paths.get(Objects.requireNonNull(GreedyClusteringEngineTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI()))
                 .filter(s -> s.startsWith("PEPMASS="))
                 .map(s -> s.substring(8, 15))
                 .map(Double::new)
                 .toArray(Double[]::new);
-        String[] lines = Files.lines(Paths.get(GreedyClusteringEngineTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI()))
+        String[] lines = Files.lines(Paths.get(Objects.requireNonNull(GreedyClusteringEngineTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI()))
                 .toArray(String[]::new);
         String[] peptides = new String[ids.length];
         int currentPeptide = 0;
@@ -89,9 +87,7 @@ public class GreedyClusteringEngineTest {
 
             System.out.println("----- " + cluster.getId() + " -------");
             cluster.getClusteredSpectraIds().forEach(
-                    s -> {
-                        System.out.println(String.format("%.2f - %d - %s", spectrumIdToPrecursor.get(s), spectrumIdToActualPrecursor.get(s), spectrumIdToSequence.get(s)));
-                    }
+                    s -> System.out.println(String.format("%.2f - %d - %s", spectrumIdToPrecursor.get(s), spectrumIdToActualPrecursor.get(s), spectrumIdToSequence.get(s)))
             );
 
             Set<String> peptides = cluster.getClusteredSpectraIds().stream()

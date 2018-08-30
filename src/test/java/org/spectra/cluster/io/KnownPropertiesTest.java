@@ -6,8 +6,6 @@ import org.junit.Test;
 
 import java.util.Properties;
 
-import static org.junit.Assert.*;
-
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
@@ -41,6 +39,6 @@ public class KnownPropertiesTest {
     @Test
     public void addMGFProperties() {
         KnownProperties.addMGFProperties(properties, "INSTRUMENT=LTQ");
-        Assert.assertTrue(properties.size() == 3);
+        Assert.assertEquals(3, properties.size());
     }
 }

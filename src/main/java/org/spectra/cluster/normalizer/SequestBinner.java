@@ -21,7 +21,7 @@ public class SequestBinner implements IIntegerNormalizer {
         for (int i = 0; i < valuesToBin.size(); i++) {
             Double value = valuesToBin.get(i);
             // stay in double space to prevent rounding issues by Java
-            Double binIndex = (value / 1.000508) - 0.18;
+            double binIndex = (value / 1.000508) - 0.18;
 
             binIndexes[i] = (int) Math.floor(binIndex);
 

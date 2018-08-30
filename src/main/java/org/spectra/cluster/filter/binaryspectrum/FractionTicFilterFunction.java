@@ -1,6 +1,5 @@
 package org.spectra.cluster.filter.binaryspectrum;
 
-import lombok.Data;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -56,9 +55,9 @@ public class FractionTicFilterFunction implements IBinarySpectrumFunction {
         int filteredPeaksSize = 0;
         int explainedTic = 0;
 
-        for (int i = 0; i < peaklist.length; i++) {
-            explainedTic += peaklist[i].getIntensity();
-            filteredPeaks[filteredPeaksSize++] = peaklist[i];
+        for (BinaryPeak aPeaklist : peaklist) {
+            explainedTic += aPeaklist.getIntensity();
+            filteredPeaks[filteredPeaksSize++] = aPeaklist;
 
             double relExplainedTic = explainedTic / totalIntensity;
 

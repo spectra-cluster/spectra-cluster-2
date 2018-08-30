@@ -46,8 +46,8 @@ public class RemoveReporterIonPeaksFunction implements IRawPeakFunction{
         Double[] reporterMzValues = getReporterMz(reporterType);
         Map<Double, Double> filteredPeaks = new HashMap<>();
 
-        for(Map.Entry peak: peaks.entrySet()){
-            double peakMz = (double) peak.getKey();
+        for(Map.Entry<Double, Double> peak: peaks.entrySet()){
+            double peakMz = peak.getKey();
             // ignore any peak that could be a neutral loss
             boolean isReporterPeak = false;
             for (double reporterMz : reporterMzValues) {
