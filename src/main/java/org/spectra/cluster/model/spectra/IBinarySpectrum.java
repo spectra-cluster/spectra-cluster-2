@@ -39,13 +39,13 @@ public interface IBinarySpectrum extends Serializable, Cloneable {
      * Get the vector of the peaks mz Values
      * @return MZ Vector of integer
      */
-    int[] getMzVector();
+    int[] getCopyMzVector();
 
     /**
      * Get the Vector of intensity Values
      * @return Get intensity Vector
      */
-    int[] getIntensityVector();
+    int[] getCopyIntensityVector();
 
     /**
      * Get number of peaks in the Spectrum
@@ -64,6 +64,13 @@ public interface IBinarySpectrum extends Serializable, Cloneable {
      * @return BinaryPeak Array
      */
     BinaryPeak[] getPeaks();
+
+    /**
+     * Returns a copy of the peaks instead of the
+     * actual internal array.
+     * @return BinaryPeak array
+     */
+    BinaryPeak[] getCopyPeaks();
 
 
 }

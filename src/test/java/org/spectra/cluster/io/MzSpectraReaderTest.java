@@ -41,7 +41,7 @@ public class MzSpectraReaderTest {
         Iterator<IBinarySpectrum> binaryIter = spectraReader.readBinarySpectraIterator();
         int count = 0;
         while(binaryIter.hasNext()){
-            Assert.assertTrue(binaryIter.next().getIntensityVector().length > 0);
+            Assert.assertTrue(binaryIter.next().getCopyIntensityVector().length > 0);
             count++;
         }
         Assert.assertEquals(2, count);
