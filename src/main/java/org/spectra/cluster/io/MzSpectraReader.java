@@ -79,6 +79,7 @@ public class MzSpectraReader {
     }
 
     private JMzReader jMzReader;
+    private final File inputFile;
 
     private FactoryNormalizer factory;
     /**
@@ -124,6 +125,7 @@ public class MzSpectraReader {
         this.precursorNormalizer = precursorNormalizer;
         this.peaksPerMzWindowFilter = peaksPerMzWindowFilter;
         this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
+        this.inputFile = file;
     }
 
     /**
@@ -167,7 +169,17 @@ public class MzSpectraReader {
             if (propertyStorage != null) {
                 for (Param param: spectrum.getAdditional().getParams()) {
                     propertyStorage.storeProperty(s.getUUI(), param.getName(), param.getValue());
+
+                    // TODO: map the title and retention time from existing cvParams
+                    // current implementation might only work for MGF files.
+
+                    // TODO: add support for PTMs
                 }
+                // always store the original filename
+                propertyStorage.storeProperty(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
+                propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrum.getId());
+                propertyStorage.storeProperty(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
+                propertyStorage.storeProperty(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
             }
 
             return peaksPerMzWindowFilter.apply(s);
