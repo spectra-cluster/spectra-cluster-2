@@ -11,6 +11,7 @@ import uk.ac.ebi.pride.tools.apl_parser.AplFile;
 import uk.ac.ebi.pride.tools.dta_parser.DtaFile;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReader;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
+import uk.ac.ebi.pride.tools.jmzreader.model.Param;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 import uk.ac.ebi.pride.tools.ms2_parser.Ms2File;
@@ -144,12 +145,31 @@ public class MzSpectraReader {
      * @return Iterator of {@link BinarySpectrum} spectra
      */
     public Iterator<IBinarySpectrum> readBinarySpectraIterator() {
+        return readBinarySpectraIterator(null);
+    }
+
+    /**
+     * Return the iterator with the {@link IBinarySpectrum} transformed from the
+     * {@link Spectrum} file.
+     * @param propertyStorage If set, spectrum properties are stored in this property storage.
+     *
+     * @return Iterator of {@link BinarySpectrum} spectra
+     */
+    public Iterator<IBinarySpectrum> readBinarySpectraIterator(IPropertyStorage propertyStorage) {
         return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
                 spectrum -> {
             IBinarySpectrum s = new BinarySpectrum(
                     ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
                     spectrum.getPrecursorCharge(),
                     factory.normalizePeaks(spectrum.getPeakList()));
+
+            // save spectrum properties
+            if (propertyStorage != null) {
+                for (Param param: spectrum.getAdditional().getParams()) {
+                    propertyStorage.storeProperty(s.getUUI(), param.getName(), param.getValue());
+                }
+            }
+
             return peaksPerMzWindowFilter.apply(s);
         });
     }
