@@ -55,6 +55,11 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
             }
         }
 
+        // return 0 if no intensities are shared
+        if (sharedIntensitySpec1.size() < 1) {
+            return 0;
+        }
+
         // calculate the hypergeometric score
         int minBin = Math.min(peaks1[0].getMz(), peaks2[0].getMz());
         int maxBin = Math.max(peaks1[peaks1.length - 1].getMz(), peaks2[peaks2.length - 1].getMz());
