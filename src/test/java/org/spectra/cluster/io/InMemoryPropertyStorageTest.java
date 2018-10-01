@@ -17,5 +17,8 @@ public class InMemoryPropertyStorageTest {
         Assert.assertEquals("1234", storage.getProperty(spec1, "RT"));
         Assert.assertEquals("1234", storage.getProperty(spec2, "RT"));
         Assert.assertNull(storage.getProperty(spec1, "Hallo"));
+
+        Assert.assertEquals(1, storage.getAvailableProperties().size());
+        Assert.assertTrue(storage.getAvailableProperties().contains("RT"));
     }
 }

@@ -1,5 +1,7 @@
 package org.spectra.cluster.io;
 
+import java.util.Set;
+
 /**
  * This interface describes a property storage used to store
  * the properties of the loaded spectra.
@@ -24,4 +26,10 @@ public interface IPropertyStorage {
      * @throws IndexOutOfBoundsException In case no item with this id exists.
      */
     String getProperty(String itemId, String propertyName) throws IndexOutOfBoundsException;
+
+    /**
+     * Returns the names of all properties currently available in the storage.
+     * @return The available properties.
+     */
+    Set<String> getAvailableProperties();
 }
