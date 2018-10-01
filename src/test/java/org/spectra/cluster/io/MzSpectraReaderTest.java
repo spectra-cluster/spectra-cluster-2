@@ -9,7 +9,9 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -65,5 +67,36 @@ public class MzSpectraReaderTest {
                 Assert.assertNotNull(peak);
             }
         }
+    }
+
+    @Test
+    public void testPropertyLoading() throws Exception {
+        File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        MzSpectraReader reader = new MzSpectraReader(testFile);
+
+        IPropertyStorage storage = new InMemoryPropertyStorage();
+
+        Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(storage);
+        List<String> specIds = new ArrayList<>();
+
+        while (iterator.hasNext()) {
+            IBinarySpectrum spectrum = iterator.next();
+            specIds.add(spectrum.getUUI());
+        }
+
+        Assert.assertEquals(158, specIds.size());
+        int nIdentified = 0;
+
+        // test the properties exist
+        for (String id : specIds) {
+            if (storage.getProperty(id, "Sequence") != null) {
+                nIdentified++;
+            }
+
+            Assert.assertNotNull("Missing retention time for " + id, storage.getProperty(id, "retention time"));
+            Assert.assertNotNull("Missing title for " + id, storage.getProperty(id, "spectrum title"));
+        }
+
+        Assert.assertEquals(136, nIdentified);
     }
 }
