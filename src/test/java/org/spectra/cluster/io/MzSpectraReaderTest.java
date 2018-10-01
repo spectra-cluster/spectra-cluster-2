@@ -98,5 +98,7 @@ public class MzSpectraReaderTest {
         }
 
         Assert.assertEquals(136, nIdentified);
+
+        Assert.assertEquals(3, storage.getAvailableProperties().size());
     }
 }
