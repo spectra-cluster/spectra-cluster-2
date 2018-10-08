@@ -2,8 +2,10 @@ package org.spectra.cluster.model.consensus;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
+import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralClusterTest;
 import org.spectra.cluster.model.spectra.BinaryPeak;
@@ -15,10 +17,21 @@ import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 public class GreedyConsensusSpectrumTest {
+    IRawSpectrumFunction loadingFilter;
+
+    @Before
+    public void setUp() {
+         loadingFilter = new RemoveImpossiblyHighPeaksFunction()
+                 .specAndThen(new RemovePrecursorPeaksFunction(0.5))
+                 .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70)));
+    }
 
     @Test
     public void testAddPeaksToConsensus() {
@@ -175,7 +188,8 @@ public class GreedyConsensusSpectrumTest {
     @Test
     public void tesBenchaMarkPeakIntesityNormalization() throws Exception {
         File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
-        MzSpectraReader readerCummulative = new MzSpectraReader(testFile,new SequestBinner(), new CumulativeIntensityNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());
+        MzSpectraReader readerCummulative = new MzSpectraReader(testFile,new SequestBinner(), new CumulativeIntensityNormalizer(),
+                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter);
 
         Iterator<IBinarySpectrum> spectrumIterator = readerCummulative.readBinarySpectraIterator();
         List<IBinarySpectrum> spectraCummulative = new ArrayList<>();
@@ -230,7 +244,8 @@ public class GreedyConsensusSpectrumTest {
     @Test
     public void tesBenchaMarkPeakIntesityNormalizationSytentic() throws Exception {
         File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("synthetic_first_pool_3xHCD_R1.mgf")).toURI());
-        MzSpectraReader readerCumulative = new MzSpectraReader(testFile,new SequestBinner(), new CumulativeIntensityNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());
+        MzSpectraReader readerCumulative = new MzSpectraReader(testFile,new SequestBinner(), new CumulativeIntensityNormalizer(),
+                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter);
 
         Iterator<IBinarySpectrum> spectrumIterator = readerCumulative.readBinarySpectraIterator();
         List<IBinarySpectrum> spectraCummulative = new ArrayList<>();

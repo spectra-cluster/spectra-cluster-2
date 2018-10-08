@@ -1,6 +1,5 @@
 package org.spectra.cluster.filter.rawpeaks;
 
-import java.rmi.MarshalledObject;
 import java.util.*;
 
 /**

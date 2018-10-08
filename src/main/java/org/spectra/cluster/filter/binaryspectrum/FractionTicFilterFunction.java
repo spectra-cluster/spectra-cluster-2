@@ -1,6 +1,5 @@
 package org.spectra.cluster.filter.binaryspectrum;
 
-import lombok.Data;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -63,11 +62,17 @@ public class FractionTicFilterFunction implements IBinarySpectrumFunction {
             double relExplainedTic = explainedTic / totalIntensity;
 
             // stop if enough TIC is explained and more then the minimum number of peaks were added
-            if (relExplainedTic > fractionTic && filteredPeaksSize > minPeaksToKeep) {
+            if (relExplainedTic > fractionTic && filteredPeaksSize >= minPeaksToKeep) {
                 break;
             }
         }
 
-        return new BinarySpectrum(binarySpectrum, Arrays.copyOf(filteredPeaks, filteredPeaksSize));
+        // truncate the array
+        filteredPeaks = Arrays.copyOf(filteredPeaks, filteredPeaksSize);
+
+        // re-sort according to m/z
+        Arrays.sort(filteredPeaks, Comparator.comparingInt(BinaryPeak::getMz));
+
+        return new BinarySpectrum(binarySpectrum, filteredPeaks);
     }
 }

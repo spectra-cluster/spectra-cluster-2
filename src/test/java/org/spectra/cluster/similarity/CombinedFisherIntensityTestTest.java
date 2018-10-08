@@ -63,7 +63,7 @@ public class CombinedFisherIntensityTestTest {
             // score differences are caused by
             // 1) binning and the thereby caused different number of peaks and different fragment tolerance
             // 2) different intensity normalisation in the original spectra-cluster code
-            Assert.assertEquals(score, orgScore, 30);
+            Assert.assertEquals(orgScore, score, 5);
 
         }
     }

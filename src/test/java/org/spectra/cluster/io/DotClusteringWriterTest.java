@@ -39,7 +39,7 @@ public class DotClusteringWriterTest {
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
-        Assert.assertEquals(11, clusters.length);
+        Assert.assertEquals(7, clusters.length);
 
         // write everything to a test file
         Path outputFile = Files.createTempFile("spectra_cluster_test_", ".clustering");

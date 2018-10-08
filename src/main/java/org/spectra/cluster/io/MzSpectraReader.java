@@ -3,6 +3,7 @@ package org.spectra.cluster.io;
 import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
+import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.model.commons.IteratorConverter;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -90,6 +91,8 @@ public class MzSpectraReader {
 
     private IIntegerNormalizer precursorNormalizer;
 
+    private final IRawSpectrumFunction loadingFilter;
+
     /**
      * Create a Reader from a file. The file type accepted are mgf or mzml
      * @param file File to be read
@@ -98,7 +101,8 @@ public class MzSpectraReader {
     public  MzSpectraReader(File file, IIntegerNormalizer mzBinner,
                             IIntegerNormalizer intensityBinner,
                             BasicIntegerNormalizer precursorNormalizer,
-                            IBinarySpectrumFunction peaksPerMzWindowFilter) throws Exception {
+                            IBinarySpectrumFunction peaksPerMzWindowFilter,
+                            IRawSpectrumFunction loadingFilter) throws Exception {
         try{
             Class<?> peakListclass = isValidPeakListFile(file);
             if( peakListclass != null){
@@ -126,6 +130,7 @@ public class MzSpectraReader {
         this.peaksPerMzWindowFilter = peaksPerMzWindowFilter;
         this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
         this.inputFile = file;
+        this.loadingFilter = loadingFilter;
     }
 
     /**
@@ -137,7 +142,11 @@ public class MzSpectraReader {
      * @param file Spectra file to read.
      */
     public MzSpectraReader(File file) throws Exception {
-        this(file, new SequestBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());
+        this(file, new TideBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(),
+                new RemoveImpossiblyHighPeaksFunction()
+                // TODO: set fragment tolerance
+                .specAndThen(new RemovePrecursorPeaksFunction(0.5))
+                .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))));
     }
 
     /**
@@ -160,6 +169,11 @@ public class MzSpectraReader {
     public Iterator<IBinarySpectrum> readBinarySpectraIterator(IPropertyStorage propertyStorage) {
         return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
                 spectrum -> {
+            // apply the initial loading filter
+            if (loadingFilter != null) {
+                spectrum = loadingFilter.apply(spectrum);
+            }
+
             IBinarySpectrum s = new BinarySpectrum(
                     ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
                     spectrum.getPrecursorCharge(),

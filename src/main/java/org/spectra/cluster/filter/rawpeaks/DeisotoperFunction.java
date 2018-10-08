@@ -3,7 +3,6 @@ package org.spectra.cluster.filter.rawpeaks;
 import edu.emory.mathcs.backport.java.util.Collections;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 
-import javax.print.attribute.standard.MediaSize;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
