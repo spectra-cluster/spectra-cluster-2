@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 public class TideBinnerTest {
     private Spectrum testSpectrum;
+    private List<Spectrum> allSpectra = new ArrayList<>(100);
+    private final static boolean verbose = false;
 
     @Before
     public void setUp() throws Exception {
@@ -21,11 +23,10 @@ public class TideBinnerTest {
         MgfFile mgfFile = new MgfFile(new File(uri));
         Iterator<Spectrum> specIt = mgfFile.getSpectrumIterator();
 
-        if (!specIt.hasNext()) {
-            throw new Exception("Failed to load spectra");
+        while (specIt.hasNext()) {
+            allSpectra.add(specIt.next());
         }
-
-        testSpectrum = specIt.next();
+        testSpectrum = allSpectra.get(0);
     }
 
     @Test
@@ -47,7 +48,7 @@ public class TideBinnerTest {
     public void testBinFirstPeaks() {
         List<Double> doubleList = new ArrayList<>(testSpectrum.getPeakList().keySet());
         Collections.sort(doubleList);
-        SequestBinner binner = new SequestBinner();
+        TideBinner binner = new TideBinner();
 
         int[] bins = binner.binDoubles(doubleList);
 
@@ -55,5 +56,28 @@ public class TideBinnerTest {
         Assert.assertEquals(126, bins[0]);
         Assert.assertEquals(129, bins[1]);
         Assert.assertEquals(130, bins[2]);
+    }
+
+    @Test
+    public void compareBinners() {
+        SequestBinner sequestBinner = new SequestBinner();
+        TideBinner tideBinner = new TideBinner();
+
+        for (Spectrum s : allSpectra) {
+            List<Double> mzValues = new ArrayList<>(s.getPeakList().keySet());
+            int[] sequestBins = sequestBinner.binDoubles(mzValues);
+            int[] tideBins = tideBinner.binDoubles(mzValues);
+
+            Assert.assertEquals(sequestBins.length, tideBins.length);
+
+            for (int i = 0; i < sequestBins.length; i++) {
+                if (sequestBins[i] != tideBins[i]) {
+                    if (verbose)
+                        System.out.println(String.format("Different bin for %.2f m/z %d -> %d", mzValues.get(i), sequestBins[i], tideBins[i]));
+                }
+
+                Assert.assertTrue(Math.abs(sequestBins[i] - tideBins[i]) <= 1);
+            }
+        }
     }
 }

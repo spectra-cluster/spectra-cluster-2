@@ -38,9 +38,9 @@ public class SequestBinnerTest {
 
         Assert.assertEquals(doublesToBin.length, indexes.length);
         Assert.assertEquals(0, indexes[0]);
-        Assert.assertEquals(0, indexes[1]);
-        Assert.assertEquals(1, indexes[2]);
-        Assert.assertEquals(18, indexes[3]);
+        Assert.assertEquals(1, indexes[1]);
+        Assert.assertEquals(2, indexes[2]);
+        Assert.assertEquals(19, indexes[3]);
     }
 
     @Test
@@ -52,8 +52,8 @@ public class SequestBinnerTest {
         int[] bins = binner.binDoubles(doubleList);
 
         Assert.assertEquals(bins.length, doubleList.size());
-        Assert.assertEquals(125, bins[0]);
-        Assert.assertEquals(128, bins[1]);
-        Assert.assertEquals(129, bins[2]);
+        Assert.assertEquals(126, bins[0]);
+        Assert.assertEquals(129, bins[1]);
+        Assert.assertEquals(130, bins[2]);
     }
 }
