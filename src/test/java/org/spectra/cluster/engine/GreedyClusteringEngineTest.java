@@ -15,6 +15,8 @@ import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -115,24 +117,39 @@ public class GreedyClusteringEngineTest {
 
     @Test
     public void localTestSyntheticPeptides() throws Exception {
-        File synthFile = new File(getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI());
+        // only run the test if the file is present
+        URL testFile = getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf");
+        if (testFile == null) {
+            return;
+        }
+
+        File synthFile = new File(testFile.toURI());
         String resultFile = synthFile.getAbsolutePath() + "_new.clustering";
         clusterFile(synthFile, Paths.get(resultFile));
     }
 
     @Test
     public void localTestImp() throws Exception {
-        /**
-         * This test is not intended to be run as part of the test suite
-         */
-        File synthFile = new File(getClass().getClassLoader().getResource("imp_hela_test.mgf").toURI());
+        // only run the test if the file is present
+        URL testFile = getClass().getClassLoader().getResource("imp_hela_test.mgf");
+        if (testFile == null) {
+            return;
+        }
+
+        File synthFile = new File(testFile.toURI());
         String resultFile = synthFile.getAbsolutePath() + "_new.clustering";
         clusterFile(synthFile, Paths.get(resultFile));
     }
 
     @Test
     public void localTestTwoSpectra() throws Exception {
-        File twoSpecFile = new File(getClass().getClassLoader().getResource("two_spectra.mgf").toURI());
+        // only run the test if the file is present
+        URL testFile = getClass().getClassLoader().getResource("two_spectra.mgf");
+        if (testFile == null) {
+            return;
+        }
+
+        File twoSpecFile = new File(testFile.toURI());
         String resultFile = twoSpecFile.getAbsolutePath() + "_new.clustering";
         clusterFile(twoSpecFile, Paths.get(resultFile));
     }
