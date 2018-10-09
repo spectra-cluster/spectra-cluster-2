@@ -15,7 +15,6 @@ import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -88,7 +87,9 @@ public class GreedyClusteringEngineTest {
 
     @Test
     public void testClustering() throws Exception {
-        IClusteringEngine engine = new GreedyClusteringEngine(10_000, 1, 0.99f, 5, new CombinedFisherIntensityTest(), new MinNumberComparisonsAssessor(10000), 5);
+        IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
+                1, 0.99f, 5, new CombinedFisherIntensityTest(),
+                new MinNumberComparisonsAssessor(10000), 5);
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
@@ -166,10 +167,13 @@ public class GreedyClusteringEngineTest {
             spectra.add(iterator.next());
         }
 
+        // sort according to m/z
+        spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
+
         // cluster everything
-        IClusteringEngine engine = new GreedyClusteringEngine(10_000,
+        IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
-                new MinNumberComparisonsAssessor(10000), 5);
+                new MinNumberComparisonsAssessor(100), 5);
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 

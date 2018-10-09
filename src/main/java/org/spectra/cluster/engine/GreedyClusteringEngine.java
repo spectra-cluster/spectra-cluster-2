@@ -10,6 +10,7 @@ import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.predicates.ClusterIsKnownComparisonPredicate;
 import org.spectra.cluster.predicates.IComparisonPredicate;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
@@ -18,6 +19,7 @@ import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Implementation of the original clustering engine used by default
@@ -94,6 +96,9 @@ public class GreedyClusteringEngine implements IClusteringEngine {
 
             // do the clustering - ie. the merging
             clusters = mergeSimilarClusters(clusters, currentThreshold, currentComparisonPredicate);
+
+            // TODO: find a better solution than sorting between clustering rounds
+            Arrays.parallelSort(clusters, Comparator.comparingInt(ICluster::getPrecursorMz));
         }
 
         return clusters;
@@ -112,13 +117,23 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         int mergedClusterSize = 0;
         // the current offset to use based on the set precursor tolerance
         int mergedClusterPrecursorOffset = 0;
+        int lastMz = 0;
+        int maxSortTolerance = Math.round((float) precursorTolerance / 5);
 
         // merge similar clusters
         for (GreedySpectralCluster clusterToMerge : clustersToMerge) {
             if (mergedClusterSize < 1) {
+                lastMz = clusterToMerge.getPrecursorMz();
                 mergedClusters[mergedClusterSize++] = clusterToMerge;
                 continue;
             }
+
+            // TODO: ideally, we should not need this check
+            // make sure everything is sorted according to precursor m/z
+            if (lastMz - clusterToMerge.getPrecursorMz() > maxSortTolerance) {
+                throw new IllegalStateException("Clusters are not sorted according to precursor m/z");
+            }
+            lastMz = clusterToMerge.getPrecursorMz();
 
             IBinarySpectrum filteredSpectrumToAdd = comparisonFilter.apply(clusterToMerge.getConsensusSpectrum());
             boolean isClusterMerged = false;
