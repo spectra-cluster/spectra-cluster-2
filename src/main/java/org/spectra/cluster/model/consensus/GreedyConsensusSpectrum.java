@@ -55,7 +55,6 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     // Charge of the consensus spectra.
     private int averageCharge;
 
-    private long sumPrecursorMz;
     private int sumCharge;
 
     private final int minPeaksToKeep;
@@ -107,9 +106,11 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             allPeaksInCluster = addPeaksToConsensus(allPeaksInCluster, spectrum.getPeaks());
 
             sumCharge += spectrum.getPrecursorCharge();
-            sumPrecursorMz += spectrum.getPrecursorMz();
-
             nSpectra++;
+
+            averagePrecursorMz = (int) Math.round(
+                    (double) averagePrecursorMz * ((double) (nSpectra -1) / nSpectra) +
+                            (double) spectrum.getPrecursorMz() / nSpectra);
         }
 
         // update properties charge, precursor m/z and precursor intensity
@@ -128,8 +129,14 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
         // update the general properties
         sumCharge += consensusSpectrumToAdd.getSummedCharge();
-        sumPrecursorMz += consensusSpectrumToAdd.getSummedPrecursorMz();
-        nSpectra += consensusSpectrumToAdd.getSpectraCount();
+        int totalSpectra = nSpectra + consensusSpectrumToAdd.getSpectraCount();
+
+        averagePrecursorMz = (int) Math.round(
+                (double) averagePrecursorMz * ((double) nSpectra / totalSpectra) +
+                        (double) consensusSpectrumToAdd.getPrecursorMz() * ((double) consensusSpectrumToAdd.getSpectraCount() / totalSpectra));
+
+
+        nSpectra = totalSpectra;
 
         // update properties charge, precursor m/z and precursor intensity
         updateProperties();
@@ -221,7 +228,6 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
      */
     protected void updateProperties() {
         if (nSpectra > 0) {
-            averagePrecursorMz = (int) sumPrecursorMz / nSpectra;
             averageCharge = sumCharge / nSpectra;
         } else {
             averagePrecursorMz = 0;
@@ -383,7 +389,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     @Override
     public void clear() {
         sumCharge = 0;
-        sumPrecursorMz = 0;
+        averagePrecursorMz = 0;
         nSpectra = 0;
 
         allPeaksInCluster = new BinaryConsensusPeak[0];
@@ -401,11 +407,6 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     private void setIsDirty(boolean isDirty) {
         this.isDirty = isDirty;
-    }
-
-    @Override
-    public long getSummedPrecursorMz() {
-        return sumPrecursorMz;
     }
 
     @Override

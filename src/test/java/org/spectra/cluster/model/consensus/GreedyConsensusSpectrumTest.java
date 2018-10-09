@@ -9,9 +9,11 @@ import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralClusterTest;
 import org.spectra.cluster.model.spectra.BinaryPeak;
+import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.CumulativeIntensityNormalizer;
+import org.spectra.cluster.normalizer.IIntegerNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
@@ -283,5 +285,54 @@ public class GreedyConsensusSpectrumTest {
             log.info("Spectrum: " + spectra.get(i).getUUI() + " score: " + score + " cumulative score: " + scoreCumulative + " CumulativeIntensity Score -  MaxIntensityScore: " + (scoreCumulative - score));
 
         }
+    }
+
+    @Test
+    public void testLargeCluster() throws Exception {
+        // always add the same spectrum to test for overflows
+        BinaryConsensusPeak[] existingPeaks = {
+                new BinaryConsensusPeak(10, 100, 10),
+                new BinaryConsensusPeak(20, 200, 5),
+                new BinaryConsensusPeak(100, 1000, 30),
+                new BinaryConsensusPeak(110, 1000, 30),
+                new BinaryConsensusPeak(120, 10, 30),
+                new BinaryConsensusPeak(130, 100, 30),
+                new BinaryConsensusPeak(140, 100, 30),
+                new BinaryConsensusPeak(150, 1000, 30),
+                new BinaryConsensusPeak(160, 1000, 30),
+                new BinaryConsensusPeak(170, 1000, 30),
+                new BinaryConsensusPeak(180, 200, 30),
+                new BinaryConsensusPeak(1000, 200, 30)
+        };
+
+        GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("0", 50, 5, 100);
+        int precursorMz = new BasicIntegerNormalizer().binValue(1024.1993);
+
+        for (int i = 0; i < 100_000; i++) {
+            IBinarySpectrum binarySpectrum = new BinarySpectrum(String.valueOf(i + 1),
+                    precursorMz,
+                    2,
+                    existingPeaks);
+
+            consensusSpectrum.addSpectra(binarySpectrum);
+
+            Assert.assertEquals(precursorMz, consensusSpectrum.getPrecursorMz());
+            Assert.assertEquals(i + 1, consensusSpectrum.getSpectraCount());
+        }
+
+        GreedyConsensusSpectrum consensusSpectrum2 = new GreedyConsensusSpectrum("c1", 50, 5, 100);
+
+        for (int i = 0; i < 15; i++) {
+            IBinarySpectrum binarySpectrum = new BinarySpectrum(String.valueOf(i + 100_010),
+                    precursorMz,
+                    2,
+                    existingPeaks);
+
+            consensusSpectrum2.addSpectra(binarySpectrum);
+        }
+
+        Assert.assertEquals(precursorMz, consensusSpectrum2.getPrecursorMz());
+        consensusSpectrum.addConsensusSpectrum(consensusSpectrum2);
+        Assert.assertEquals(precursorMz, consensusSpectrum.getPrecursorMz());
     }
 }
