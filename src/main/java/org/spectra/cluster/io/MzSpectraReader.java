@@ -15,6 +15,7 @@ import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Param;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
+import uk.ac.ebi.pride.tools.mgf_parser.model.Ms2Query;
 import uk.ac.ebi.pride.tools.ms2_parser.Ms2File;
 import uk.ac.ebi.pride.tools.mzdata_wrapper.MzMlWrapper;
 import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLFile;
@@ -191,7 +192,15 @@ public class MzSpectraReader {
                 }
                 // always store the original filename
                 propertyStorage.storeProperty(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
-                propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrum.getId());
+
+                String spectrumId = spectrum.getId();
+
+                // make spectrum id PSI format compatible
+                if (spectrum instanceof Ms2Query) {
+                    spectrumId = "index=" + spectrumId;
+                }
+
+                propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
                 propertyStorage.storeProperty(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
                 propertyStorage.storeProperty(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
             }
