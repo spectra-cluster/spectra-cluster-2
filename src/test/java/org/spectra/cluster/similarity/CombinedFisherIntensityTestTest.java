@@ -24,7 +24,6 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.normalizer.TideBinner;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 
 import java.io.File;
 import java.net.URI;

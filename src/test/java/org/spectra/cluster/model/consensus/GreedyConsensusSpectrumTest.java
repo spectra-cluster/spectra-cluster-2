@@ -13,7 +13,6 @@ import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.CumulativeIntensityNormalizer;
-import org.spectra.cluster.normalizer.IIntegerNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
