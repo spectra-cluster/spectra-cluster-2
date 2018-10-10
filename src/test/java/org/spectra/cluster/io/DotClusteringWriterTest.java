@@ -14,6 +14,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,6 +32,8 @@ public class DotClusteringWriterTest {
             IBinarySpectrum s = iterator.next();
             spectra.add(s);
         }
+
+        spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
     }
 
     @Test
@@ -39,7 +42,7 @@ public class DotClusteringWriterTest {
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
-        Assert.assertEquals(7, clusters.length);
+        Assert.assertEquals(8, clusters.length);
 
         // write everything to a test file
         Path outputFile = Files.createTempFile("spectra_cluster_test_", ".clustering");
@@ -53,7 +56,7 @@ public class DotClusteringWriterTest {
         // read the file back in
         List<String> lines = Files.readAllLines(outputFile);
 
-        Assert.assertEquals(247, lines.size());
+        Assert.assertEquals(223, lines.size());
 
         Files.delete(outputFile);
     }

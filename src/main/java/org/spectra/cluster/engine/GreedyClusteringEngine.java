@@ -60,8 +60,8 @@ public class GreedyClusteringEngine implements IClusteringEngine {
                                   INumberOfComparisonAssessor numberOfComparisonAssessor, int nInitiallySharedPeaks)
             throws Exception {
         this.precursorTolerance = precursorTolerance;
-        this.thresholdStart = thresholdStart;
-        this.thresholdEnd = thresholdEnd;
+        this.thresholdStart = 1 - thresholdStart;
+        this.thresholdEnd = 1 - thresholdEnd;
         this.clusteringRounds = clusteringRounds;
         this.similarityMeasure = similarityMeasure;
         this.numberOfComparisonAssessor = numberOfComparisonAssessor;
@@ -79,11 +79,11 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     public ICluster[] clusterSpectra(IBinarySpectrum... spectra) {
         // convert all spectra to clusters
         GreedySpectralCluster[] clusters = convertSpectraToCluster(spectra);
-        float scoreIncrement = (thresholdStart - thresholdEnd) / (float) (clusteringRounds - 1);
+        float scoreIncrement = (thresholdEnd - thresholdStart) / (float) (clusteringRounds - 1);
         IComparisonPredicate<ICluster> currentComparisonPredicate;
 
         // cluster the spectra
-        for (float currentThreshold = thresholdStart; currentThreshold >= thresholdEnd; currentThreshold -= scoreIncrement) {
+        for (float currentThreshold = thresholdStart; currentThreshold <= thresholdEnd; currentThreshold += scoreIncrement) {
             log.debug(String.format("Merging clusters with threshold %.3f", currentThreshold));
 
             // set the current predicate to use

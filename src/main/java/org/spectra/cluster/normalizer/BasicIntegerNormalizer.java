@@ -11,7 +11,7 @@ public class BasicIntegerNormalizer implements IIntegerNormalizer {
     /**
      * This is optimised for m/z values.
      */
-    public static final int MZ_CONSTANT = 1000;
+    public static final int MZ_CONSTANT = 10000;
     private final int constant;
 
     /**
