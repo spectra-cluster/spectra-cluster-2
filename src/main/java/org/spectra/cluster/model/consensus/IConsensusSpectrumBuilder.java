@@ -57,10 +57,5 @@ public interface IConsensusSpectrumBuilder extends IBinarySpectrum{
      */
     void addSpectra(IBinarySpectrum... spectra);
 
-    /**
-     * These getters are used to merge two consensus spectra
-     */
-    long getSummedPrecursorMz();
-
     int getSummedCharge();
 }

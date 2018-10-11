@@ -3,6 +3,7 @@ package org.spectra.cluster.io;
 import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
+import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.model.commons.IteratorConverter;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -14,6 +15,7 @@ import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Param;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
+import uk.ac.ebi.pride.tools.mgf_parser.model.Ms2Query;
 import uk.ac.ebi.pride.tools.ms2_parser.Ms2File;
 import uk.ac.ebi.pride.tools.mzdata_wrapper.MzMlWrapper;
 import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLFile;
@@ -90,6 +92,8 @@ public class MzSpectraReader {
 
     private IIntegerNormalizer precursorNormalizer;
 
+    private final IRawSpectrumFunction loadingFilter;
+
     /**
      * Create a Reader from a file. The file type accepted are mgf or mzml
      * @param file File to be read
@@ -98,7 +102,8 @@ public class MzSpectraReader {
     public  MzSpectraReader(File file, IIntegerNormalizer mzBinner,
                             IIntegerNormalizer intensityBinner,
                             BasicIntegerNormalizer precursorNormalizer,
-                            IBinarySpectrumFunction peaksPerMzWindowFilter) throws Exception {
+                            IBinarySpectrumFunction peaksPerMzWindowFilter,
+                            IRawSpectrumFunction loadingFilter) throws Exception {
         try{
             Class<?> peakListclass = isValidPeakListFile(file);
             if( peakListclass != null){
@@ -126,6 +131,7 @@ public class MzSpectraReader {
         this.peaksPerMzWindowFilter = peaksPerMzWindowFilter;
         this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
         this.inputFile = file;
+        this.loadingFilter = loadingFilter;
     }
 
     /**
@@ -137,7 +143,11 @@ public class MzSpectraReader {
      * @param file Spectra file to read.
      */
     public MzSpectraReader(File file) throws Exception {
-        this(file, new SequestBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction());
+        this(file, new TideBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(),
+                new RemoveImpossiblyHighPeaksFunction()
+                // TODO: set fragment tolerance
+                .specAndThen(new RemovePrecursorPeaksFunction(0.5))
+                .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))));
     }
 
     /**
@@ -160,6 +170,11 @@ public class MzSpectraReader {
     public Iterator<IBinarySpectrum> readBinarySpectraIterator(IPropertyStorage propertyStorage) {
         return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
                 spectrum -> {
+            // apply the initial loading filter
+            if (loadingFilter != null) {
+                spectrum = loadingFilter.apply(spectrum);
+            }
+
             IBinarySpectrum s = new BinarySpectrum(
                     ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
                     spectrum.getPrecursorCharge(),
@@ -177,7 +192,15 @@ public class MzSpectraReader {
                 }
                 // always store the original filename
                 propertyStorage.storeProperty(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
-                propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrum.getId());
+
+                String spectrumId = spectrum.getId();
+
+                // make spectrum id PSI format compatible
+                if (spectrum instanceof Ms2Query) {
+                    spectrumId = "index=" + spectrumId;
+                }
+
+                propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
                 propertyStorage.storeProperty(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
                 propertyStorage.storeProperty(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
             }

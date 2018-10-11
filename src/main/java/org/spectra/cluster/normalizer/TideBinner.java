@@ -1,16 +1,23 @@
 package org.spectra.cluster.normalizer;
 
 
+import org.spectra.cluster.util.Masses;
+
 import java.util.List;
 
 /**
- * Implementation of the binning procedure found in the Sequest
- * Comet and MaRaCluster algorithm.
- * Bin boundaries are calculated based on Ii = 1.0005079 x (0.18 + i) Th, for i = 0, 1
+ * Implementation of the binning procedure as used in Tide.
+ * This code is adapted from the Tide source code in
+ * mass_constants.h
  *
  * @author jg
  */
-public class SequestBinner implements IIntegerNormalizer {
+public class TideBinner implements IIntegerNormalizer {
+    public static final double BIN_WIDTH = 1.0005079;
+    public static final double BIN_OFFSET = 0.68;
+
+    /** All peaks are converted using a charge = 1 **/
+    private static final int CHARGE = 1;
 
     @Override
     public int[] binDoubles(List<Double> valuesToBin) {
@@ -21,9 +28,9 @@ public class SequestBinner implements IIntegerNormalizer {
         for (int i = 0; i < valuesToBin.size(); i++) {
             Double value = valuesToBin.get(i);
             // stay in double space to prevent rounding issues by Java
-            double binIndex = (value / 1.0005079) - 0.18;
+            double binIndex = (value + (CHARGE - 1)* Masses.PROTON)/(CHARGE*BIN_WIDTH) + 1.0 - BIN_OFFSET;
 
-            binIndexes[i] = (int) Math.ceil(binIndex);
+            binIndexes[i] = (int) Math.floor(binIndex);
 
             if (binIndexes[i] < 0) {
                 binIndexes[i] = 0;

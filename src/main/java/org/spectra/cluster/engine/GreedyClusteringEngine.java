@@ -18,6 +18,7 @@ import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Implementation of the original clustering engine used by default
@@ -59,8 +60,8 @@ public class GreedyClusteringEngine implements IClusteringEngine {
                                   INumberOfComparisonAssessor numberOfComparisonAssessor, int nInitiallySharedPeaks)
             throws Exception {
         this.precursorTolerance = precursorTolerance;
-        this.thresholdStart = thresholdStart;
-        this.thresholdEnd = thresholdEnd;
+        this.thresholdStart = 1 - thresholdStart;
+        this.thresholdEnd = 1 - thresholdEnd;
         this.clusteringRounds = clusteringRounds;
         this.similarityMeasure = similarityMeasure;
         this.numberOfComparisonAssessor = numberOfComparisonAssessor;
@@ -78,11 +79,11 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     public ICluster[] clusterSpectra(IBinarySpectrum... spectra) {
         // convert all spectra to clusters
         GreedySpectralCluster[] clusters = convertSpectraToCluster(spectra);
-        float scoreIncrement = (thresholdStart - thresholdEnd) / (float) (clusteringRounds - 1);
+        float scoreIncrement = (thresholdEnd - thresholdStart) / (float) (clusteringRounds - 1);
         IComparisonPredicate<ICluster> currentComparisonPredicate;
 
         // cluster the spectra
-        for (float currentThreshold = thresholdStart; currentThreshold >= thresholdEnd; currentThreshold -= scoreIncrement) {
+        for (float currentThreshold = thresholdStart; currentThreshold <= thresholdEnd; currentThreshold += scoreIncrement) {
             log.debug(String.format("Merging clusters with threshold %.3f", currentThreshold));
 
             // set the current predicate to use
@@ -94,6 +95,9 @@ public class GreedyClusteringEngine implements IClusteringEngine {
 
             // do the clustering - ie. the merging
             clusters = mergeSimilarClusters(clusters, currentThreshold, currentComparisonPredicate);
+
+            // TODO: find a better solution than sorting between clustering rounds
+            Arrays.parallelSort(clusters, Comparator.comparingInt(ICluster::getPrecursorMz));
         }
 
         return clusters;
@@ -112,13 +116,23 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         int mergedClusterSize = 0;
         // the current offset to use based on the set precursor tolerance
         int mergedClusterPrecursorOffset = 0;
+        int lastMz = 0;
+        int maxSortTolerance = Math.round((float) precursorTolerance / 5);
 
         // merge similar clusters
         for (GreedySpectralCluster clusterToMerge : clustersToMerge) {
             if (mergedClusterSize < 1) {
+                lastMz = clusterToMerge.getPrecursorMz();
                 mergedClusters[mergedClusterSize++] = clusterToMerge;
                 continue;
             }
+
+            // TODO: ideally, we should not need this check
+            // make sure everything is sorted according to precursor m/z
+            if (lastMz - clusterToMerge.getPrecursorMz() > maxSortTolerance) {
+                throw new IllegalStateException("Clusters are not sorted according to precursor m/z");
+            }
+            lastMz = clusterToMerge.getPrecursorMz();
 
             IBinarySpectrum filteredSpectrumToAdd = comparisonFilter.apply(clusterToMerge.getConsensusSpectrum());
             boolean isClusterMerged = false;
