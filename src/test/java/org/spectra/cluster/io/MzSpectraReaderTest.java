@@ -53,7 +53,7 @@ public class MzSpectraReaderTest {
 
     @Test
     public void testNoNullSpectra() throws Exception {
-        File testFile = new File(Objects.requireNonNull(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
+        File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(testFile);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
 

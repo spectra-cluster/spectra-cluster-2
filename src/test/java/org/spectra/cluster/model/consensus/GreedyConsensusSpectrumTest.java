@@ -159,10 +159,12 @@ public class GreedyConsensusSpectrumTest {
             spectra.add(spectrumIterator.next());
         }
 
+        long currentTime = System.currentTimeMillis();
+
         GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("Test");
         consensusSpectrum.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
-        long currentTime = System.currentTimeMillis();
+        currentTime = System.currentTimeMillis();
         IBinarySpectrumSimilarity similarity = new CombinedFisherIntensityTest();
 
         IBinarySpectrum consensus = consensusSpectrum.getConsensusSpectrum();

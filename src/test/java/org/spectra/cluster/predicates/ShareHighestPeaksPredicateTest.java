@@ -20,7 +20,7 @@ public class ShareHighestPeaksPredicateTest {
 
     @Before
     public void setUp() throws Exception {
-        testFile = new File(Objects.requireNonNull(Objects.requireNonNull(ShareHighestPeaksPredicate.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI()));
+        testFile = new File(Objects.requireNonNull(ShareHighestPeaksPredicate.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI()));
         MzSpectraReader reader = new MzSpectraReader(testFile);
         spectra = new ArrayList<>(50);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
@@ -31,7 +31,7 @@ public class ShareHighestPeaksPredicateTest {
     }
 
     @Test
-    public void testShareHighestPeaks() {
+    public void testShareHighestPeaks() throws Exception {
         IComparisonPredicate<IBinarySpectrum> comparisonPredicate = new ShareHighestPeaksPredicate(5);
         BinaryPeak[] wrongPeaks = {
                 new BinaryPeak(1, 1),

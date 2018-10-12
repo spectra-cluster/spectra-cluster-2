@@ -39,6 +39,6 @@ public class KnownPropertiesTest {
     @Test
     public void addMGFProperties() {
         KnownProperties.addMGFProperties(properties, "INSTRUMENT=LTQ");
-        Assert.assertEquals(3, properties.size());
+        Assert.assertTrue(properties.size() == 3);
     }
 }
