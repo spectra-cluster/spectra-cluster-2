@@ -40,7 +40,7 @@ public class BasicMzBinner implements IIntegerNormalizer{
         for (int i = 0; i < valuesToBin.size(); i++) {
             Double value = valuesToBin.get(i);
             // stay in double space to prevent rounding issues by Java
-            Double binIndex = (value / binnerValue);
+            double binIndex = (value / binnerValue);
             binIndexes[i] = (int) Math.floor(binIndex);
             if (binIndexes[i] < 0) {
                 binIndexes[i] = 0;
