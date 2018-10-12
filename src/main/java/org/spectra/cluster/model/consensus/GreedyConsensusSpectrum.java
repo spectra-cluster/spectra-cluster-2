@@ -340,6 +340,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
         /**
          * The maxiumn number of peaks to keep will be, the number of intervals * number of peaks per interval.
+         * TODO: We are allocating the maximun capacity possible here, we should try to see in the future if we can allocate less.
          */
         List<BinaryConsensusPeak> peaksToKeep = new ArrayList<>((maxMz/windowSize) * peaksPerWindowToKeep);
 
