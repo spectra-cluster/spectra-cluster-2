@@ -114,12 +114,12 @@ public class GreedyClusteringEngineTest {
             ICluster cluster = clusters[i];
 
             if (verbose) {
-            System.out.println("----- " + cluster.getId() + " -------");
-            cluster.getClusteredSpectraIds().forEach(
+                System.out.println("----- " + cluster.getId() + " -------");
+                cluster.getClusteredSpectraIds().forEach(
                         s -> {
                             System.out.println(String.format("%.2f - %d - %s", spectrumIdToPrecursor.get(s), spectrumIdToActualPrecursor.get(s), spectrumIdToSequence.get(s)));
                         }
-            );
+                );
             }
 
             Set<String> peptides = cluster.getClusteredSpectraIds().stream()

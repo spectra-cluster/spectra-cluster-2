@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Implementation of the binning procedure found in the Sequest
  * Comet and MaRaCluster algorithm.
- * Bin boundries are calculated based on Ii = 1.000508 x (0.18 + i) Th, for i = 0, 1
+ * Bin boundaries are calculated based on Ii = 1.0005079 x (0.18 + i) Th, for i = 0, 1
  *
  * @author jg
  */
@@ -21,9 +21,9 @@ public class SequestBinner implements IIntegerNormalizer {
         for (int i = 0; i < valuesToBin.size(); i++) {
             Double value = valuesToBin.get(i);
             // stay in double space to prevent rounding issues by Java
-            double binIndex = (value / 1.000508) - 0.18;
+            double binIndex = (value / 1.0005079) - 0.18;
 
-            binIndexes[i] = (int) Math.floor(binIndex);
+            binIndexes[i] = (int) Math.ceil(binIndex);
 
             if (binIndexes[i] < 0) {
                 binIndexes[i] = 0;

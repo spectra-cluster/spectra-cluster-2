@@ -103,7 +103,7 @@ class KnownProperties {
         if(line.contains("="))  {
             int index = line.indexOf("=") ;
             String key = line.substring(0,index);
-            String value = line.substring(index + 1);
+            String value = line.substring(index + 1,line.length());
             return handleKnownProperty(props,key, value);
         }
         else {

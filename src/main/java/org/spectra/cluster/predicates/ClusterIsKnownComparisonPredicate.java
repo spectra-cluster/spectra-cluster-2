@@ -12,7 +12,10 @@ public class ClusterIsKnownComparisonPredicate implements IComparisonPredicate<I
         if (o1.isKnownComparisonMatch(o2.getId())) {
             return true;
         }
-        return o2.isKnownComparisonMatch(o1.getId());
+        if (o2.isKnownComparisonMatch(o1.getId())) {
+            return true;
+        }
 
+        return false;
     }
 }
