@@ -118,8 +118,8 @@ public class CombinedFisherIntensityTestTest {
         List<Double> scores = new ArrayList<>(impSpectra.size() - 1);
 
         System.out.printf("Spec m/z %.2f - %.2f\n",
-                impSpectra.stream().mapToDouble(s -> s.getPrecursorMz()).min().getAsDouble(),
-                impSpectra.stream().mapToDouble(s -> s.getPrecursorMz()).max().getAsDouble());
+                impSpectra.stream().mapToDouble(IBinarySpectrum::getPrecursorMz).min().getAsDouble(),
+                impSpectra.stream().mapToDouble(IBinarySpectrum::getPrecursorMz).max().getAsDouble());
 
         for (int i = 1; i < impSpectra.size(); i++) {
             double score = similarity.correlation(firstSpec, impSpectra.get(i));

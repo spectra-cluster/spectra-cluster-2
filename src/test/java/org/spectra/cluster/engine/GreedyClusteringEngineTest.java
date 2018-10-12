@@ -110,15 +110,11 @@ public class GreedyClusteringEngineTest {
         Assert.assertEquals(8, clusters.length);
 
         // all clusters must have only 1 peptide sequence
-        for (int i = 0; i < clusters.length; i++) {
-            ICluster cluster = clusters[i];
-
+        for (ICluster cluster : clusters) {
             if (verbose) {
                 System.out.println("----- " + cluster.getId() + " -------");
                 cluster.getClusteredSpectraIds().forEach(
-                        s -> {
-                            System.out.println(String.format("%.2f - %d - %s", spectrumIdToPrecursor.get(s), spectrumIdToActualPrecursor.get(s), spectrumIdToSequence.get(s)));
-                        }
+                        s -> System.out.println(String.format("%.2f - %d - %s", spectrumIdToPrecursor.get(s), spectrumIdToActualPrecursor.get(s), spectrumIdToSequence.get(s)))
                 );
             }
 
