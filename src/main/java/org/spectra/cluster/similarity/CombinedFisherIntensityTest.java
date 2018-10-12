@@ -55,6 +55,11 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
             }
         }
 
+        // return 0 if no intensities are shared
+        if (sharedIntensitySpec1.size() < 1) {
+            return 0;
+        }
+
         // calculate the hypergeometric score
         int minBin = Math.min(peaks1[0].getMz(), peaks2[0].getMz());
         int maxBin = Math.max(peaks1[peaks1.length - 1].getMz(), peaks2[peaks2.length - 1].getMz());
@@ -67,7 +72,11 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
             lessPeaks = peaks1.length;
         }
 
-        double hgtScore = new HyperGeometric(maxBin - minBin, morePeaks, lessPeaks, RANDOM_ENGINE).pdf(sharedIntensitySpec1.size());
+        // the (maxBin - minBin) * 2 formula is used to keep the scores consistent with version
+        // 1.x where the bins were evaluated based on the set fragment tolerance. Estimating based
+        // on fragment tolerance leads to roughly twise as many bins.
+        // -- JG 08.10.2018
+        double hgtScore = new HyperGeometric((maxBin - minBin) * 2, morePeaks, lessPeaks, RANDOM_ENGINE).pdf(sharedIntensitySpec1.size());
 
         if (hgtScore == 0) {
             hgtScore = 1;

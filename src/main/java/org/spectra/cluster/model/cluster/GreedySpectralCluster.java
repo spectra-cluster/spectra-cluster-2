@@ -163,8 +163,15 @@ public class GreedySpectralCluster implements ICluster {
         clusteredSpectraIds.addAll(cluster.getClusteredSpectraIds());
 
         // add the comparison matches
-        bestComparisonMatches.addAll(cluster.getComparisonMatches());
-        updateComparisonMatches();
+        if (cluster.getComparisonMatches().size() > 0) {
+            for (ComparisonMatch match : cluster.getComparisonMatches()) {
+                // make sure not to add any self-references
+                if (!match.getSpectrumId().equals(id)) {
+                    bestComparisonMatches.add(match);
+                }
+            }
+            updateComparisonMatches();
+        }
     }
 
     /**

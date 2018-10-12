@@ -13,13 +13,11 @@ import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.LSHBinner;
 import org.spectra.cluster.normalizer.SequestBinner;
-import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -69,8 +67,8 @@ public class JaccardCorrelationTest {
 
         JaccardCorrelation correlation = new JaccardCorrelation();
 
-        double similarity = correlation.correlation(binarySpectrum1.getMzVector(),
-                binarySpectrum2.getMzVector());
+        double similarity = correlation.correlation(binarySpectrum1.getCopyMzVector(),
+                binarySpectrum2.getCopyMzVector());
         Assert.assertTrue(similarity - 0.99f < 0.1);
     }
 
@@ -79,8 +77,8 @@ public class JaccardCorrelationTest {
         LSHBinner lshBinner = LSHBinner.getInstance();
         JaccardCorrelation correlation = new JaccardCorrelation();
 
-        int[] vector1 = lshBinner.getKernels(binarySpectrum1.getMzVector());
-        int[] vector2 = lshBinner.getKernels(binarySpectrum2.getMzVector());
+        int[] vector1 = lshBinner.getKernels(binarySpectrum1.getCopyMzVector());
+        int[] vector2 = lshBinner.getKernels(binarySpectrum2.getCopyMzVector());
 
         double similarity = correlation.correlation(vector1, vector2);
         Assert.assertTrue(similarity - 0.99f < 0.1);
@@ -108,11 +106,11 @@ public class JaccardCorrelationTest {
 
         for(int i = 0; i < spectra.size(); i++){
             for(int j = i+1; j < spectra.size(); j++){
-                double similarity = correlation.correlation(spectra.get(i).getMzVector(),
-                        spectra.get(j).getMzVector());
+                double similarity = correlation.correlation(spectra.get(i).getCopyMzVector(),
+                        spectra.get(j).getCopyMzVector());
 
-                int[] vector1 = lshBinner.getKernels(spectra.get(i).getMzVector());
-                int[] vector2 = lshBinner.getKernels(spectra.get(j).getMzVector());
+                int[] vector1 = lshBinner.getKernels(spectra.get(i).getCopyMzVector());
+                int[] vector2 = lshBinner.getKernels(spectra.get(j).getCopyMzVector());
                 double similarityLSH = correlation.correlation(vector1, vector2);
 
                 System.out.println("New Comparison");
@@ -120,11 +118,11 @@ public class JaccardCorrelationTest {
                 Assert.assertTrue(Math.abs(similarity - similarityLSH) < 1);
 
 
-                similarity = correlation.correlation(functionNpeaks.apply(spectra.get(i)).getMzVector(),
-                        functionNpeaks.apply(spectra.get(j)).getMzVector());
+                similarity = correlation.correlation(functionNpeaks.apply(spectra.get(i)).getCopyMzVector(),
+                        functionNpeaks.apply(spectra.get(j)).getCopyMzVector());
 
-                vector1 = lshBinner.getKernels(functionNpeaks.apply(spectra.get(i)).getMzVector());
-                vector2 = lshBinner.getKernels(functionNpeaks.apply(spectra.get(j)).getMzVector());
+                vector1 = lshBinner.getKernels(functionNpeaks.apply(spectra.get(i)).getCopyMzVector());
+                vector2 = lshBinner.getKernels(functionNpeaks.apply(spectra.get(j)).getCopyMzVector());
                 similarityLSH = correlation.correlation(vector1, vector2);
 
                 log.info("The Jaccard for 100 Intensity Peaks: " + i + " and " + j + " is: " + similarity + " and LSH Score is: " + similarityLSH + " Difference: " + (similarity - similarityLSH));
