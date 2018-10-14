@@ -12,8 +12,8 @@ import java.util.*;
  * within each region.
  */
 public class TideRawPeaksIntensityNormalizer implements IRawPeakFunction {
-    private final int N_REGIONS = 10;
-    private final double MAX_REGION_INTENSITY = 50;
+    private static final int N_REGIONS = 10;
+    private static final double MAX_REGION_INTENSITY = 50;
 
     @Override
     public Map<Double, Double> apply(Map<Double, Double> peaks) {

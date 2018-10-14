@@ -31,7 +31,7 @@ public class GreedyClusteringEngineTest {
     Map<String, Integer> spectrumIdToActualPrecursor = new HashMap<>(30);
 
     /** These tests are only intended for local comparisons and debugging */
-    private final boolean runLocalTests = false;
+    private static final boolean runLocalTests = false;
 
     @Before
     public void setUp() throws Exception {
@@ -259,7 +259,7 @@ public class GreedyClusteringEngineTest {
         float[] thresholds = {0.99f, 0.98f, 0.95f, 0.995f};
 
         for (float t : thresholds) {
-            Path thisResult = Paths.get(resultFile.toString() + "_" + String.valueOf(t));
+            Path thisResult = Paths.get(resultFile.toString() + '_' + String.valueOf(t));
 
             IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                     1, t, 5, new CombinedFisherIntensityTest(),

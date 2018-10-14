@@ -52,7 +52,7 @@ public class CumulativeDistributionFunctionFactory {
         Path resourcePath = Paths.get(Objects.requireNonNull(CumulativeDistributionFunctionFactory.class.getClassLoader().getResource(resource)).toURI());
 
         StringBuilder definitionString = new StringBuilder();
-        Files.lines(resourcePath).forEach(s -> definitionString.append(s).append("\n"));
+        Files.lines(resourcePath).forEach(s -> definitionString.append(s).append('\n'));
 
         return CumulativeDistributionFunction.fromString(definitionString.toString());
     }

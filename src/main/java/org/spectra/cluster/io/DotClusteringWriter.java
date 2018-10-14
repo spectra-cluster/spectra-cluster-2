@@ -55,9 +55,9 @@ public class DotClusteringWriter implements IClusterWriter {
             // write everything to a string builder first
             StringBuilder stringBuilder = new StringBuilder("=Cluster=\n");
 
-            stringBuilder.append("id=").append(cluster.getId()).append("\n");
+            stringBuilder.append("id=").append(cluster.getId()).append('\n');
             // TODO: convert int precursor m/z back to actual precursor m/z
-            stringBuilder.append("av_precursor_mz=").append(String.valueOf(cluster.getPrecursorMz())).append("\n");
+            stringBuilder.append("av_precursor_mz=").append(String.valueOf(cluster.getPrecursorMz())).append('\n');
             // precursor intensities are not really supported
             stringBuilder.append("av_precursor_intensity=1\n");
 
@@ -103,9 +103,9 @@ public class DotClusteringWriter implements IClusterWriter {
         boolean isFirst = true;
         for (Map.Entry<String, Integer> stringCount : sequenceCounts.entrySet()) {
             if (!isFirst) {
-                stringBuilder.append(",");
+                stringBuilder.append(',');
             }
-            stringBuilder.append(stringCount.getKey()).append(":").append(String.valueOf(stringCount.getValue()));
+            stringBuilder.append(stringCount.getKey()).append(':').append(String.valueOf(stringCount.getValue()));
             isFirst = false;
         }
         stringBuilder.append("]\n");
@@ -133,19 +133,19 @@ public class DotClusteringWriter implements IClusterWriter {
                 .append("#file=").append(filename != null ? filename : "")
                 .append("#id=").append(fileId != null ? fileId : "")
                 .append("#title=").append(title != null ? title : "")
-                .append("\t")
+                .append('\t')
                 // no longer supported - most common peptide
-                .append("false").append("\t")
-                .append(sequence != null ? sequence : "").append("\t")
-                .append(precursorMz != null ? precursorMz : "").append("\t")
-                .append(charge != null ? charge : "").append("\t")
+                .append("false").append('\t')
+                .append(sequence != null ? sequence : "").append('\t')
+                .append(precursorMz != null ? precursorMz : "").append('\t')
+                .append(charge != null ? charge : "").append('\t')
                 // species is not supported
-                .append("\t")
-                .append(ptms != null ? ptms : "").append("\t")
+                .append('\t')
+                .append(ptms != null ? ptms : "").append('\t')
                 // score currently not supported
                 .append("0\t")
                 // JSON encoded stuff
-                .append("{");
+                .append('{');
 
         boolean isFirst = true;
         if (retentionTime != null) {
@@ -171,20 +171,20 @@ public class DotClusteringWriter implements IClusterWriter {
         boolean isFirst = true;
         for (BinaryConsensusPeak p : peaks) {
             if (!isFirst) {
-                stringBuilder.append(",");
+                stringBuilder.append(',');
             } else {
                 isFirst = false;
             }
 
             stringBuilder.append(String.valueOf(p.getCount()));
         }
-        stringBuilder.append("\n");
+        stringBuilder.append('\n');
 
         stringBuilder.append("consensus_mz=");
         isFirst = true;
         for (BinaryConsensusPeak p : peaks) {
             if (!isFirst) {
-                stringBuilder.append(",");
+                stringBuilder.append(',');
             } else {
                 isFirst = false;
             }
@@ -192,13 +192,13 @@ public class DotClusteringWriter implements IClusterWriter {
             // TODO: Convert to actual decimal number
             stringBuilder.append(String.valueOf(p.getMz()));
         }
-        stringBuilder.append("\n");
+        stringBuilder.append('\n');
 
         stringBuilder.append("consensus_intens=");
         isFirst = true;
         for (BinaryConsensusPeak p : peaks) {
             if (!isFirst) {
-                stringBuilder.append(",");
+                stringBuilder.append(',');
             } else {
                 isFirst = false;
             }
@@ -206,7 +206,7 @@ public class DotClusteringWriter implements IClusterWriter {
             // TODO: Convert to actual decimal number
             stringBuilder.append(String.valueOf(p.getIntensity()));
         }
-        stringBuilder.append("\n");
+        stringBuilder.append('\n');
     }
 
     @Override
