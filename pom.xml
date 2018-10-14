@@ -16,6 +16,7 @@
        <common-collections.version>3.2.2</common-collections.version>
        <jmzreader.version>2.0.4</jmzreader.version>
        <commons-math3.version>3.5</commons-math3.version>
+       <mapdb.version>3.0.7</mapdb.version>
     </properties>
 
     <dependencies>
@@ -48,6 +49,18 @@
             <groupId>uk.ac.ebi.pride.tools</groupId>
             <artifactId>jmzreader</artifactId>
             <version>${jmzreader.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>${mapdb.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-map</artifactId>
+            <version>3.16.4</version>
         </dependency>
 
         <dependency>

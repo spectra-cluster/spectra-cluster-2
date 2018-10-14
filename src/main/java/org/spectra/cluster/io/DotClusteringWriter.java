@@ -1,6 +1,8 @@
 package org.spectra.cluster.io;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spectra.cluster.io.properties.IPropertyStorage;
+import org.spectra.cluster.io.properties.StoredProperties;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.BinaryConsensusPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;

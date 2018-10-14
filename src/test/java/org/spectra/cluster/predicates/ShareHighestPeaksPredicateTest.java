@@ -31,7 +31,7 @@ public class ShareHighestPeaksPredicateTest {
     }
 
     @Test
-    public void testShareHighestPeaks() throws Exception {
+    public void testShareHighestPeaks() {
         IComparisonPredicate<IBinarySpectrum> comparisonPredicate = new ShareHighestPeaksPredicate(5);
         BinaryPeak[] wrongPeaks = {
                 new BinaryPeak(1, 1),

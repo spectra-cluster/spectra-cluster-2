@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class TestTideRawPeaksIntensityNormalizer {
     @Test
-    public void testNormalizer() throws Exception {
+    public void testNormalizer() {
         Map<Double, Double> peaks = new HashMap<>();
         peaks.put(1.0, 100.0);
         peaks.put(2.0, 10.0);

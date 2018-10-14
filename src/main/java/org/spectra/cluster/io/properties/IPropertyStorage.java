@@ -1,4 +1,4 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.properties;
 
 import java.util.Set;
 
@@ -32,4 +32,10 @@ public interface IPropertyStorage {
      * @return The available properties.
      */
     Set<String> getAvailableProperties();
+
+    /**
+     * Get size of the storage
+     * @return number of elements in the Storage.
+     */
+    int storageSize();
 }

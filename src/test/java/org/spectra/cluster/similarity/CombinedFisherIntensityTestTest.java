@@ -14,8 +14,8 @@ import org.spectra.cluster.filter.rawpeaks.KeepNHighestRawPeaks;
 import org.spectra.cluster.filter.rawpeaks.RawPeaksWrapperFunction;
 import org.spectra.cluster.filter.rawpeaks.RemoveImpossiblyHighPeaksFunction;
 import org.spectra.cluster.filter.rawpeaks.RemovePrecursorPeaksFunction;
-import org.spectra.cluster.io.IPropertyStorage;
-import org.spectra.cluster.io.InMemoryPropertyStorage;
+import org.spectra.cluster.io.properties.IPropertyStorage;
+import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
 import org.spectra.cluster.io.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.BinaryPeak;
@@ -39,7 +39,7 @@ public class CombinedFisherIntensityTestTest {
 
     @Before
     public void setUp() throws Exception {
-        File impFile = new File(getClass().getClassLoader().getResource("imp_single_cluster.mgf").toURI());
+        File impFile = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("imp_single_cluster.mgf")).toURI());
         MzSpectraReader reader = new MzSpectraReader(impFile, new TideBinner(), new MaxPeakNormalizer(),
                 new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(),
                 new RemoveImpossiblyHighPeaksFunction()

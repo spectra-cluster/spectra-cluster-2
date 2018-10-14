@@ -287,7 +287,7 @@ public class GreedyConsensusSpectrumTest {
     }
 
     @Test
-    public void testLargeCluster() throws Exception {
+    public void testLargeCluster() {
         // always add the same spectrum to test for overflows
         BinaryConsensusPeak[] existingPeaks = {
                 new BinaryConsensusPeak(10, 100, 10),

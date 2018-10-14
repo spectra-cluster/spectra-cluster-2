@@ -1,4 +1,4 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.properties;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import java.util.Properties;
  *
  * @author Johannes Griss
  */
-class KnownProperties {
+public class KnownProperties {
 
     // Known properties keys
     private static final String IDENTIFIED_PEPTIDE_KEY = "identifiedPeptide";

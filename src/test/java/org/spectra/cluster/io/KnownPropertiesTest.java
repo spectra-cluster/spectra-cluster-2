@@ -3,6 +3,7 @@ package org.spectra.cluster.io;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.io.properties.*;
 
 import java.util.Properties;
 

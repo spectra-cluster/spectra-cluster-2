@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
+import org.spectra.cluster.io.properties.IPropertyStorage;
+import org.spectra.cluster.io.properties.StoredProperties;
 import org.spectra.cluster.model.commons.IteratorConverter;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;

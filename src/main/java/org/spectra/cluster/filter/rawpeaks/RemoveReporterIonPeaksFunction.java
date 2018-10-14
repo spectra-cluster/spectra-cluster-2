@@ -44,7 +44,7 @@ public class RemoveReporterIonPeaksFunction implements IRawPeakFunction{
     public Map<Double, Double> apply(Map<Double, Double> peaks) {
         // get the m/z values
         Double[] reporterMzValues = getReporterMz(reporterType);
-        Map<Double, Double> filteredPeaks = new HashMap<>();
+        Map<Double, Double> filteredPeaks = new HashMap<>(peaks.size());
 
         for(Map.Entry peak: peaks.entrySet()){
             double peakMz = (double) peak.getKey();
@@ -81,7 +81,7 @@ public class RemoveReporterIonPeaksFunction implements IRawPeakFunction{
             case ALL:
             default:
                 // merge all known reporters
-                List<Double> reporterMz = new ArrayList<>();
+                List<Double> reporterMz = new ArrayList<>(REPORTER_TYPE.values().length);
 
                 for (REPORTER_TYPE rt : REPORTER_TYPE.values()) {
                     if (rt == REPORTER_TYPE.ALL)

@@ -1,4 +1,4 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.properties;
 
 /**
  * Defined the stored properties.

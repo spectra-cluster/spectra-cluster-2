@@ -1,6 +1,7 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.properties;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import org.spectra.cluster.io.properties.IPropertyStorage;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,9 +16,9 @@ import java.util.Set;
  *
  * @author jg
  */
-public class InMemoryPropertyStorage implements  IPropertyStorage {
-    private final Map<String, String> propertyStorage;
-    private final Set<String> propertyNames = new HashSet<>(20);
+public class InMemoryPropertyStorage implements IPropertyStorage {
+    protected Map<String, String> propertyStorage;
+    protected final Set<String> propertyNames = new HashSet<>(20);
 
     public InMemoryPropertyStorage() {
         propertyStorage = new HashMap<>(20_000);
@@ -34,12 +35,16 @@ public class InMemoryPropertyStorage implements  IPropertyStorage {
         return propertyStorage.get(getStorageKey(itemId, propertyName));
     }
 
-    private String getStorageKey(String itemId, String propertyName) {
+    protected String getStorageKey(String itemId, String propertyName) {
         return itemId + propertyName;
     }
 
     @Override
     public Set<String> getAvailableProperties() {
         return Collections.unmodifiableSet(propertyNames);
+    }
+
+    public int storageSize(){
+        return propertyStorage.size();
     }
 }
