@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
-import org.spectra.cluster.io.properties.MapDBPropertyStorage;
 
 import java.util.Random;
 
@@ -40,10 +39,10 @@ public class InMemoryPropertyStorageTest {
             storage.storeProperty(String.valueOf(i), "RT", String.valueOf(Math.random()));
         }
         Assert.assertEquals(1, storage.getAvailableProperties().size());
-        Assert.assertTrue(storage.storageSize() == 100000);
+        Assert.assertEquals(100000, storage.storageSize());
 
         for( int i = 0; i < 40; i++){
-            System.out.println(storage.getProperty(String.valueOf(random.nextInt((100000 - 0) + 1) + 0),"RT"));
+            System.out.println(storage.getProperty(String.valueOf(random.nextInt((100000) + 1)),"RT"));
         }
 
         System.out.println((System.currentTimeMillis() - time) / 1000);

@@ -6,8 +6,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Random;
 
-import static org.junit.Assert.*;
-
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
@@ -25,7 +23,7 @@ public class MapDBPropertyStorageTest {
     public void storeProperty() throws IOException {
 
         long time = System.currentTimeMillis();
-        IPropertyStorage storage = new MapDBPropertyStorage();
+        MapDBPropertyStorage storage = new MapDBPropertyStorage();
 
         Random random = new Random();
 
@@ -33,15 +31,15 @@ public class MapDBPropertyStorageTest {
             storage.storeProperty(String.valueOf(i), "RT", String.valueOf(Math.random()));
         }
         Assert.assertEquals(1, storage.getAvailableProperties().size());
-        Assert.assertTrue(storage.storageSize() == 10000000);
+        Assert.assertEquals(10000000, storage.storageSize());
 
         for( int i = 0; i < 40; i++){
-            System.out.println(storage.getProperty(String.valueOf(random.nextInt((10000000 - 0) + 1) + 0),"RT"));
+            System.out.println(storage.getProperty(String.valueOf(random.nextInt((10000000) + 1)),"RT"));
         }
 
         System.out.println((System.currentTimeMillis() - time) / 1000);
 
-        ((MapDBPropertyStorage) storage).close();
+        storage.close();
     }
 
 }

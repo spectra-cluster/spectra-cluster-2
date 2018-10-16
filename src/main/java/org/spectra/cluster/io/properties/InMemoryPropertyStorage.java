@@ -1,7 +1,6 @@
 package org.spectra.cluster.io.properties;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import org.spectra.cluster.io.properties.IPropertyStorage;
 
 import java.util.HashMap;
 import java.util.HashSet;
