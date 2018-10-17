@@ -9,6 +9,7 @@ import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.*;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;

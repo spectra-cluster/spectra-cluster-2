@@ -8,6 +8,7 @@ import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;

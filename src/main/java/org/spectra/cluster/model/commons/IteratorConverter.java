@@ -1,5 +1,7 @@
 package org.spectra.cluster.model.commons;
 
+import org.spectra.cluster.io.spectra.MzSpectraReader;
+
 import java.util.Iterator;
 
 /**
@@ -12,7 +14,7 @@ import java.util.Iterator;
  *
  * This class enable to convert an {@link Iterator} of type F to an {@link Iterator} of type
  * T . It use the {@link Converter} interface. This class is used to transform an Iterator of Spectrum
- * to a Iterator of BinarySpectrum in {@link org.spectra.cluster.io.MzSpectraReader}
+ * to a Iterator of BinarySpectrum in {@link MzSpectraReader}
  *
  *
  * @author ypriverol on 14/08/2018.

@@ -1,4 +1,4 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.spectra;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;

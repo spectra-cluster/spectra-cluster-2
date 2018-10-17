@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
-import org.spectra.cluster.io.MzSpectraReader;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 

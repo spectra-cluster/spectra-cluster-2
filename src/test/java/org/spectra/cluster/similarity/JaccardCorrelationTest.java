@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
-import org.spectra.cluster.io.MzSpectraReader;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;

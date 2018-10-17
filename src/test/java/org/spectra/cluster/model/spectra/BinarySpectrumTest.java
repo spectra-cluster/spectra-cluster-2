@@ -4,7 +4,7 @@ package org.spectra.cluster.model.spectra;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.spectra.cluster.io.MzSpectraReader;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
 import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;

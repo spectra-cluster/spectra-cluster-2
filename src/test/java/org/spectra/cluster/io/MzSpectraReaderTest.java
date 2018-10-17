@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;

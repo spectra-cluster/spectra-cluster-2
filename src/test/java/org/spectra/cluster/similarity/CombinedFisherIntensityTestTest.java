@@ -16,7 +16,7 @@ import org.spectra.cluster.filter.rawpeaks.RemoveImpossiblyHighPeaksFunction;
 import org.spectra.cluster.filter.rawpeaks.RemovePrecursorPeaksFunction;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
-import org.spectra.cluster.io.MzSpectraReader;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;

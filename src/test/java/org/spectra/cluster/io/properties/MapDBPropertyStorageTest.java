@@ -23,7 +23,31 @@ public class MapDBPropertyStorageTest {
     public void storeProperty() throws IOException {
 
         long time = System.currentTimeMillis();
-        MapDBPropertyStorage storage = new MapDBPropertyStorage();
+        MapDBPropertyStorage storage = new MapDBPropertyStorage(false);
+
+        Random random = new Random();
+
+        for(int i = 0; i < 10000000; i++){
+            storage.storeProperty(String.valueOf(i), "RT", String.valueOf(Math.random()));
+        }
+        Assert.assertEquals(1, storage.getAvailableProperties().size());
+        Assert.assertEquals(10000000, storage.storageSize());
+
+        for( int i = 0; i < 40; i++){
+            System.out.println(storage.getProperty(String.valueOf(random.nextInt((10000000) + 1)),"RT"));
+        }
+
+        System.out.println((System.currentTimeMillis() - time) / 1000);
+
+        storage.close();
+    }
+
+
+    @Test
+    public void storePropertyDynamic() throws IOException {
+
+        long time = System.currentTimeMillis();
+        MapDBPropertyStorage storage = new MapDBPropertyStorage(true);
 
         Random random = new Random();
 
