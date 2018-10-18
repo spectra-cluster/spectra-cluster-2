@@ -27,8 +27,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +52,8 @@ public class MzSpectraReader {
 
     /** Pattern for validating mzXML format */
     private static final Pattern mzXmlHeaderPattern = Pattern.compile("^[^<]*(<\\?xml [^>]*>\\s*(<!--[^>]*-->\\s*)*)?<(mzXML) xmlns=.*", Pattern.MULTILINE);
+
+    private final Set<ISpectrumListener> listener = new HashSet<>(5);
 
     /** This enum type Capture the two file types supported in Spectra Cluster **/
     public enum MzFileType{
@@ -207,6 +208,11 @@ public class MzSpectraReader {
                 propertyStorage.storeProperty(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
             }
 
+            // call the listeners
+            for (ISpectrumListener spectrumListener : listener) {
+                spectrumListener.onNewSpectrum(s);
+            }
+
             return peaksPerMzWindowFilter.apply(s);
         });
     }
@@ -294,6 +300,19 @@ public class MzSpectraReader {
 
     }
 
+    /**
+     * Add a new listener that will receive every loaded spectrum.
+     *
+     * The listener is called **after** any pre-processing of the spectrum
+     * was performed.
+     *
+     * @param newListener The new listener
+     */
+    public void addSpectrumListener(ISpectrumListener newListener) {
+        listener.add(newListener);
+    }
 
-
+    public void removeSpectrumListener(ISpectrumListener theListener) {
+        listener.remove(theListener);
+    }
 }
