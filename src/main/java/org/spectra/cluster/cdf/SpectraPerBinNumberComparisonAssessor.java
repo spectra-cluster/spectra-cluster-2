@@ -1,5 +1,8 @@
 package org.spectra.cluster.cdf;
 
+import org.spectra.cluster.io.spectra.ISpectrumListener;
+import org.spectra.cluster.model.spectra.IBinarySpectrum;
+
 /**
  * This INumberOfComparisonAssessor assess the number of
  * comparisons based on all spectra within a bin. For this
@@ -10,7 +13,7 @@ package org.spectra.cluster.cdf;
  *
  * Created by jg on 13.10.17.
  */
-public class SpectraPerBinNumberComparisonAssessor implements INumberOfComparisonAssessor {
+public class SpectraPerBinNumberComparisonAssessor implements INumberOfComparisonAssessor, ISpectrumListener {
     private final double windowSize;
     private final int[] spectraPerBin;
     private final int maxBin;
@@ -47,6 +50,11 @@ public class SpectraPerBinNumberComparisonAssessor implements INumberOfCompariso
     public synchronized void countSpectrum(int precursorMz) {
         int bin = getBinForSpectrum(precursorMz);
         spectraPerBin[bin] += 1;
+    }
+
+    @Override
+    public void onNewSpectrum(IBinarySpectrum spectrum) {
+        countSpectrum(spectrum.getPrecursorMz());
     }
 
     /**

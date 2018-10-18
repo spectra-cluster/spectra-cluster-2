@@ -3,12 +3,14 @@ package org.spectra.cluster.io;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 
 import java.io.File;
 import java.net.URI;
@@ -103,5 +105,30 @@ public class MzSpectraReaderTest {
         Assert.assertEquals(136, nIdentified);
 
         Assert.assertEquals(7, storage.getAvailableProperties().size());
+    }
+
+    @Test
+    public void testSpectrumListener() throws Exception {
+        File testFile = new File(getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI());
+        MzSpectraReader reader = new MzSpectraReader(testFile);
+        SpectraPerBinNumberComparisonAssessor assessor = new SpectraPerBinNumberComparisonAssessor(
+                BasicIntegerNormalizer.MZ_CONSTANT * 1, 1, BasicIntegerNormalizer.MZ_CONSTANT * 5000);
+
+        reader.addSpectrumListener(assessor);
+
+        // process all spectra
+        Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
+
+        while (spectrumIterator.hasNext()) {
+            Assert.assertNotNull(spectrumIterator.next());
+        }
+
+        // true values were created using R script
+        Assert.assertEquals(17, assessor.getNumberOfComparisons(BasicIntegerNormalizer.MZ_CONSTANT * 503, 1));
+        Assert.assertEquals(59, assessor.getNumberOfComparisons(BasicIntegerNormalizer.MZ_CONSTANT * 633, 1));
+        Assert.assertEquals(2, assessor.getNumberOfComparisons(BasicIntegerNormalizer.MZ_CONSTANT * 1258, 1));
+        Assert.assertEquals(109, assessor.getNumberOfComparisons(BasicIntegerNormalizer.MZ_CONSTANT * 957, 1));
+
+        Assert.assertEquals(1, assessor.getNumberOfComparisons(BasicIntegerNormalizer.MZ_CONSTANT * 300, 1));
     }
 }
