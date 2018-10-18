@@ -64,5 +64,53 @@ public class ClusterStorageFactory {
     }
 
 
+    /**
+     * Create a Dynamic Storage for the clusters. Depending on erros in the
+     * file system. This can return a null value.
+     * @param  filePathName file Path for the file
+     * @return BinaryClusterStorage
+     */
+    public static Optional<IClusterStorage> buildDynamicStorage(String filePathName){
+        try {
+            return Optional.of(new BinaryClusterStorage(true, -1, filePathName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Create a Static Storage for the clusters. The Static Storage is really fast but it demands
+     * pre-allocation of the number of entries that will be storage.
+     * @return BinaryClusterStorage
+     */
+    public static Optional<IClusterStorage> buildStaticStorage(String filePathName){
+        try {
+            return Optional.of(new BinaryClusterStorage(false, -1, filePathName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+
+    /**
+     * Return an Static Storage for the number of clusters that will be process.
+     * @param numberClusters Number of Clusters
+     * @param filePathName File Path Name
+     * @return BinaryClusterStorage
+     */
+    public static Optional<IClusterStorage> buildStaticStorage(int numberClusters, String filePathName){
+        try {
+            return Optional.of(new BinaryClusterStorage(false, -1, filePathName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+
+
+
 
 }
