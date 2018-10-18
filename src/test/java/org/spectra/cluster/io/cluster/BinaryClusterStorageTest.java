@@ -3,6 +3,7 @@ package org.spectra.cluster.io.cluster;
 import org.ehcache.sizeof.SizeOf;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
@@ -75,8 +76,9 @@ public class BinaryClusterStorageTest {
         clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
     }
 
+    @Ignore
     @Test
-    public void storeClusterStatic() {
+    public void storeBigClusterStatic() {
 
         long time = System.currentTimeMillis();
 
@@ -106,8 +108,9 @@ public class BinaryClusterStorageTest {
         System.out.println((System.currentTimeMillis() - time)/1000);
     }
 
+    @Ignore
     @Test
-    public void storeClusterDynamic() {
+    public void storeBigClusterDynamic() {
 
         long time = System.currentTimeMillis();
 
@@ -137,8 +140,9 @@ public class BinaryClusterStorageTest {
         System.out.println((System.currentTimeMillis() - time)/1000);
     }
 
+    @Ignore
     @Test
-    public void deleteClustersDynamic() {
+    public void deleteBigClustersDynamic() {
 
         long time = System.currentTimeMillis();
 
@@ -170,6 +174,69 @@ public class BinaryClusterStorageTest {
 
         }
         Assert.assertTrue(clusterStorage.size() == 0);
+
+        System.out.println((System.currentTimeMillis() - time)/1000);
+    }
+
+
+    @Test
+    public void storeClusterStatic() {
+
+        long time = System.currentTimeMillis();
+
+        ClusterStorageFactory factory = new ClusterStorageFactory();
+        Optional<IClusterStorage> clusterStorageOptional = factory.buildStaticStorage(800);
+        IClusterStorage clusterStorage = clusterStorageOptional.get();
+
+
+        // Store one millions of spectra
+        for(int i = 0; i < 10; i++){
+            int finalI = i;
+            Arrays.asList(clusters).forEach(cluster -> {
+                clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster);
+            });
+        }
+
+        Assert.assertEquals(80, clusterStorage.size());
+
+        // Retrieve all the spectra
+        for(int i = 0; i < 10; i++){
+            int finalI = i;
+            Arrays.asList(clusters).forEach(cluster -> {
+                clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId();
+            });
+        }
+
+        System.out.println((System.currentTimeMillis() - time)/1000);
+    }
+
+    @Test
+    public void storeClusterDynamic() {
+
+        long time = System.currentTimeMillis();
+
+        ClusterStorageFactory factory = new ClusterStorageFactory();
+        Optional<IClusterStorage> clusterStorageOptional = factory.buildDynamicStorage();
+        IClusterStorage clusterStorage = clusterStorageOptional.get();
+
+
+        // Store one millions of spectra
+        for(int i = 0; i < 10; i++){
+            int finalI = i;
+            Arrays.stream(clusters).forEach(cluster -> {
+                clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster);
+            });
+        }
+
+        Assert.assertEquals(80, clusterStorage.size());
+
+        // Retrieve all the spectra
+        for(int i = 0; i < 10; i++){
+            int finalI = i;
+            Arrays.stream(clusters).forEach(cluster -> {
+                clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId();
+            });
+        }
 
         System.out.println((System.currentTimeMillis() - time)/1000);
     }

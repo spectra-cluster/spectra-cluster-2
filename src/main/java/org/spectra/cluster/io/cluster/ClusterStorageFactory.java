@@ -56,7 +56,7 @@ public class ClusterStorageFactory {
      */
     public static Optional<IClusterStorage> buildStaticStorage(int numberClusters){
         try {
-            return Optional.of(new BinaryClusterStorage(false, -1, null));
+            return Optional.of(new BinaryClusterStorage(false, numberClusters, null));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,7 +102,7 @@ public class ClusterStorageFactory {
      */
     public static Optional<IClusterStorage> buildStaticStorage(int numberClusters, String filePathName){
         try {
-            return Optional.of(new BinaryClusterStorage(false, -1, filePathName));
+            return Optional.of(new BinaryClusterStorage(false, numberClusters, filePathName));
         } catch (IOException e) {
             e.printStackTrace();
         }

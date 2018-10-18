@@ -45,10 +45,13 @@ public class MapDBPropertyStorage extends InMemoryPropertyStorage{
     public boolean dynamic = false;
 
 
-    public MapDBPropertyStorage(boolean dynamic) throws IOException {
+    public MapDBPropertyStorage(boolean dynamic, long numberProperties) throws IOException {
 
         // Create the file that will store the persistence database
         this.dynamic = dynamic;
+
+        if(numberProperties == -1)
+            numberProperties = MAX_NUMBER_FEATURES;
 
         if(dynamic){
             log.info("----- LEVELDB MAP ------------------------");
@@ -66,7 +69,7 @@ public class MapDBPropertyStorage extends InMemoryPropertyStorage{
             dbFile.deleteOnExit();
             this.propertyStorage =
                     ChronicleMapBuilder.of(String.class, String.class)
-                            .entries(MAX_NUMBER_FEATURES) //the maximum number of entries for the map
+                            .entries(numberProperties) //the maximum number of entries for the map
                             .averageKeySize(64)
                             .averageValueSize(54)
                             .createPersistedTo(dbFile);

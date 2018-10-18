@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -22,24 +23,26 @@ public class MapDBPropertyStorageTest {
     @Test
     public void storeProperty() throws IOException {
 
+        Optional<IPropertyStorage> propertyStorage = PropertyStorageFactory.buildStaticPropertyStorage(200);
+
         long time = System.currentTimeMillis();
-        MapDBPropertyStorage storage = new MapDBPropertyStorage(false);
+        IPropertyStorage storage = propertyStorage.get();
 
         Random random = new Random();
 
-        for(int i = 0; i < 10000000; i++){
+        for(int i = 0; i < 200; i++){
             storage.storeProperty(String.valueOf(i), "RT", String.valueOf(Math.random()));
         }
         Assert.assertEquals(1, storage.getAvailableProperties().size());
-        Assert.assertEquals(10000000, storage.storageSize());
+        Assert.assertEquals(200, storage.storageSize());
 
         for( int i = 0; i < 40; i++){
-            System.out.println(storage.getProperty(String.valueOf(random.nextInt((10000000) + 1)),"RT"));
+            System.out.println(storage.getProperty(String.valueOf(random.nextInt((200) + 1)),"RT"));
         }
 
         System.out.println((System.currentTimeMillis() - time) / 1000);
 
-        storage.close();
+        ((MapDBPropertyStorage)storage).close();
     }
 
 
@@ -47,23 +50,24 @@ public class MapDBPropertyStorageTest {
     public void storePropertyDynamic() throws IOException {
 
         long time = System.currentTimeMillis();
-        MapDBPropertyStorage storage = new MapDBPropertyStorage(true);
+        Optional<IPropertyStorage> propertyStorage = PropertyStorageFactory.buildDynamicPropertyStorage();
+        IPropertyStorage storage = propertyStorage.get();
 
         Random random = new Random();
 
-        for(int i = 0; i < 10000000; i++){
+        for(int i = 0; i < 200; i++){
             storage.storeProperty(String.valueOf(i), "RT", String.valueOf(Math.random()));
         }
         Assert.assertEquals(1, storage.getAvailableProperties().size());
-        Assert.assertEquals(10000000, storage.storageSize());
+        Assert.assertEquals(200, storage.storageSize());
 
         for( int i = 0; i < 40; i++){
-            System.out.println(storage.getProperty(String.valueOf(random.nextInt((10000000) + 1)),"RT"));
+            System.out.println(storage.getProperty(String.valueOf(random.nextInt((200) + 1)),"RT"));
         }
 
         System.out.println((System.currentTimeMillis() - time) / 1000);
 
-        storage.close();
+        ((MapDBPropertyStorage)storage).close();
     }
 
 }
