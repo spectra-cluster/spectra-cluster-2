@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 
@@ -21,9 +22,13 @@ import java.util.concurrent.ConcurrentMap;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  * <p>
+ *
+ * The {@link BinaryClusterStorage} allows to storage in memory/disk a clusters to be analyzed. Two flavours can be use, the Dynamic Storage (no pre-allocation of the number of clusters is needed) and the Static Storage (pre-allocation of the number of clusters is needed).
+ *
+ * Some benchmarks has proved that the Static Storage is 4x faster than the Dynamic Storage. However this storage needs to be used only when its known the number of clusters.
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- * ==Overview==
  *
  * @author ypriverol on 17/10/2018.
  */
@@ -127,12 +132,30 @@ public class BinaryClusterStorage implements IClusterStorage {
         return Optional.of(value);
     }
 
+    /**
+     * Delete a Cluster by Key
+     * @param key key to be deleted
+     * @return True if the cluster has been deleted
+     */
     @Override
     public boolean deleteCluster(String key) {
-        if(dynamic)
+        if(dynamic){
             levelDB.delete(Iq80DBFactory.bytes(key));
+            levelDBSize--;
+        }
         else
             clusters.remove(key);
+        return true;
+    }
+
+    /**
+     * Delete a Cluster by Key
+     * @param keys key to be deleted
+     * @return True if the cluster has been deleted
+     */
+    @Override
+    public boolean deleteCluster(String... keys) {
+        Arrays.stream(keys).parallel().forEach(this::deleteCluster);
         return true;
     }
 

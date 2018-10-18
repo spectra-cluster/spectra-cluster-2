@@ -33,11 +33,18 @@ public interface IClusterStorage extends Serializable {
     Optional<ICluster> getCluster(String key);
 
     /**
-     * Delete specific key frm the Map
+     * Delete specific key from the Map
      * @param key key to be delete
-     * @return return key.
+     * @return return true is the clusters has been deleted .
      */
     boolean deleteCluster(String key);
+
+    /**
+     * Delete specific keys from the Map
+     * @param keys key to be delete
+     * @return return true if the cluster has been deleted.
+     */
+    boolean deleteCluster(String... keys);
 
     /**
      * Get the number of Spectra in the Map

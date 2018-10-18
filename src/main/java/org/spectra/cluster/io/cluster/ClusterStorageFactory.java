@@ -8,15 +8,24 @@ import java.util.Optional;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  * <p>
+ *
+ * This class provide a Factory to retrieve the different flavours of {@link BinaryClusterStorage}.
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- * ==Overview==
+ *
  *
  * @author ypriverol on 17/10/2018.
  */
 public class ClusterStorageFactory {
 
-    Optional<IClusterStorage> buildDynamicStorage(){
+    /**
+     * Create a Dynamic Storage for the clusters. Depending on erros in the
+     * file system. This can return a null value.
+     *
+     * @return BinaryClusterStorage
+     */
+    public static Optional<IClusterStorage> buildDynamicStorage(){
         try {
             return Optional.of(new BinaryClusterStorage(true, -1, null));
         } catch (IOException e) {
@@ -25,7 +34,12 @@ public class ClusterStorageFactory {
         return Optional.empty();
     }
 
-    Optional<IClusterStorage> buildStaticStorage(){
+    /**
+     * Create a Static Storage for the clusters. The Static Storage is really fast but it demands
+     * pre-allocation of the number of entries that will be storage.
+     * @return BinaryClusterStorage
+     */
+    public static Optional<IClusterStorage> buildStaticStorage(){
         try {
             return Optional.of(new BinaryClusterStorage(false, -1, null));
         } catch (IOException e) {
@@ -35,7 +49,12 @@ public class ClusterStorageFactory {
     }
 
 
-    Optional<IClusterStorage> buildStaticStorage(int numberClusters){
+    /**
+     * Return an Static Storage for the number of clusters that will be process.
+     * @param numberClusters Number of Clusters
+     * @return BinaryClusterStorage
+     */
+    public static Optional<IClusterStorage> buildStaticStorage(int numberClusters){
         try {
             return Optional.of(new BinaryClusterStorage(false, -1, null));
         } catch (IOException e) {

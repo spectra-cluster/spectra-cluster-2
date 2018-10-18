@@ -137,4 +137,41 @@ public class BinaryClusterStorageTest {
         System.out.println((System.currentTimeMillis() - time)/1000);
     }
 
+    @Test
+    public void deleteClustersDynamic() {
+
+        long time = System.currentTimeMillis();
+
+        ClusterStorageFactory factory = new ClusterStorageFactory();
+        Optional<IClusterStorage> clusterStorageOptional = factory.buildDynamicStorage();
+        IClusterStorage clusterStorage = clusterStorageOptional.get();
+
+
+        // Store one millions of spectra
+        for(int i = 0; i < 10000; i++){
+            int finalI = i;
+            Arrays.stream(clusters).forEach(cluster -> {
+                clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster);
+            });
+        }
+
+        Assert.assertEquals(80000, clusterStorage.size());
+
+        // Retrieve all the spectra
+        for(int i = 0; i < 10000; i++){
+            int finalI = i;
+            Arrays.stream(clusters).forEach(cluster -> {
+                clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId();
+            });
+
+            Arrays.stream(clusters).forEach(cluster -> {
+                clusterStorage.deleteCluster(cluster.getId() + String.valueOf(finalI));
+            });
+
+        }
+        Assert.assertTrue(clusterStorage.size() == 0);
+
+        System.out.println((System.currentTimeMillis() - time)/1000);
+    }
+
 }
