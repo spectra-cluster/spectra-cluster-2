@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -198,7 +199,7 @@ public class GreedySpectralCluster implements ICluster {
 
         // remove lowest items in case there are too many
         if (bestComparisonMatches.size() > SAVED_COMPARISON_MATCHES) {
-            bestComparisonMatches = bestComparisonMatches.subList(bestComparisonMatches.size() - SAVED_COMPARISON_MATCHES, bestComparisonMatches.size());
+            bestComparisonMatches = new ArrayList<>(bestComparisonMatches.subList(bestComparisonMatches.size() - SAVED_COMPARISON_MATCHES, bestComparisonMatches.size()));
         }
 
         lowestBestComparisonSimilarity = bestComparisonMatches.get(0).getSimilarity();
@@ -247,5 +248,20 @@ public class GreedySpectralCluster implements ICluster {
     public boolean isKnownComparisonMatch(String clusterId) {
         return bestComparisonMatches.size() != 0 && bestComparisonMatches.stream().anyMatch(comparisonMatch -> comparisonMatch.getSpectrumId().equals(clusterId));
 
+    }
+
+    @Override
+    public byte[] toBytes() throws IOException {
+        ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+        ObjectOutputStream outputStream = new ObjectOutputStream(streamOut);
+        outputStream.writeObject(this);
+        return streamOut.toByteArray();
+    }
+
+
+    public static ICluster fromBytes(byte[] clusterBytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream in = new ByteArrayInputStream(clusterBytes);
+        ObjectInputStream inputStream = new ObjectInputStream(in);
+        return ((GreedySpectralCluster) inputStream.readObject());
     }
 }

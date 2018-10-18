@@ -1,4 +1,4 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.cluster;
 
 import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.io.properties.IPropertyStorage;

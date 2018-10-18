@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
+import org.spectra.cluster.io.cluster.DotClusteringWriter;
+import org.spectra.cluster.io.cluster.IClusterWriter;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
