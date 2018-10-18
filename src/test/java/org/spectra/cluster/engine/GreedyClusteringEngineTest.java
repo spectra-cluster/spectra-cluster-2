@@ -6,7 +6,11 @@ import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
-import org.spectra.cluster.io.*;
+import org.spectra.cluster.io.cluster.DotClusteringWriter;
+import org.spectra.cluster.io.cluster.IClusterWriter;
+import org.spectra.cluster.io.properties.IPropertyStorage;
+import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
@@ -31,7 +35,7 @@ public class GreedyClusteringEngineTest {
     Map<String, Integer> spectrumIdToActualPrecursor = new HashMap<>(30);
 
     /** These tests are only intended for local comparisons and debugging */
-    private final boolean runLocalTests = false;
+    private static final boolean runLocalTests = false;
 
     @Before
     public void setUp() throws Exception {
@@ -110,15 +114,11 @@ public class GreedyClusteringEngineTest {
         Assert.assertEquals(8, clusters.length);
 
         // all clusters must have only 1 peptide sequence
-        for (int i = 0; i < clusters.length; i++) {
-            ICluster cluster = clusters[i];
-
+        for (ICluster cluster : clusters) {
             if (verbose) {
                 System.out.println("----- " + cluster.getId() + " -------");
                 cluster.getClusteredSpectraIds().forEach(
-                        s -> {
-                            System.out.println(String.format("%.2f - %d - %s", spectrumIdToPrecursor.get(s), spectrumIdToActualPrecursor.get(s), spectrumIdToSequence.get(s)));
-                        }
+                        s -> System.out.println(String.format("%.2f - %d - %s", spectrumIdToPrecursor.get(s), spectrumIdToActualPrecursor.get(s), spectrumIdToSequence.get(s)))
                 );
             }
 
@@ -263,7 +263,7 @@ public class GreedyClusteringEngineTest {
         float[] thresholds = {0.99f, 0.98f, 0.95f, 0.995f};
 
         for (float t : thresholds) {
-            Path thisResult = Paths.get(resultFile.toString() + "_" + String.valueOf(t));
+            Path thisResult = Paths.get(resultFile.toString() + '_' + String.valueOf(t));
 
             IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                     1, t, 5, new CombinedFisherIntensityTest(),

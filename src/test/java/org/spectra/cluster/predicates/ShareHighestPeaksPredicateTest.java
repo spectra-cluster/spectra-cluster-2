@@ -3,7 +3,7 @@ package org.spectra.cluster.predicates;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.spectra.cluster.io.MzSpectraReader;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -31,7 +31,7 @@ public class ShareHighestPeaksPredicateTest {
     }
 
     @Test
-    public void testShareHighestPeaks() throws Exception {
+    public void testShareHighestPeaks() {
         IComparisonPredicate<IBinarySpectrum> comparisonPredicate = new ShareHighestPeaksPredicate(5);
         BinaryPeak[] wrongPeaks = {
                 new BinaryPeak(1, 1),

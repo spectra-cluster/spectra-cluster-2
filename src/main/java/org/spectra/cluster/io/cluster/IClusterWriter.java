@@ -1,4 +1,4 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.cluster;
 
 import org.spectra.cluster.model.cluster.ICluster;
 

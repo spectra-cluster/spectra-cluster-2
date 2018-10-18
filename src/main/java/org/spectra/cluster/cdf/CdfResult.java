@@ -85,15 +85,15 @@ public class CdfResult {
 
             stringBuilder
                     .append(String.format("%.2f", scoreIncrements * (i + 1)))
-                    .append("\t")
+                    .append('\t')
                     .append(lowerPeptidesPerScoreIncrement.get(i))
-                    .append("\t")
+                    .append('\t')
                     .append(totalMatches)
-                    .append("\t")
+                    .append('\t')
                     .append((double) totalMatches / totalComparisons)
-                    .append("\t")
+                    .append('\t')
                     .append(totalComparisons)
-                    .append("\n");
+                    .append('\n');
         }
 
         return stringBuilder.toString();
@@ -109,7 +109,7 @@ public class CdfResult {
             throw new Exception("Cannot join same object");
 
         if (this.scoreIncrements != other.scoreIncrements)
-            throw new Exception("Cannot add cdf result with different score increment (this = " + this.scoreIncrements + ", other = " + other.scoreIncrements + ")");
+            throw new Exception("Cannot add cdf result with different score increment (this = " + this.scoreIncrements + ", other = " + other.scoreIncrements + ')');
 
         int maxSize = Math.max(other.lowerPeptidesPerScoreIncrement.size(), this.lowerPeptidesPerScoreIncrement.size());
 

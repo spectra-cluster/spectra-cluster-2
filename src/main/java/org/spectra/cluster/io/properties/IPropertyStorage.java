@@ -1,5 +1,6 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.properties;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Set;
  *
  * @author jg
  */
-public interface IPropertyStorage {
+public interface IPropertyStorage extends Serializable {
     /**
      * Store a property.
      * @param itemId The item's unique id to store the property for.
@@ -32,4 +33,10 @@ public interface IPropertyStorage {
      * @return The available properties.
      */
     Set<String> getAvailableProperties();
+
+    /**
+     * Get size of the storage
+     * @return number of elements in the Storage.
+     */
+    int storageSize();
 }

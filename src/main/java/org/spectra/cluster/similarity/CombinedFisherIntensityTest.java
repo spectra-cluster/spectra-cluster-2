@@ -21,7 +21,7 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
 
     protected final static RandomEngine RANDOM_ENGINE = RandomEngine.makeDefault();
 
-    public final double MAX_SCORE = 200;
+    public static final double MAX_SCORE = 200;
 
     @Override
     public double correlation(IBinarySpectrum spectrum1, IBinarySpectrum spectrum2) {

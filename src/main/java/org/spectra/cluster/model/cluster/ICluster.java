@@ -4,6 +4,8 @@ package org.spectra.cluster.model.cluster;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -12,7 +14,7 @@ import java.util.Set;
  *
  * @author jg
  */
-public interface ICluster {
+public interface ICluster extends Serializable {
 
     /**
      * Returns the cluster's id. This is identical with the cluster's consensus spectrum's id.
@@ -75,4 +77,11 @@ public interface ICluster {
     List<ComparisonMatch> getComparisonMatches();
 
     boolean isKnownComparisonMatch(String clusterId);
+
+    /**
+     * This method allow to convert an ICluster into a Byte Serializable object
+     * @return byte Array
+     */
+    byte[] toBytes() throws IOException;
+
 }

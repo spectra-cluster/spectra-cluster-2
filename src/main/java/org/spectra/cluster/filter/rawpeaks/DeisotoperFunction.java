@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DeisotoperFunction implements IRawSpectrumFunction {
-    private final double ISOTOPE_SPACING = 1.003355;
+    private static final double ISOTOPE_SPACING = 1.003355;
     private final double deisotopeThreshold;
 
     /**

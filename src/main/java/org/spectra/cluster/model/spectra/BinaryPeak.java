@@ -2,6 +2,8 @@ package org.spectra.cluster.model.spectra;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
@@ -16,7 +18,7 @@ import lombok.Data;
  */
 
 @Data
-public class BinaryPeak {
+public class BinaryPeak implements Serializable {
     protected final int mz;
     protected final int intensity;
 }

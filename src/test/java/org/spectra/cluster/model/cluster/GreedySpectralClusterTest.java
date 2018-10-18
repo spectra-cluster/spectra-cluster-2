@@ -2,7 +2,7 @@ package org.spectra.cluster.model.cluster;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.spectra.cluster.io.MzSpectraReader;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 

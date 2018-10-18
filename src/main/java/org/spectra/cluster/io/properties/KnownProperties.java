@@ -1,4 +1,4 @@
-package org.spectra.cluster.io;
+package org.spectra.cluster.io.properties;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import java.util.Properties;
  *
  * @author Johannes Griss
  */
-class KnownProperties {
+public class KnownProperties {
 
     // Known properties keys
     private static final String IDENTIFIED_PEPTIDE_KEY = "identifiedPeptide";
@@ -87,9 +87,9 @@ class KnownProperties {
     public static String toMGFLine(String property, String value) {
         String key = KEY_TO_MGF_KEY.get(property);
         if (key == null) {
-            return UNKNOWN_MGF_KEY + "=" + property + "=" + value;
+            return UNKNOWN_MGF_KEY + '=' + property + '=' + value;
         } else {
-            return key + "=" + value;
+            return key + '=' + value;
         }
     }
 
@@ -101,9 +101,9 @@ class KnownProperties {
      */
     public static boolean addMGFProperties(Properties props,String line) {
         if(line.contains("="))  {
-            int index = line.indexOf("=") ;
+            int index = line.indexOf('=') ;
             String key = line.substring(0,index);
-            String value = line.substring(index + 1,line.length());
+            String value = line.substring(index + 1);
             return handleKnownProperty(props,key, value);
         }
         else {
