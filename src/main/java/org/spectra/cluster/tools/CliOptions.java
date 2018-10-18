@@ -106,28 +106,33 @@ public class CliOptions {
         Option rounds = OptionBuilder
                 .hasArg()
                 .withDescription("number of clustering rounds to use.")
+                .withLongOpt(OPTIONS.ROUNDS.getLongValue())
                 .create(OPTIONS.ROUNDS.getValue());
         options.addOption(rounds);
 
         Option majorPeakJobs = OptionBuilder
                 .hasArg()
                 .withDescription("number of threads to use for major peak clustering.")
+                .withLongOpt(OPTIONS.MAJOR_PEAK_JOBS.getLongValue())
                 .create(OPTIONS.MAJOR_PEAK_JOBS.getValue());
         options.addOption(majorPeakJobs);
 
         Option binaryDirectory = OptionBuilder
                 .hasArg()
                 .withDescription("path to the directory to (temporarily) store the binary files. By default a temporary directory is being created")
+                .withLongOpt(OPTIONS.BINARY_TMP_DIR.getLongValue())
                 .create(OPTIONS.BINARY_TMP_DIR.getValue());
         options.addOption(binaryDirectory);
 
         Option keepBinary = OptionBuilder
                 .withDescription("if this options is set, the binary files are not deleted after clustering.")
+                .withLongOpt(OPTIONS.KEEP_BINARY_FILE.getLongValue())
                 .create(OPTIONS.KEEP_BINARY_FILE.getValue());
         options.addOption(keepBinary);
 
         Option reuseBinaryFiles = OptionBuilder
                 .withDescription("if this option is set, the binary files found in the binary file directory will be used for clustering.")
+                .withLongOpt(OPTIONS.REUSE_BINARY_FILES.getLongValue())
                 .create(OPTIONS.REUSE_BINARY_FILES.getValue());
         options.addOption(reuseBinaryFiles);
 
@@ -167,6 +172,7 @@ public class CliOptions {
         Option xMinComparisons = OptionBuilder
                 .withDescription("(Experimental option) Sets the minimum number of comparisons used to calculate the probability that incorrect spectra are clustered.")
                 .hasArg()
+                .withLongOpt(OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getLongValue())
                 .create(OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue());
         options.addOption(xMinComparisons);
 
@@ -174,6 +180,7 @@ public class CliOptions {
                 .hasArg()
                 .withArgName("output filename")
                 .withDescription("(Experimental option) Learn the used cumulative distribution function directly from the processed data. This is only recommended for high-resolution data. The result will be written to the defined file.")
+                .withLongOpt(OPTIONS.ADVANCED_LEARN_CDF.getLongValue())
                 .create(OPTIONS.ADVANCED_LEARN_CDF.getValue());
         options.addOption(xLearnCdf);
 
@@ -181,6 +188,7 @@ public class CliOptions {
                 .hasArg()
                 .withArgName("CDF filename")
                 .withDescription("(Experimental option) Loads the cumulative distribution function to use from the specified file. These files can be created using the " + OPTIONS.ADVANCED_LEARN_CDF.getValue() + " parameter")
+                .withLongOpt(OPTIONS.ADVANCED_LOAD_CDF_FILE.getLongValue())
                 .create(OPTIONS.ADVANCED_LOAD_CDF_FILE.getValue());
         options.addOption(xLoadCdf);
 
@@ -193,6 +201,7 @@ public class CliOptions {
 
         Option xDisableMgfComments = OptionBuilder
                 .withDescription("(Advanced option) If set, MGF comment strings are NOT supported. This will increase performance but only works for MGF files that do not contain any comments")
+                .withLongOpt(OPTIONS.ADVANCED_DISABLE_MGF_COMMENTS.getLongValue())
                 .create(OPTIONS.ADVANCED_DISABLE_MGF_COMMENTS.getValue());
         options.addOption(xDisableMgfComments);
     }
