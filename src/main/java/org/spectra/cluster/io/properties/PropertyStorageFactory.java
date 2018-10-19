@@ -2,7 +2,6 @@ package org.spectra.cluster.io.properties;
 
 import org.spectra.cluster.exceptions.SpectraClusterException;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.Optional;
 

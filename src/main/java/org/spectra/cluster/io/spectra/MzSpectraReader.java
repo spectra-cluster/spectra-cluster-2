@@ -233,7 +233,7 @@ public class MzSpectraReader {
     public Iterator<IBinarySpectrum> readBinarySpectraIterator(IPropertyStorage propertyStorage) {
         Stream<Tuple<File, Iterator<Spectrum>>> iteratorStream = inputFiles
                 .entrySet().stream()
-                .map(x -> new Tuple<>((File)x.getKey(), x.getValue().getSpectrumIterator())).collect(Collectors.toList()).stream();
+                .map(x -> new Tuple<>(x.getKey(), x.getValue().getSpectrumIterator())).collect(Collectors.toList()).stream();
 
         return new StreamIteratorConverter<Stream<ITuple>, IBinarySpectrum>(iteratorStream, tupleSpectrum -> {
 

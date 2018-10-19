@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Random;
 
 /**

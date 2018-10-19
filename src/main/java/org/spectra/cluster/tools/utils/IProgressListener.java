@@ -7,5 +7,5 @@ package org.spectra.cluster.tools.utils;
  * Created by jg on 10.06.16.
  */
 public interface IProgressListener {
-    public void onProgressUpdate(ProgressUpdate progressUpdate);
+    void onProgressUpdate(ProgressUpdate progressUpdate);
 }

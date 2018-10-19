@@ -10,7 +10,6 @@ import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.cluster.DotClusteringWriter;
 import org.spectra.cluster.io.cluster.IClusterWriter;
 import org.spectra.cluster.io.properties.IPropertyStorage;
-import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
 import org.spectra.cluster.io.properties.PropertyStorageFactory;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
@@ -23,15 +22,10 @@ import org.spectra.cluster.tools.utils.IProgressListener;
 import org.spectra.cluster.tools.utils.ProgressUpdate;
 import org.spectra.cluster.util.DefaultParameters;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -121,7 +115,7 @@ public class SpectraClusterTool implements IProgressListener {
             IPropertyStorage localStorage = PropertyStorageFactory.buildDynamicPropertyStorage();
             File[] inputFiles = null;
             inputFiles = Arrays.stream(peakFiles)
-                    .map(x -> new File(x))
+                    .map(File::new)
                     .toArray(File[]::new);
 
             MzSpectraReader reader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),

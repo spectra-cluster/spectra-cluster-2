@@ -112,7 +112,7 @@ public class MzSpectraReaderTest {
         File testFile = new File(getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(testFile);
         SpectraPerBinNumberComparisonAssessor assessor = new SpectraPerBinNumberComparisonAssessor(
-                BasicIntegerNormalizer.MZ_CONSTANT * 1, 1, BasicIntegerNormalizer.MZ_CONSTANT * 5000);
+                BasicIntegerNormalizer.MZ_CONSTANT, 1, BasicIntegerNormalizer.MZ_CONSTANT * 5000);
 
         reader.addSpectrumListener(assessor);
 

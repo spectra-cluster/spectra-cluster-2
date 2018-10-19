@@ -12,8 +12,6 @@ package org.spectra.cluster.model.commons;
  * @author ypriverol on 19/10/2018.
  */
 
-import java.io.Serializable;
-
 /**
  * Tuple stores two elements.
  *

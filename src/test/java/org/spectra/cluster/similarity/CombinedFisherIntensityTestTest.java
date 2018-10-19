@@ -123,7 +123,6 @@ public class CombinedFisherIntensityTestTest {
 
         for (int i = 1; i < impSpectra.size(); i++) {
             double score = similarity.correlation(firstSpec, impSpectra.get(i));
-            Assert.assertNotNull(score);
             // only accept very high scores
             Assert.assertTrue(score > 100);
             scores.add(score);

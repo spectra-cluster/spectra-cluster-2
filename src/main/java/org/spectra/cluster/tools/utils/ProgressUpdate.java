@@ -15,7 +15,7 @@ public class ProgressUpdate {
         CLUSTERING,
         MERGING,
         OUTPUT
-    };
+    }
 
     private String message;
     private Integer tasksCompleted;

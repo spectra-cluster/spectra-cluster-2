@@ -61,7 +61,7 @@ public class DefaultParameters {
 
     public Properties readProperties() throws URISyntaxException {
         Properties properties = new Properties();
-        InputStream output = null;
+        InputStream output;
 
         try {
             File propertiesFactoryBean = new File(DefaultParameters.class.getClassLoader().getResource("application.properties").toURI());
