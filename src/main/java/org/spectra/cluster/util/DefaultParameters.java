@@ -31,6 +31,7 @@ public class DefaultParameters {
 
     private Float thresholdStart;
     private Float thresholdEnd;
+    private int nInitiallySharedPeaks;
 
 
     public DefaultParameters(){
@@ -46,27 +47,28 @@ public class DefaultParameters {
     }
 
     private void setProperties(Properties properties) {
-        if(properties.contains("precursor.tolerance"))
+        if(properties.containsKey("precursor.tolerance"))
             this.precursorIonTolerance = Double.parseDouble(properties.getProperty("precursor.tolerance").trim());
-        if(properties.contains("fragment.tolerance"))
+        if(properties.containsKey("fragment.tolerance"))
             this.fragmentIonTolerance = Double.parseDouble(properties.getProperty("fragment.tolerance"));
-        if(properties.contains("threshold.start"))
+        if(properties.containsKey("threshold.start"))
             this.thresholdStart =  Float.parseFloat(properties.getProperty("threshold.start"));
-        if(properties.contains("threshold.end"))
+        if(properties.containsKey("threshold.end"))
             this.thresholdEnd   =  Float.parseFloat(properties.getProperty("threshold.end"));
-        if(properties.contains("number.higher.peaks"))
+        if(properties.containsKey("number.higher.peaks"))
             this.numberHigherPeaks = Integer.parseInt(properties.getProperty("number.higher.peaks"));
-        if(properties.contains("cluster.rounds"))
+        if(properties.containsKey("cluster.rounds"))
             this.clusterRounds = Integer.parseInt(properties.getProperty("cluster.rounds"));
         if(properties.contains("binary.temp.directory"))
             this.binaryDirectory = properties.getProperty("binary.temp.directory");
-        if(properties.contains("reuse.binary.files"))
+        if(properties.containsKey("reuse.binary.files"))
             this.reuseBinary = Boolean.parseBoolean(properties.getProperty("reuse.binary.files"));
-        if(properties.contains("cluster.fast.mode"))
+        if(properties.containsKey("cluster.fast.mode"))
             this.fastMode = Boolean.parseBoolean(properties.getProperty("cluster.fast.mode"));
-
-        if(properties.contains("filters.remove.reporter.peaks"))
+        if(properties.containsKey("filters.remove.reporter.peaks"))
             this.filterReportPeaks = Boolean.parseBoolean(properties.getProperty("filters.remove.reporter.peaks"));
+        if(properties.containsKey("initially.shared.peaks"))
+            this.nInitiallySharedPeaks = Integer.parseInt(properties.getProperty("initially.shared.peaks"));
     }
 
     public Properties readProperties() throws URISyntaxException {

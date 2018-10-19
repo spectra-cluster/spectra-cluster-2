@@ -77,7 +77,7 @@ public class SpectraClusterTool implements IProgressListener {
                 throw new MissingParameterException("Missing required option " + CliOptions.OPTIONS.OUTPUT_PATH.getValue());
             File finalResultFile = new File(commandLine.getOptionValue(CliOptions.OPTIONS.OUTPUT_PATH.getValue()));
 
-            if(!commandLine.hasOption(CliOptions.OPTIONS.CONFIG_FILE.getValue()))
+            if(commandLine.hasOption(CliOptions.OPTIONS.CONFIG_FILE.getValue()))
                 defaultParameters.mergeParameters(commandLine.getOptionValue(CliOptions.OPTIONS.CONFIG_FILE.getValue()));
 
             if (finalResultFile.exists())
@@ -110,6 +110,8 @@ public class SpectraClusterTool implements IProgressListener {
                 fragmentTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue()));
             }
 
+            int nInitiallySharedPeaks = defaultParameters.getNInitiallySharedPeaks();
+
             /** Perform clustering **/
             IRawSpectrumFunction loadingFilter = new RemoveImpossiblyHighPeaksFunction()
                     .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
@@ -140,7 +142,7 @@ public class SpectraClusterTool implements IProgressListener {
 
                 IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                         startThreshold, t, rounds, new CombinedFisherIntensityTest(),
-                        new MinNumberComparisonsAssessor(10_000), 5);
+                        new MinNumberComparisonsAssessor(10_000), nInitiallySharedPeaks);
 
                 ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
