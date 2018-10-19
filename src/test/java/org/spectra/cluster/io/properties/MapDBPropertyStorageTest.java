@@ -2,6 +2,7 @@ package org.spectra.cluster.io.properties;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.spectra.cluster.exceptions.SpectraClusterException;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -21,13 +22,11 @@ import java.util.Random;
 public class MapDBPropertyStorageTest {
 
     @Test
-    public void storeProperty() throws IOException {
+    public void storeProperty() throws IOException, SpectraClusterException {
 
-        Optional<IPropertyStorage> propertyStorage = PropertyStorageFactory.buildStaticPropertyStorage(200);
+        IPropertyStorage storage = PropertyStorageFactory.buildStaticPropertyStorage(200);
 
         long time = System.currentTimeMillis();
-        IPropertyStorage storage = propertyStorage.get();
-
         Random random = new Random();
 
         for(int i = 0; i < 200; i++){
@@ -47,12 +46,10 @@ public class MapDBPropertyStorageTest {
 
 
     @Test
-    public void storePropertyDynamic() throws IOException {
+    public void storePropertyDynamic() throws IOException, SpectraClusterException {
 
         long time = System.currentTimeMillis();
-        Optional<IPropertyStorage> propertyStorage = PropertyStorageFactory.buildDynamicPropertyStorage();
-        IPropertyStorage storage = propertyStorage.get();
-
+        IPropertyStorage storage = PropertyStorageFactory.buildDynamicPropertyStorage();
         Random random = new Random();
 
         for(int i = 0; i < 200; i++){

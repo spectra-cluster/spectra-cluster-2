@@ -11,5 +11,17 @@ package org.spectra.cluster.exceptions;
  *
  * @author ypriverol on 18/10/2018.
  */
-public class SpectraClusterException {
+public class SpectraClusterException extends Exception {
+
+    public SpectraClusterException() {
+        super();
+    }
+
+    public SpectraClusterException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public SpectraClusterException(String message) {
+        super(message);
+    }
 }

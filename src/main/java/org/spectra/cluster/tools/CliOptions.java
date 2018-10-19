@@ -15,6 +15,8 @@ public class CliOptions {
     public enum OPTIONS {
         OUTPUT_PATH("output.path", "o"),
 
+        INPUT_FILES("input.files", "i"),
+
         PRECURSOR_TOLERANCE("precursor.tolerance", "p"),
         FRAGMENT_TOLERANCE("fragment.tolerance", "f"),
 
@@ -68,6 +70,14 @@ public class CliOptions {
     private static final Options options = new Options();
 
     static {
+
+        Option inputFiles = OptionBuilder
+                .hasArgs(5)
+                .withDescription("Input files to be analyzed. If more than one file is provided it should be with space ")
+                .withLongOpt(OPTIONS.INPUT_FILES.getLongValue())
+                .create(OPTIONS.INPUT_FILES.getValue());
+        options.addOption(inputFiles);
+
         Option fragmentTolerance = OptionBuilder
                 .hasArg()
                 .withDescription("fragment ion tolerance in m/z to use for fragment peak matching")

@@ -17,8 +17,9 @@ import java.util.Iterator;
  * to a Iterator of BinarySpectrum in {@link MzSpectraReader}
  *
  *
- * @author ypriverol on 14/08/2018.
+ * @author ypriverol
  */
+@Deprecated
 public class IteratorConverter<F, T> implements Iterator<T> {
 
     private final Converter<? super F, ? extends T> converter;

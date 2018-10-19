@@ -1,7 +1,24 @@
 package org.spectra.cluster.tools;
 
 import org.apache.commons.cli.*;
+import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
+import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.MissingParameterException;
+import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
+import org.spectra.cluster.filter.rawpeaks.*;
+import org.spectra.cluster.io.cluster.DotClusteringWriter;
+import org.spectra.cluster.io.cluster.IClusterWriter;
+import org.spectra.cluster.io.properties.IPropertyStorage;
+import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
+import org.spectra.cluster.io.properties.PropertyStorageFactory;
+import org.spectra.cluster.io.spectra.MzSpectraReader;
+import org.spectra.cluster.model.cluster.ICluster;
+import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
+import org.spectra.cluster.normalizer.MaxPeakNormalizer;
+import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.tools.utils.IProgressListener;
 import org.spectra.cluster.tools.utils.ProgressUpdate;
 import org.spectra.cluster.util.DefaultParameters;
@@ -10,9 +27,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -50,6 +69,15 @@ public class SpectraClusterTool implements IProgressListener {
                 return;
             }
 
+            // File input
+            String[] peakFiles = null;
+            if (commandLine.hasOption(CliOptions.OPTIONS.INPUT_FILES.getValue())) {
+                peakFiles = commandLine.getOptionValues(CliOptions.OPTIONS.INPUT_FILES.getValue());
+            }else{
+                printUsage();
+                throw new MissingParameterException("Missing required option " + CliOptions.OPTIONS.OUTPUT_PATH.getValue());
+            }
+
             // RESULT FILE PATH
             if (!commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_PATH.getValue()))
                 throw new MissingParameterException("Missing required option " + CliOptions.OPTIONS.OUTPUT_PATH.getValue());
@@ -59,7 +87,7 @@ public class SpectraClusterTool implements IProgressListener {
                 throw new Exception("Result file " + finalResultFile + " already exists");
 
             // NUMBER OF ROUNDS
-            int rounds = 4;
+            int rounds = defaultParameters.getClusterRounds();
             if (commandLine.hasOption(CliOptions.OPTIONS.ROUNDS.getValue()))
                 rounds = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.ROUNDS.getValue()));
 
@@ -69,188 +97,65 @@ public class SpectraClusterTool implements IProgressListener {
                 startThreshold = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.START_THRESHOLD.getValue()));
 
             // END THRESHOLD
-            float endThreshold = 0.99F;
+            float endThreshold = defaultParameters.getThresholdEnd();
             if (commandLine.hasOption(CliOptions.OPTIONS.END_THRESHOLD.getValue()))
                 endThreshold = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.END_THRESHOLD.getValue()));
 
-//            // PRECURSOR TOLERANCE
-//            if (commandLine.hasOption(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue())) {
-//                float precursorTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue()));
-//                Defaults.setDefaultPrecursorIonTolerance(precursorTolerance);
-//            }
-//
-//            // FRAGMENT ION TOLERANCE
-//            if (commandLine.hasOption(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue())) {
-//                float fragmentTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue()));
-//                Defaults.setFragmentIonTolerance(fragmentTolerance);
-//            }
-//
-//            // BINARY TMP DIR
-//            if (commandLine.hasOption(CliOptions.OPTIONS.BINARY_TMP_DIR.getValue())) {
-//                File binaryTmpDirectory = new File(commandLine.getOptionValue(CliOptions.OPTIONS.BINARY_TMP_DIR.getValue()));
-//                spectraClusterStandalone.setTemporaryDirectory(binaryTmpDirectory);
-//            }
-//
-//            // KEEP BINARY FILES
-//            if (commandLine.hasOption(CliOptions.OPTIONS.KEEP_BINARY_FILE.getValue())) {
-//                spectraClusterStandalone.setKeepBinaryFiles(true);
-//            }
-//
-//            // FAST MODE
-//            if (commandLine.hasOption(CliOptions.OPTIONS.FAST_MODE.getValue())) {
-//                spectraClusterStandalone.setUseFastMode(true);
-//            }
-//
-//            // VERBOSE
-//            if (commandLine.hasOption(CliOptions.OPTIONS.VERBOSE.getValue())) {
-//                spectraClusterStandalone.setVerbose(true);
-//            }
-//
-//            // REMOVE QUANT PEAKS
-//            if (commandLine.hasOption(CliOptions.OPTIONS.REMOVE_REPORTER_PEAKS.getValue())) {
-//                String quantTypeString = commandLine.getOptionValue(CliOptions.OPTIONS.REMOVE_REPORTER_PEAKS.getValue());
-//                RemoveReporterIonPeaksFunction.REPORTER_TYPE reporterType;
-//
-//                if (quantTypeString.toLowerCase().equals("itraq")) {
-//                    reporterType = RemoveReporterIonPeaksFunction.REPORTER_TYPE.ITRAQ;
-//                }
-//                else if (quantTypeString.toLowerCase().equals("tmt")) {
-//                    reporterType = RemoveReporterIonPeaksFunction.REPORTER_TYPE.TMT;
-//                }
-//                else if (quantTypeString.toLowerCase().equals("all")) {
-//                    reporterType = RemoveReporterIonPeaksFunction.REPORTER_TYPE.ALL;
-//                }
-//                else {
-//                    throw new MissingParameterException("Invalid reporter type defined. Valid values are " +
-//                            "'ITRAQ', 'TMT', and 'ALL'.");
-//                }
-//
-//                spectraClusterStandalone.setReporterType(reporterType);
-//            }
-//
-//            // FILES TO PROCESS
-//            String[] peaklistFilenames = commandLine.getArgs();
-//
-//            // RE-USE BINARY FILES
-//            boolean reUseBinaryFiles = commandLine.hasOption(CliOptions.OPTIONS.REUSE_BINARY_FILES.getValue());
-//
-//            // if re-use is set, binaryTmpDirectory is required and merging is impossible
-//            if (reUseBinaryFiles && !commandLine.hasOption(CliOptions.OPTIONS.BINARY_TMP_DIR.getValue()))
-//                throw new MissingParameterException("Missing required option '" + CliOptions.OPTIONS.BINARY_TMP_DIR.getValue() + "' with " + CliOptions.OPTIONS.REUSE_BINARY_FILES.getValue());
-//
-//            if (reUseBinaryFiles && peaklistFilenames.length > 0)
-//                System.out.println("WARNING: " + CliOptions.OPTIONS.REUSE_BINARY_FILES.getValue() + " set, input files will be ignored");
-//
-//            // make sure input files were set
-//            if (!reUseBinaryFiles && peaklistFilenames.length < 1)
-//                throw new MissingParameterException("No spectrum files passed. Please list the peak list files to process after the command.");
-//
-//            // add the filters
-//            List<String> addedFilters = new ArrayList<String>();
-//            if (commandLine.hasOption(CliOptions.OPTIONS.FILTER.getValue())) {
-//                for (String filterName : commandLine.getOptionValues(CliOptions.OPTIONS.FILTER.getValue())) {
-//                    ClusteringSettings.SPECTRUM_FILTER filter = ClusteringSettings.SPECTRUM_FILTER.getFilterForName(filterName);
-//
-//                    if (filter == null) {
-//                        throw new InvalidParameterException("Error: Unknown filter name passed: '" + filterName + "'");
-//                    }
-//
-//                    ClusteringSettings.addIntitalSpectrumFilter(filter.filter);
-//                    addedFilters.add(filterName);
-//                }
-//            }
-//
-//            /**
-//             * Advanced options
-//             */
-//            // MIN NUMBER COMPARISONS
-//            Defaults.setMinNumberComparisons(10000);
-//            if (commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue())) {
-//                int minComparisons = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue()));
-//                Defaults.setMinNumberComparisons(minComparisons);
-//            }
-//
-//            // N HIGHEST PEAKS
-//            if (commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_NUMBER_PREFILTERED_PEAKS.getValue())) {
-//                int nHighestPeaks = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.ADVANCED_NUMBER_PREFILTERED_PEAKS.getValue()));
-//                ClusteringSettings.setLoadingSpectrumFilter(new HighestNPeakFunction(nHighestPeaks));
-//            }
-//
-//            // MGF COMMENT SUPPORT
-//            ClusteringSettings.disableMGFCommentSupport = commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_DISABLE_MGF_COMMENTS.getValue());
-//
-//            /**
-//             * ------ Learn the CDF if set --------
-//             */
-//            if (commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_LEARN_CDF.getValue())) {
-//                String cdfOuputFilename = commandLine.getOptionValue(CliOptions.OPTIONS.ADVANCED_LEARN_CDF.getValue());
-//                File cdfOutputFile = new File(cdfOuputFilename);
-//
-//                if (cdfOutputFile.exists()) {
-//                    throw new Exception("CDF output file " + cdfOuputFilename + " already exists.");
-//                }
-//
-//                CdfLearner cdfLearner = new CdfLearner();
-//                System.out.println("Learning CDF...");
-//                CdfResult cdfResult = cdfLearner.learnCumulativeDistribution(peaklistFilenames, paralellJobs);
-//
-//                // write it to the file
-//                FileWriter writer = new FileWriter(cdfOutputFile);
-//                writer.write(cdfResult.toString());
-//                writer.close();
-//
-//                System.out.println("CDF successfully written to " + cdfOuputFilename);
-//                return;
-//            }
-//
-//            /**
-//             * ------ Load the CDF from file -------
-//             */
-//            if (commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_LOAD_CDF_FILE.getValue())) {
-//                BufferedReader reader = new BufferedReader(
-//                        new FileReader(
-//                                commandLine.getOptionValue(CliOptions.OPTIONS.ADVANCED_LOAD_CDF_FILE.getValue())));
-//
-//                StringBuilder cdfString = new StringBuilder();
-//                String line;
-//                while ((line = reader.readLine()) != null) {
-//                    cdfString.append(line);
-//                }
-//                reader.close();
-//
-//                Defaults.setCumulativeDistributionFunction(CumulativeDistributionFunction.fromString(cdfString.toString()));
-//            }
-//
-//            /**
-//             * ------- THE ACTUAL LOGIC STARTS HERE -----------
-//             */
-//            printSettings(finalResultFile, paralellJobs, startThreshold, endThreshold, rounds, spectraClusterStandalone.isKeepBinaryFiles(),
-//                    spectraClusterStandalone.getTemporaryDirectory(), peaklistFilenames, reUseBinaryFiles, spectraClusterStandalone.isUseFastMode(),
-//                    addedFilters);
-//
-//            spectraClusterStandalone.addProgressListener(this);
-//
-//            // make sure binary files exist
-//            if (reUseBinaryFiles) {
-//                File binaryFileDirectory = new File(spectraClusterStandalone.getTemporaryDirectory(), "spectra");
-//                if (!binaryFileDirectory.isDirectory()) {
-//                    reUseBinaryFiles = false;
-//                    System.out.println("No binary files found. Re-creating them...");
-//                }
-//            }
-//
-//            if (reUseBinaryFiles) {
-//                spectraClusterStandalone.clusterExistingBinaryFiles(
-//                        spectraClusterStandalone.getTemporaryDirectory(), thresholds, finalResultFile);
-//            }
-//            else {
-//                List<File> peaklistFiles = new ArrayList<File>(peaklistFilenames.length);
-//                for (String filename : peaklistFilenames) {
-//                    peaklistFiles.add(new File(filename));
-//                }
-//
-//                spectraClusterStandalone.clusterPeaklistFiles(peaklistFiles, thresholds, finalResultFile);
-//            }
+            // PRECURSOR TOLERANCE
+            double precursorTolerance = defaultParameters.getPrecursorIonTolerance();
+            if (commandLine.hasOption(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue())) {
+                precursorTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue()));
+            }
+
+            // PRECURSOR TOLERANCE
+            double fragmentTolerance = defaultParameters.getFragmentIonTolerance();
+            if (commandLine.hasOption(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue())) {
+                fragmentTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue()));
+            }
+
+            /** Perform clustering **/
+            IRawSpectrumFunction loadingFilter = new RemoveImpossiblyHighPeaksFunction()
+                    .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
+                    .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters.getNumberHigherPeaks())));
+
+            IPropertyStorage localStorage = PropertyStorageFactory.buildDynamicPropertyStorage();
+            File[] inputFiles = null;
+            inputFiles = Arrays.stream(peakFiles)
+                    .map(x -> new File(x))
+                    .toArray(File[]::new);
+
+            MzSpectraReader reader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),
+                    new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, inputFiles);
+            Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(localStorage);
+            List<IBinarySpectrum> spectra = new ArrayList<>(1_000);
+
+            while (iterator.hasNext()) {
+                spectra.add(iterator.next());
+            }
+
+            // sort according to m/z
+            spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
+
+            // cluster everything
+            float[] thresholds = {0.99f, 0.98f, 0.95f, 0.995f};
+
+            for (float t : thresholds) {
+                Path thisResult = Paths.get(finalResultFile.getAbsolutePath() + '_' + String.valueOf(t));
+
+                IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
+                        1, t, 5, new CombinedFisherIntensityTest(),
+                        new MinNumberComparisonsAssessor(10_000), 5);
+
+                ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
+
+                IClusterWriter writer = new DotClusteringWriter(thisResult, false, localStorage);
+                writer.appendClusters(clusters);
+                writer.close();
+
+                System.out.println("Results written to " + thisResult.toString());
+            }
+
+
         } catch (MissingParameterException e) {
             System.out.println("Error: " + e.getMessage() + "\n\n");
             printUsage();

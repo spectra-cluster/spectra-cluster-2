@@ -25,7 +25,7 @@ public class DefaultParameters {
     private boolean fastMode;
     private Integer clusterRounds;
     private boolean filterReportPeaks;
-    private Double numberHigherPeaks;
+    private Integer numberHigherPeaks;
     private Double precursorIonTolerance;
     private Double fragmentIonTolerance;
 
@@ -42,7 +42,7 @@ public class DefaultParameters {
             this.fragmentIonTolerance = Double.parseDouble(properties.getProperty("fragment.tolerance"));
             this.thresholdStart =  Float.parseFloat(properties.getProperty("threshold.start"));
             this.thresholdEnd   =  Float.parseFloat(properties.getProperty("threshold.end"));
-            this.numberHigherPeaks = Double.parseDouble(properties.getProperty("number.higher.peaks"));
+            this.numberHigherPeaks = Integer.parseInt(properties.getProperty("number.higher.peaks"));
 
             this.clusterRounds = Integer.parseInt(properties.getProperty("cluster.rounds"));
             this.binaryDirectory = properties.getProperty("binary.temp.directory");
