@@ -139,7 +139,7 @@ public class SpectraClusterTool implements IProgressListener {
                 Path thisResult = Paths.get(finalResultFile.getAbsolutePath() + '_' + String.valueOf(t));
 
                 IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
-                        1, t, 5, new CombinedFisherIntensityTest(),
+                        startThreshold, t, rounds, new CombinedFisherIntensityTest(),
                         new MinNumberComparisonsAssessor(10_000), 5);
 
                 ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
