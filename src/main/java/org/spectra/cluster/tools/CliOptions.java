@@ -13,6 +13,8 @@ import org.apache.commons.cli.Options;
  */
 public class CliOptions {
     public enum OPTIONS {
+
+        CONFIG_FILE("config", "c"),
         OUTPUT_PATH("output.path", "o"),
 
         INPUT_FILES("input.files", "i"),
@@ -71,6 +73,13 @@ public class CliOptions {
 
     static {
 
+        Option config = OptionBuilder
+                .hasArg()
+                .withDescription("Input file with all the configuration parameters")
+                .withLongOpt(OPTIONS.CONFIG_FILE.getLongValue())
+                .create(OPTIONS.CONFIG_FILE.getValue());
+        options.addOption(config);
+
         Option inputFiles = OptionBuilder
                 .hasArgs(5)
                 .withDescription("Input files to be analyzed. If more than one file is provided it should be with space ")
@@ -80,74 +89,74 @@ public class CliOptions {
 
         Option fragmentTolerance = OptionBuilder
                 .hasArg()
-                .withDescription("fragment ion tolerance in m/z to use for fragment peak matching")
+                .withDescription("Fragment ion tolerance in m/z to use for fragment peak matching")
                 .withLongOpt(OPTIONS.FRAGMENT_TOLERANCE.getLongValue())
                 .create(OPTIONS.FRAGMENT_TOLERANCE.getValue());
         options.addOption(fragmentTolerance);
 
         Option precursorTolerance = OptionBuilder
                 .hasArg()
-                .withDescription("precursor tolerance (clustering window size) in m/z used during matching.")
+                .withDescription("Precursor tolerance (clustering window size) in m/z used during matching.")
                 .withLongOpt(OPTIONS.PRECURSOR_TOLERANCE.getLongValue())
                 .create(OPTIONS.PRECURSOR_TOLERANCE.getValue());
         options.addOption(precursorTolerance);
 
         Option outputPath = OptionBuilder
                 .hasArg()
-                .withDescription("path to the outputfile. Outputfile must not exist.")
+                .withDescription("Path to the outputfile. Outputfile must not exist.")
                 .withLongOpt(OPTIONS.OUTPUT_PATH.getLongValue())
                 .create(OPTIONS.OUTPUT_PATH.getValue());
         options.addOption(outputPath);
 
         Option startThreshold = OptionBuilder
                 .hasArg()
-                .withDescription("(highest) starting threshold")
+                .withDescription("(Highest) starting threshold")
                 .withLongOpt(OPTIONS.START_THRESHOLD.getLongValue())
                 .create(OPTIONS.START_THRESHOLD.getValue());
         options.addOption(startThreshold);
 
         Option endThreshold = OptionBuilder
                 .hasArg()
-                .withDescription("(lowest) final clustering threshold")
+                .withDescription("(Lowest) final clustering threshold")
                 .withLongOpt(OPTIONS.END_THRESHOLD.getLongValue())
                 .create(OPTIONS.END_THRESHOLD.getValue());
         options.addOption(endThreshold);
 
         Option rounds = OptionBuilder
                 .hasArg()
-                .withDescription("number of clustering rounds to use.")
+                .withDescription("Number of clustering rounds to use.")
                 .withLongOpt(OPTIONS.ROUNDS.getLongValue())
                 .create(OPTIONS.ROUNDS.getValue());
         options.addOption(rounds);
 
         Option majorPeakJobs = OptionBuilder
                 .hasArg()
-                .withDescription("number of threads to use for major peak clustering.")
+                .withDescription("Number of threads to use for major peak clustering.")
                 .withLongOpt(OPTIONS.MAJOR_PEAK_JOBS.getLongValue())
                 .create(OPTIONS.MAJOR_PEAK_JOBS.getValue());
         options.addOption(majorPeakJobs);
 
         Option binaryDirectory = OptionBuilder
                 .hasArg()
-                .withDescription("path to the directory to (temporarily) store the binary files. By default a temporary directory is being created")
+                .withDescription("Path to the directory to (temporarily) store the binary files. By default a temporary directory is being created")
                 .withLongOpt(OPTIONS.BINARY_TMP_DIR.getLongValue())
                 .create(OPTIONS.BINARY_TMP_DIR.getValue());
         options.addOption(binaryDirectory);
 
         Option keepBinary = OptionBuilder
-                .withDescription("if this options is set, the binary files are not deleted after clustering.")
+                .withDescription("If this options is set, the binary files are not deleted after clustering.")
                 .withLongOpt(OPTIONS.KEEP_BINARY_FILE.getLongValue())
                 .create(OPTIONS.KEEP_BINARY_FILE.getValue());
         options.addOption(keepBinary);
 
         Option reuseBinaryFiles = OptionBuilder
-                .withDescription("if this option is set, the binary files found in the binary file directory will be used for clustering.")
+                .withDescription("If this option is set, the binary files found in the binary file directory will be used for clustering.")
                 .withLongOpt(OPTIONS.REUSE_BINARY_FILES.getLongValue())
                 .create(OPTIONS.REUSE_BINARY_FILES.getValue());
         options.addOption(reuseBinaryFiles);
 
         Option fastMode = OptionBuilder
-                .withDescription("if this option is set the 'fast mode' is enabled. In this mode, the radical peak filtering used for the comparison function is already applied during spectrum conversion. Thereby, the clustering and consensus spectrum quality is slightly decreased but speed increases 2-3 fold.")
+                .withDescription("If this option is set the 'fast mode' is enabled. In this mode, the radical peak filtering used for the comparison function is already applied during spectrum conversion. Thereby, the clustering and consensus spectrum quality is slightly decreased but speed increases 2-3 fold.")
                 .withLongOpt(OPTIONS.FAST_MODE.getLongValue())
                 .create(OPTIONS.FAST_MODE.getValue());
         options.addOption(fastMode);
@@ -160,7 +169,7 @@ public class CliOptions {
         options.addOption(filter);
 
         Option verbose = OptionBuilder
-                .withDescription("if set additional status information is printed.")
+                .withDescription("If set additional status information is printed.")
                 .withLongOpt(OPTIONS.VERBOSE.getLongValue())
                 .create(OPTIONS.VERBOSE.getValue());
         options.addOption(verbose);

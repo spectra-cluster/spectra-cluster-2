@@ -37,26 +37,36 @@ public class DefaultParameters {
 
         try {
             Properties properties = readProperties();
-
-            this.precursorIonTolerance = Double.parseDouble(properties.getProperty("precursor.tolerance").trim());
-            this.fragmentIonTolerance = Double.parseDouble(properties.getProperty("fragment.tolerance"));
-            this.thresholdStart =  Float.parseFloat(properties.getProperty("threshold.start"));
-            this.thresholdEnd   =  Float.parseFloat(properties.getProperty("threshold.end"));
-            this.numberHigherPeaks = Integer.parseInt(properties.getProperty("number.higher.peaks"));
-
-            this.clusterRounds = Integer.parseInt(properties.getProperty("cluster.rounds"));
-            this.binaryDirectory = properties.getProperty("binary.temp.directory");
-            this.reuseBinary = Boolean.parseBoolean(properties.getProperty("reuse.binary.files"));
-            this.fastMode = Boolean.parseBoolean(properties.getProperty("cluster.fast.mode"));
-
-            this.filterReportPeaks = Boolean.parseBoolean(properties.getProperty("filters.remove.reporter.peaks"));
-
-
+            setProperties(properties);
 
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void setProperties(Properties properties) {
+        if(properties.contains("precursor.tolerance"))
+            this.precursorIonTolerance = Double.parseDouble(properties.getProperty("precursor.tolerance").trim());
+        if(properties.contains("fragment.tolerance"))
+            this.fragmentIonTolerance = Double.parseDouble(properties.getProperty("fragment.tolerance"));
+        if(properties.contains("threshold.start"))
+            this.thresholdStart =  Float.parseFloat(properties.getProperty("threshold.start"));
+        if(properties.contains("threshold.end"))
+            this.thresholdEnd   =  Float.parseFloat(properties.getProperty("threshold.end"));
+        if(properties.contains("number.higher.peaks"))
+            this.numberHigherPeaks = Integer.parseInt(properties.getProperty("number.higher.peaks"));
+        if(properties.contains("cluster.rounds"))
+            this.clusterRounds = Integer.parseInt(properties.getProperty("cluster.rounds"));
+        if(properties.contains("binary.temp.directory"))
+            this.binaryDirectory = properties.getProperty("binary.temp.directory");
+        if(properties.contains("reuse.binary.files"))
+            this.reuseBinary = Boolean.parseBoolean(properties.getProperty("reuse.binary.files"));
+        if(properties.contains("cluster.fast.mode"))
+            this.fastMode = Boolean.parseBoolean(properties.getProperty("cluster.fast.mode"));
+
+        if(properties.contains("filters.remove.reporter.peaks"))
+            this.filterReportPeaks = Boolean.parseBoolean(properties.getProperty("filters.remove.reporter.peaks"));
     }
 
     public Properties readProperties() throws URISyntaxException {
@@ -71,5 +81,13 @@ public class DefaultParameters {
             e.printStackTrace();
         }
         return properties;
+    }
+
+    public void mergeParameters(String configFile) throws IOException {
+        File propertiesFactoryBean = new File(configFile);
+        Properties newProperties = new Properties();
+        InputStream output = new FileInputStream(propertiesFactoryBean);
+        newProperties.load(output);
+        setProperties(newProperties);
     }
 }

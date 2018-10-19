@@ -64,7 +64,7 @@ public class SpectraClusterTool implements IProgressListener {
             }
 
             // File input
-            String[] peakFiles = null;
+            String[] peakFiles;
             if (commandLine.hasOption(CliOptions.OPTIONS.INPUT_FILES.getValue())) {
                 peakFiles = commandLine.getOptionValues(CliOptions.OPTIONS.INPUT_FILES.getValue());
             }else{
@@ -76,6 +76,9 @@ public class SpectraClusterTool implements IProgressListener {
             if (!commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_PATH.getValue()))
                 throw new MissingParameterException("Missing required option " + CliOptions.OPTIONS.OUTPUT_PATH.getValue());
             File finalResultFile = new File(commandLine.getOptionValue(CliOptions.OPTIONS.OUTPUT_PATH.getValue()));
+
+            if(!commandLine.hasOption(CliOptions.OPTIONS.CONFIG_FILE.getValue()))
+                defaultParameters.mergeParameters(commandLine.getOptionValue(CliOptions.OPTIONS.CONFIG_FILE.getValue()));
 
             if (finalResultFile.exists())
                 throw new Exception("Result file " + finalResultFile + " already exists");
@@ -113,8 +116,7 @@ public class SpectraClusterTool implements IProgressListener {
                     .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters.getNumberHigherPeaks())));
 
             IPropertyStorage localStorage = PropertyStorageFactory.buildDynamicPropertyStorage();
-            File[] inputFiles = null;
-            inputFiles = Arrays.stream(peakFiles)
+            File[] inputFiles = Arrays.stream(peakFiles)
                     .map(File::new)
                     .toArray(File[]::new);
 
