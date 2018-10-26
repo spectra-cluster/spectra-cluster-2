@@ -1,12 +1,15 @@
 package org.spectra.cluster.io.spectra;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.StoredProperties;
-import org.spectra.cluster.model.commons.IteratorConverter;
+import org.spectra.cluster.model.commons.ITuple;
+import org.spectra.cluster.model.commons.StreamIteratorConverter;
+import org.spectra.cluster.model.commons.Tuple;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.*;
@@ -21,6 +24,7 @@ import uk.ac.ebi.pride.tools.mgf_parser.model.Ms2Query;
 import uk.ac.ebi.pride.tools.ms2_parser.Ms2File;
 import uk.ac.ebi.pride.tools.mzdata_wrapper.MzMlWrapper;
 import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLFile;
+import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLParsingException;
 import uk.ac.ebi.pride.tools.pkl_parser.PklFile;
 
 import java.io.BufferedReader;
@@ -28,8 +32,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -83,8 +90,7 @@ public class MzSpectraReader {
         }
     }
 
-    private JMzReader jMzReader;
-    private final File inputFile;
+    private Map<File, JMzReader> inputFiles;
 
     private FactoryNormalizer factory;
     /**
@@ -99,6 +105,53 @@ public class MzSpectraReader {
 
     /**
      * Create a Reader from a file. The file type accepted are mgf or mzml
+     * @param files File to be read
+     * @throws Exception File not supported
+     */
+    public  MzSpectraReader(IIntegerNormalizer mzBinner,
+                            IIntegerNormalizer intensityBinner,
+                            BasicIntegerNormalizer precursorNormalizer,
+                            IBinarySpectrumFunction peaksPerMzWindowFilter,
+                            IRawSpectrumFunction loadingFilter, File ... files ) throws Exception {
+        this.inputFiles = new ConcurrentHashMap<>();
+
+        Arrays.stream(files).parallel().forEach( file -> {
+            JMzReader jMzReader = null;
+            try{
+                Class<?> peakListclass = isValidPeakListFile(file);
+                if( peakListclass != null){
+                    if(peakListclass == MgfFile.class)
+                        jMzReader = new MgfFile(file);
+                    else if (peakListclass == AplFile.class)
+                        jMzReader = new AplFile(file);
+                    else if(peakListclass == Ms2File.class)
+                        jMzReader = new Ms2File(file);
+                    else if(peakListclass == PklFile.class)
+                        jMzReader = new PklFile(file);
+                    else if(peakListclass == DtaFile.class)
+                        jMzReader = new PklFile(file);
+                    } else if(isValidMzML(file))
+                        jMzReader = new MzMlWrapper(file);
+                    else if(isValidmzXML(file))
+                        jMzReader = new MzXMLFile(file);
+                }catch (JMzReaderException | MzXMLParsingException e){
+                    String message = "The file type provided is not supported -- " + Arrays.toString(MzFileType.values());
+                    log.error(message);
+            }
+            if(jMzReader != null)
+                this.inputFiles.put(file, jMzReader);
+            });
+
+        if(this.inputFiles.isEmpty())
+            throw new SpectraClusterException("Non of the provided files are supported --" + files.toString());
+        this.precursorNormalizer = precursorNormalizer;
+        this.peaksPerMzWindowFilter = peaksPerMzWindowFilter;
+        this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
+        this.loadingFilter = loadingFilter;
+    }
+
+    /**
+     * Create a Reader from a file. The file type accepted are mgf or mzml
      * @param file File to be read
      * @throws Exception File not supported
      */
@@ -108,6 +161,7 @@ public class MzSpectraReader {
                             IBinarySpectrumFunction peaksPerMzWindowFilter,
                             IRawSpectrumFunction loadingFilter) throws Exception {
         try{
+            JMzReader jMzReader = null;
             Class<?> peakListclass = isValidPeakListFile(file);
             if( peakListclass != null){
                 if(peakListclass == MgfFile.class)
@@ -124,6 +178,13 @@ public class MzSpectraReader {
                 jMzReader = new MzMlWrapper(file);
             else if(isValidmzXML(file))
                 jMzReader = new MzXMLFile(file);
+
+            if(jMzReader != null){
+                this.inputFiles = new ConcurrentHashMap<>();
+                this.inputFiles.put(file, jMzReader);
+            }else{
+                throw new SpectraClusterException("The provided file is not supported --" + file.getAbsolutePath());
+            }
         }catch (JMzReaderException e){
             String message = "The file type provided is not support -- " + Arrays.toString(MzFileType.values());
             log.error(message);
@@ -133,7 +194,6 @@ public class MzSpectraReader {
         this.precursorNormalizer = precursorNormalizer;
         this.peaksPerMzWindowFilter = peaksPerMzWindowFilter;
         this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
-        this.inputFile = file;
         this.loadingFilter = loadingFilter;
     }
 
@@ -171,8 +231,15 @@ public class MzSpectraReader {
      * @return Iterator of {@link BinarySpectrum} spectra
      */
     public Iterator<IBinarySpectrum> readBinarySpectraIterator(IPropertyStorage propertyStorage) {
-        return new IteratorConverter<>(jMzReader.getSpectrumIterator(),
-                spectrum -> {
+        Stream<Tuple<File, Iterator<Spectrum>>> iteratorStream = inputFiles
+                .entrySet().stream()
+                .map(x -> new Tuple<>(x.getKey(), x.getValue().getSpectrumIterator())).collect(Collectors.toList()).stream();
+
+        return new StreamIteratorConverter<Stream<ITuple>, IBinarySpectrum>(iteratorStream, tupleSpectrum -> {
+
+            File inputFile = (File) tupleSpectrum.getKey();
+            Spectrum spectrum = (Spectrum) tupleSpectrum.getValue();
+
             // apply the initial loading filter
             if (loadingFilter != null) {
                 spectrum = loadingFilter.apply(spectrum);

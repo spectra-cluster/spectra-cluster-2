@@ -1,13 +1,11 @@
 package org.spectra.cluster.io.cluster;
 
-import org.ehcache.sizeof.SizeOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
-import org.spectra.cluster.engine.GreedyClusteringEngineTest;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
@@ -20,12 +18,7 @@ import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-
-import static org.junit.Assert.*;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -90,9 +83,7 @@ public class BinaryClusterStorageTest {
         // Store one millions of spectra
         for(int i = 0; i < 100000; i++){
             int finalI = i;
-            Arrays.asList(clusters).forEach(cluster -> {
-                clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster);
-            });
+            Arrays.asList(clusters).forEach(cluster -> clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster));
         }
 
         Assert.assertEquals(800000, clusterStorage.size());
@@ -100,9 +91,7 @@ public class BinaryClusterStorageTest {
         // Retrieve all the spectra
         for(int i = 0; i < 100000; i++){
             int finalI = i;
-            Arrays.asList(clusters).forEach(cluster -> {
-                clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId();
-            });
+            Arrays.asList(clusters).forEach(cluster -> clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId());
         }
 
         System.out.println((System.currentTimeMillis() - time)/1000);
@@ -122,9 +111,7 @@ public class BinaryClusterStorageTest {
         // Store one millions of spectra
         for(int i = 0; i < 100000; i++){
             int finalI = i;
-            Arrays.stream(clusters).forEach(cluster -> {
-                clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster);
-            });
+            Arrays.stream(clusters).forEach(cluster -> clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster));
         }
 
         Assert.assertEquals(800000, clusterStorage.size());
@@ -132,9 +119,7 @@ public class BinaryClusterStorageTest {
         // Retrieve all the spectra
         for(int i = 0; i < 100000; i++){
             int finalI = i;
-            Arrays.stream(clusters).forEach(cluster -> {
-                clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId();
-            });
+            Arrays.stream(clusters).forEach(cluster -> clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId());
         }
 
         System.out.println((System.currentTimeMillis() - time)/1000);
@@ -154,9 +139,7 @@ public class BinaryClusterStorageTest {
         // Store one millions of spectra
         for(int i = 0; i < 10000; i++){
             int finalI = i;
-            Arrays.stream(clusters).forEach(cluster -> {
-                clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster);
-            });
+            Arrays.stream(clusters).forEach(cluster -> clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster));
         }
 
         Assert.assertEquals(80000, clusterStorage.size());
@@ -164,16 +147,12 @@ public class BinaryClusterStorageTest {
         // Retrieve all the spectra
         for(int i = 0; i < 10000; i++){
             int finalI = i;
-            Arrays.stream(clusters).forEach(cluster -> {
-                clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId();
-            });
+            Arrays.stream(clusters).forEach(cluster -> clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId());
 
-            Arrays.stream(clusters).forEach(cluster -> {
-                clusterStorage.deleteCluster(cluster.getId() + String.valueOf(finalI));
-            });
+            Arrays.stream(clusters).forEach(cluster -> clusterStorage.deleteCluster(cluster.getId() + String.valueOf(finalI)));
 
         }
-        Assert.assertTrue(clusterStorage.size() == 0);
+        Assert.assertEquals(0, clusterStorage.size());
 
         System.out.println((System.currentTimeMillis() - time)/1000);
     }
@@ -192,9 +171,7 @@ public class BinaryClusterStorageTest {
         // Store one millions of spectra
         for(int i = 0; i < 10; i++){
             int finalI = i;
-            Arrays.asList(clusters).forEach(cluster -> {
-                clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster);
-            });
+            Arrays.asList(clusters).forEach(cluster -> clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster));
         }
 
         Assert.assertEquals(80, clusterStorage.size());
@@ -202,9 +179,7 @@ public class BinaryClusterStorageTest {
         // Retrieve all the spectra
         for(int i = 0; i < 10; i++){
             int finalI = i;
-            Arrays.asList(clusters).forEach(cluster -> {
-                clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId();
-            });
+            Arrays.asList(clusters).forEach(cluster -> clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId());
         }
 
         System.out.println((System.currentTimeMillis() - time)/1000);
@@ -223,9 +198,7 @@ public class BinaryClusterStorageTest {
         // Store one millions of spectra
         for(int i = 0; i < 10; i++){
             int finalI = i;
-            Arrays.stream(clusters).forEach(cluster -> {
-                clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster);
-            });
+            Arrays.stream(clusters).forEach(cluster -> clusterStorage.storeCluster(cluster.getId() + String.valueOf(finalI), cluster));
         }
 
         Assert.assertEquals(80, clusterStorage.size());
@@ -233,9 +206,7 @@ public class BinaryClusterStorageTest {
         // Retrieve all the spectra
         for(int i = 0; i < 10; i++){
             int finalI = i;
-            Arrays.stream(clusters).forEach(cluster -> {
-                clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId();
-            });
+            Arrays.stream(clusters).forEach(cluster -> clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId());
         }
 
         System.out.println((System.currentTimeMillis() - time)/1000);

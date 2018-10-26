@@ -1,6 +1,7 @@
 package org.spectra.cluster.io.properties;
 
-import javax.swing.text.html.Option;
+import org.spectra.cluster.exceptions.SpectraClusterException;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -29,13 +30,12 @@ public class PropertyStorageFactory {
      * Get a Static Property Storage with default version MAX_NUMBER_FEATURES
      * @return IPropertyStorage
      */
-    public static Optional<IPropertyStorage> buildStaticPropertyStorage(){
+    public static IPropertyStorage buildStaticPropertyStorage() throws SpectraClusterException {
         try {
-            return Optional.of(new MapDBPropertyStorage(false, -1));
+            return new MapDBPropertyStorage(false, -1);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new SpectraClusterException("Error building the Dynamic Property Storage --", e.getCause());
         }
-        return Optional.empty();
     }
 
     /**
@@ -43,13 +43,12 @@ public class PropertyStorageFactory {
      * @param numberProperties Number of properties
      * @return IPropertyStorage
      */
-    public static Optional<IPropertyStorage> buildStaticPropertyStorage( int numberProperties){
+    public static IPropertyStorage buildStaticPropertyStorage( int numberProperties) throws SpectraClusterException {
         try {
-            return Optional.of(new MapDBPropertyStorage(false, numberProperties));
+            return new MapDBPropertyStorage(false, numberProperties);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new SpectraClusterException("Error building the Dynamic Property Storage --", e.getCause());
         }
-        return Optional.empty();
 
     }
 
@@ -57,13 +56,11 @@ public class PropertyStorageFactory {
      * Get a Static Property Storage with s predefined number of entries.
      * @return IPropertyStorage
      */
-    public static Optional<IPropertyStorage> buildDynamicPropertyStorage( ){
+    public static IPropertyStorage buildDynamicPropertyStorage( ) throws SpectraClusterException {
         try {
-            return Optional.of(new MapDBPropertyStorage(true, -1));
+            return new MapDBPropertyStorage(true, -1);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new SpectraClusterException("Error building the Dynamic Property Storage --", e.getCause());
         }
-        return Optional.empty();
-
     }
 }
