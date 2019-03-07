@@ -116,6 +116,11 @@ public class MzSpectraReader {
         this.inputFiles = new ConcurrentHashMap<>();
 
         Arrays.stream(files).parallel().forEach( file -> {
+            if (!file.exists()) {
+                log.error(file.toString() + " does not exist");
+                return;
+            }
+
             JMzReader jMzReader = null;
             try{
                 Class<?> peakListclass = isValidPeakListFile(file);
@@ -135,7 +140,8 @@ public class MzSpectraReader {
                     else if(isValidmzXML(file))
                         jMzReader = new MzXMLFile(file);
                 }catch (JMzReaderException | MzXMLParsingException e){
-                    String message = "The file type provided is not supported -- " + Arrays.toString(MzFileType.values());
+                    String message = "The file type provided is not supported -- " +
+                            Arrays.toString(MzFileType.values()) + ": " + e.getMessage();
                     log.error(message);
             }
             if(jMzReader != null)

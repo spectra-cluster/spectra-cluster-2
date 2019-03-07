@@ -1,11 +1,10 @@
 package org.spectra.cluster.cdf;
 
+import com.google.common.io.LineReader;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * Created by jg on 05.05.15.
@@ -49,10 +48,20 @@ public class CumulativeDistributionFunctionFactory {
      * @throws Exception
      */
     private static CumulativeDistributionFunction getCumulativeDistributionFunctionForResource(String resource) throws Exception {
-        Path resourcePath = Paths.get(Objects.requireNonNull(CumulativeDistributionFunctionFactory.class.getClassLoader().getResource(resource)).toURI());
+        InputStream cdfStream = ClassLoader.getSystemResourceAsStream("cumulative.cdf.tsv");
+
+        if (cdfStream == null) {
+            throw new Exception("Failed to load cumulative distribution function file.");
+        }
+
+        LineReader reader = new LineReader(new InputStreamReader(cdfStream));
 
         StringBuilder definitionString = new StringBuilder();
-        Files.lines(resourcePath).forEach(s -> definitionString.append(s).append('\n'));
+
+        String line;
+        while((line = reader.readLine()) != null) {
+            definitionString.append(line).append('\n');
+        }
 
         return CumulativeDistributionFunction.fromString(definitionString.toString());
     }
