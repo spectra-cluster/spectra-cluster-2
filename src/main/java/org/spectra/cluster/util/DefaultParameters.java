@@ -76,8 +76,7 @@ public class DefaultParameters {
         InputStream output;
 
         try {
-            File propertiesFactoryBean = new File(DefaultParameters.class.getClassLoader().getResource("application.properties").toURI());
-            output = new FileInputStream(propertiesFactoryBean);
+            output = getClass().getClassLoader().getResourceAsStream("application.properties");
             properties.load(output);
         } catch (IOException e) {
             e.printStackTrace();
