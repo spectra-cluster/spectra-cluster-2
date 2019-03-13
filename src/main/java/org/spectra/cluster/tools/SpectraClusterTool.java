@@ -1,5 +1,6 @@
 package org.spectra.cluster.tools;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -42,6 +43,7 @@ import java.util.*;
  *
  * @author ypriverol on 18/10/2018.
  */
+@Slf4j
 public class SpectraClusterTool implements IProgressListener {
 
     public static final boolean DELETE_TEMPORARY_CLUSTERING_RESULTS = true;
@@ -152,6 +154,7 @@ public class SpectraClusterTool implements IProgressListener {
 
             List<IBinarySpectrum> spectra = new ArrayList<>(1_000);
 
+            log.debug(String.format("Loading spectra from %d file(s)...", inputFiles.length));
             while (iterator.hasNext()) {
                 spectra.add(iterator.next());
             }
@@ -166,6 +169,7 @@ public class SpectraClusterTool implements IProgressListener {
                     startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
                     new MinNumberComparisonsAssessor(10_000), nInitiallySharedPeaks);
 
+            log.debug("Clustering files...");
             ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
             IClusterWriter writer = new DotClusteringWriter(thisResult, false, localStorage);
@@ -174,7 +178,7 @@ public class SpectraClusterTool implements IProgressListener {
 
             System.out.println("Results written to " + thisResult.toString());
 
-
+            System.exit(0);
         } catch (MissingParameterException e) {
             System.out.println("Error: " + e.getMessage() + "\n\n");
             printUsage();
