@@ -10,12 +10,12 @@ import java.util.*;
  * This is a greedy version of the FrankEtAlConsensusSpectrumBuilder. It only supports the addition of spectra but not their removal.
  * Thereby, the original peaks do not have to be kept. This implementation of {@link IConsensusSpectrumBuilder} contains in the
  * allPeaksInCluster property all the peaks of the spectra that belongs to the cluster.
- *
+ * <p>
  * allPeaksInCluster: Contains all the peaks of the {@link IBinarySpectrum} that belong to the Cluster. All peaks of the spectra that belongs to
  * the Cluster needs to be keep to accurately compute the ConsensusPeaks each time is needed.
- *
+ * <p>
  * consensusPeaks: This is the Array of @{@link BinaryPeak} of a clean @{@link GreedyConsensusSpectrum}.
- *
+ * <p>
  * isDirty: This variable is used to notice the algorithm each time the consensusPeaks are generated from the allPeaksInCluster. This variable is important because
  * the class only will update the consensusPeaks when is needed.
  *
@@ -39,7 +39,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     private final String id;
 
     // The peaks of the GreedyConsensusSpectrum
-    private BinaryPeak[]  consensusPeaks;
+    private BinaryPeak[] consensusPeaks;
 
     // All peaks in the Cluster
     private BinaryConsensusPeak[] allPeaksInCluster = new BinaryConsensusPeak[0];
@@ -64,10 +64,11 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     /**
      * Generate a new GreedyConsensusSpectrum
-     * @param id The id to use
-     * @param minPeaksToKeep The minimum number of peaks that should always be retained.
+     *
+     * @param id                   The id to use
+     * @param minPeaksToKeep       The minimum number of peaks that should always be retained.
      * @param peaksPerWindowToKeep The minimum number of peaks to keep within the m/z window size.
-     * @param windowSize The m/z window size for the peak filter to use.
+     * @param windowSize           The m/z window size for the peak filter to use.
      */
     public GreedyConsensusSpectrum(String id, int minPeaksToKeep, int peaksPerWindowToKeep, int windowSize) {
         this.id = id;
@@ -89,7 +90,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     /**
      * This function will add to the allPeaksInCluster, the peaks from the newSpectra.
-     *
+     * <p>
      * Any clustering process will compute the similarity between spectra and try to add the similar spectra to the {@link GreedyConsensusSpectrum}.
      * This method only add the peaks of the spetra to allPeaksInCluster and declare the Consensus Spectrum as Dirty. The algorithm loop the list of {@link IBinarySpectrum} and
      * add the {@link BinaryPeak} o the allPeaksInCluster property.
@@ -109,12 +110,12 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             nSpectra++;
 
             averagePrecursorMz = (int) Math.round(
-                    (double) averagePrecursorMz * ((double) (nSpectra -1) / nSpectra) +
+                    (double) averagePrecursorMz * ((double) (nSpectra - 1) / nSpectra) +
                             (double) spectrum.getPrecursorMz() / nSpectra);
         }
 
-        // update properties charge, precursor m/z and precursor intensity
-        updateProperties();
+        // update the average charge
+        averageCharge = sumCharge / nSpectra;
 
         setIsDirty(true);
     }
@@ -138,8 +139,8 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
         nSpectra = totalSpectra;
 
-        // update properties charge, precursor m/z and precursor intensity
-        updateProperties();
+        // update the average charge
+        averageCharge = sumCharge / nSpectra;
 
         setIsDirty(true);
     }
@@ -148,7 +149,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
      * Adds the passed peaks to the spectrum.
      *
      * @param existingPeaks The already existing peaks
-     * @param peaksToAdd New peaks to add. These may be BinaryPeak or BinaryConsensusPeak objects.
+     * @param peaksToAdd    New peaks to add. These may be BinaryPeak or BinaryConsensusPeak objects.
      */
     protected static BinaryConsensusPeak[] addPeaksToConsensus(BinaryConsensusPeak[] existingPeaks, BinaryPeak[] peaksToAdd) {
         if (peaksToAdd.length < 1) {
@@ -161,13 +162,13 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
         BinaryConsensusPeak[] newPeaks = new BinaryConsensusPeak[existingPeaks.length + peaksToAdd.length];
 
-        while (indexExistingPeaks < existingPeaks.length && indexPeaksToAdd < peaksToAdd.length){
+        while (indexExistingPeaks < existingPeaks.length && indexPeaksToAdd < peaksToAdd.length) {
 
-            if(existingPeaks[indexExistingPeaks].getMz() < peaksToAdd[indexPeaksToAdd].getMz()){
+            if (existingPeaks[indexExistingPeaks].getMz() < peaksToAdd[indexPeaksToAdd].getMz()) {
                 newPeaks[finalPeakIndex] = existingPeaks[indexExistingPeaks];
                 indexExistingPeaks++;
                 finalPeakIndex++;
-            }else if (existingPeaks[indexExistingPeaks].getMz() == peaksToAdd[indexPeaksToAdd].getMz()){
+            } else if (existingPeaks[indexExistingPeaks].getMz() == peaksToAdd[indexPeaksToAdd].getMz()) {
                 // it's the same peak so adapt it
                 int newCount = existingPeaks[indexExistingPeaks].getCount();
                 long newIntensity = existingPeaks[indexExistingPeaks].getIntensity() * existingPeaks[indexExistingPeaks].getCount();
@@ -203,14 +204,14 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         }
 
         // Add the remaining spectra from existing Peaks
-        while (indexExistingPeaks < existingPeaks.length){
+        while (indexExistingPeaks < existingPeaks.length) {
             newPeaks[finalPeakIndex] = existingPeaks[indexExistingPeaks];
             indexExistingPeaks++;
             finalPeakIndex++;
         }
 
         // Add the remaining spectra from new Peaks
-        while (indexPeaksToAdd < peaksToAdd.length){
+        while (indexPeaksToAdd < peaksToAdd.length) {
             if (peaksToAdd[indexPeaksToAdd] instanceof BinaryConsensusPeak)
                 newPeaks[finalPeakIndex] = new BinaryConsensusPeak((BinaryConsensusPeak) peaksToAdd[indexPeaksToAdd]);
             else
@@ -223,26 +224,12 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     }
 
     /**
-     * Updates all properties of the consensus spectrum as well as the actual consensus spectrum.
-     * AveragePrecursorMZ and averageCharge.
-     */
-    protected void updateProperties() {
-        if (nSpectra > 0) {
-            averageCharge = sumCharge / nSpectra;
-        } else {
-            averagePrecursorMz = 0;
-            averageCharge = 0;
-        }
-    }
-
-    /**
      * Generate the consensus Spectrum using the Intensities in the allPeaksInCluster.
      * A normalization step is performed in the peaks and only the most intensity peaks
      * in an mz windows are keept . The current implementation combine the functions
      * adaptPeak and the function filterNoise.
-     *
      */
-    private void generateConsensusSpectrum(){
+    private void generateConsensusSpectrum() {
         if (allPeaksInCluster.length < 1) {
             consensusPeaks = new BinaryPeak[0];
         }
@@ -252,75 +239,14 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     }
 
     /**
-     * Filters the consensus spectrum keeping only the top N peaks per M m/z
-     * @param peaks Peaks to filter
-     * @return final clean array {@link BinaryConsensusPeak}
-     */
-    protected BinaryConsensusPeak[] filterNoise(BinaryConsensusPeak[] peaks) {
-        if (peaks.length < minPeaksToKeep || peaks.length < 1) {
-            return peaks;
-        }
-
-        // get the max m/z
-        int maxMz = Arrays.stream(peaks).mapToInt(BinaryPeak::getMz).max().getAsInt();
-        int peakIndex = 0;
-
-        List<BinaryConsensusPeak> peaksToKeep = new ArrayList<>(100);
-
-        // Keep top N peaks per W m/z
-        for (int windowStart = 0; windowStart <= maxMz && peakIndex < peaks.length; windowStart += windowSize) {
-            List<BinaryConsensusPeak> windowPeaks = new ArrayList<>(20);
-
-            for(; peakIndex < peaks.length && peaks[peakIndex].getMz() < windowStart + windowSize; peakIndex++) {
-                windowPeaks.add(peaks[peakIndex]);
-            }
-
-            if (windowPeaks.size() < 1) {
-                continue;
-            }
-
-            if (windowPeaks.size() <= peaksPerWindowToKeep) {
-                peaksToKeep.addAll(windowPeaks);
-            } else {
-                // only keep the top N peaks
-                windowPeaks.sort(Comparator.comparingInt(BinaryPeak::getIntensity));
-                peaksToKeep.addAll(windowPeaks.subList(windowPeaks.size() - peaksPerWindowToKeep, windowPeaks.size()));
-            }
-        }
-
-        return peaksToKeep.stream().sorted(Comparator.comparingInt(BinaryPeak::getMz)).toArray(BinaryConsensusPeak[]::new);
-    }
-
-    /**
-     * Adapt the peak intensities in allPeaksInCluster using the following formula:
-     * I = I * (0.95 + 0.05 * (1 + pi)^5)
-     * //TOdo : @jgriss where this came from.
-     * where pi is the peaks probability
-     */
-    protected static BinaryConsensusPeak[] adaptPeakIntensities(BinaryConsensusPeak[] peaks, int nSpectra) {
-        BinaryConsensusPeak[] adaptedPeaks = new BinaryConsensusPeak[peaks.length];
-        double doubleSpectra = (double) nSpectra;
-
-        for (int i = 0; i < peaks.length; i++) {
-            double peakProbability = (double) peaks[i].getCount() / doubleSpectra;
-            int newIntensity = (int) Math.round((double) peaks[i].getIntensity() * (0.95 + 0.05 * Math.pow(1 + peakProbability, 5)));
-
-            adaptedPeaks[i] = new BinaryConsensusPeak(peaks[i].getMz(), newIntensity, peaks[i].getCount());
-        }
-
-        return adaptedPeaks;
-    }
-
-    /**
      * Adapt the peak intensities in allPeaksInCluster using the following formula:
      * I = I * (0.95 + 0.05 * (1 + pi)^5) . This probability comes from the FrankEtAll manuscript.
      *
-     *
-     * @param peaks This are all the peaks in the following consensus cluster.
+     * @param peaks    This are all the peaks in the following consensus cluster.
      * @param nSpectra Number of spectra.
      * @return A clean array with {@link BinaryConsensusPeak}
      */
-    protected  BinaryConsensusPeak[] adaptPeakWithNoiseFilterIntensities(BinaryConsensusPeak[] peaks, int nSpectra) {
+    protected BinaryConsensusPeak[] adaptPeakWithNoiseFilterIntensities(BinaryConsensusPeak[] peaks, int nSpectra) {
         BinaryConsensusPeak[] adaptedPeaks = new BinaryConsensusPeak[peaks.length];
 
         double doubleSpectra = (double) nSpectra;
@@ -332,7 +258,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             int newIntensity = (int) Math.round((double) peaks[i].getIntensity() * (0.95 + 0.05 * Math.pow(1 + peakProbability, 5)));
 
             adaptedPeaks[i] = new BinaryConsensusPeak(peaks[i].getMz(), newIntensity, peaks[i].getCount());
-            if(peaks[i].getMz() > maxMz)
+            if (peaks[i].getMz() > maxMz)
                 maxMz = peaks[i].getMz();
         }
 
@@ -345,13 +271,13 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         /**
          * The maxiumn number of peaks to keep will be, the number of intervals * number of peaks per interval.
          */
-        List<BinaryConsensusPeak> peaksToKeep = new ArrayList<>((maxMz/windowSize) * peaksPerWindowToKeep);
+        List<BinaryConsensusPeak> peaksToKeep = new ArrayList<>((maxMz / windowSize) * peaksPerWindowToKeep);
 
         // Keep top N peaks per W m/z
         for (int windowStart = 0; windowStart <= maxMz && peakIndex < adaptedPeaks.length; windowStart += windowSize) {
-            List<BinaryConsensusPeak> windowPeaks = new ArrayList<>((maxMz/windowSize) * peaksPerWindowToKeep);
+            List<BinaryConsensusPeak> windowPeaks = new ArrayList<>((maxMz / windowSize) * peaksPerWindowToKeep);
 
-            for(; peakIndex < adaptedPeaks.length && adaptedPeaks[peakIndex].getMz() < windowStart + windowSize; peakIndex++) {
+            for (; peakIndex < adaptedPeaks.length && adaptedPeaks[peakIndex].getMz() < windowStart + windowSize; peakIndex++) {
                 windowPeaks.add(adaptedPeaks[peakIndex]);
             }
 
@@ -368,19 +294,20 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             }
         }
 
-        return peaksToKeep.stream().sorted(Comparator.comparingInt(BinaryPeak::getMz)).toArray(BinaryConsensusPeak[]::new);
-
-
-
+        return peaksToKeep
+                .stream()
+                .sorted(Comparator.comparingInt(BinaryPeak::getMz))
+                .toArray(BinaryConsensusPeak[]::new);
     }
 
     /**
      * This function retrieve the current {@link IBinarySpectrum}.
+     *
      * @return binaryConsensusSpectrum
      */
     @Override
     public IBinarySpectrum getConsensusSpectrum() {
-        if(isDirty)
+        if (isDirty)
             generateConsensusSpectrum();
         return this;
     }
@@ -392,7 +319,8 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         nSpectra = 0;
 
         allPeaksInCluster = new BinaryConsensusPeak[0];
-        setIsDirty(true);
+        consensusPeaks = new BinaryPeak[0];
+        setIsDirty(false);
     }
 
     @Override
@@ -415,35 +343,31 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     @Override
     public int getPrecursorMz() {
-        if(isDirty())
-            generateConsensusSpectrum();
         return averagePrecursorMz;
     }
 
     @Override
     public int getPrecursorCharge() {
-        if(isDirty())
-            generateConsensusSpectrum();
         return averageCharge;
     }
 
     @Override
     public int[] getCopyMzVector() {
-        if(isDirty())
+        if (isDirty())
             generateConsensusSpectrum();
         return Arrays.stream(consensusPeaks).mapToInt(BinaryPeak::getMz).toArray();
     }
 
     @Override
     public int[] getCopyIntensityVector() {
-        if(isDirty())
+        if (isDirty())
             generateConsensusSpectrum();
         return Arrays.stream(consensusPeaks).mapToInt(BinaryPeak::getIntensity).toArray();
     }
 
     @Override
     public int getNumberOfPeaks() {
-        if(isDirty())
+        if (isDirty())
             generateConsensusSpectrum();
         return consensusPeaks.length;
     }
@@ -455,7 +379,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     @Override
     public BinaryPeak[] getPeaks() {
-        if(isDirty())
+        if (isDirty())
             generateConsensusSpectrum();
 
         return consensusPeaks;

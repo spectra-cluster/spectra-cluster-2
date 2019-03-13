@@ -88,57 +88,6 @@ public class GreedyConsensusSpectrumTest {
         Assert.assertEquals(10, mergedPeaks[4].getCount());
     }
 
-    @Test
-    public void testAdaptPeakIntensities() {
-        BinaryConsensusPeak[] existingPeaks = {
-                new BinaryConsensusPeak(10, 100, 10),
-                new BinaryConsensusPeak(20, 200, 5),
-                new BinaryConsensusPeak(100, 1000, 30)
-        };
-
-        BinaryConsensusPeak[] adaptedPeaks = GreedyConsensusSpectrum.adaptPeakIntensities(existingPeaks, 30);
-
-        Assert.assertEquals(3, adaptedPeaks.length);
-
-        for (int i = 0; i < existingPeaks.length; i++) {
-            Assert.assertEquals(existingPeaks[i].getMz(), adaptedPeaks[i].getMz());
-            Assert.assertEquals(existingPeaks[i].getCount(), adaptedPeaks[i].getCount());
-        }
-
-        Assert.assertEquals(116, adaptedPeaks[0].getIntensity());
-            Assert.assertEquals(212, adaptedPeaks[1].getIntensity());
-        Assert.assertEquals(2550, adaptedPeaks[2].getIntensity());
-    }
-
-    @Test
-    public void tesFilterNoise() {
-        BinaryConsensusPeak[] existingPeaks = {
-                new BinaryConsensusPeak(10, 100, 10),
-                new BinaryConsensusPeak(20, 200, 5),
-                new BinaryConsensusPeak(100, 1000, 30),
-                new BinaryConsensusPeak(110, 1000, 30),
-                new BinaryConsensusPeak(120, 10, 30),
-                new BinaryConsensusPeak(130, 100, 30),
-                new BinaryConsensusPeak(140, 100, 30),
-                new BinaryConsensusPeak(150, 1000, 30),
-                new BinaryConsensusPeak(160, 1000, 30),
-                new BinaryConsensusPeak(170, 1000, 30),
-                new BinaryConsensusPeak(180, 200, 30),
-                new BinaryConsensusPeak(1000, 200, 30)
-        };
-
-        GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("0", 0, 5, 100);
-        BinaryConsensusPeak[] filtered = consensusSpectrum.filterNoise(existingPeaks);
-
-        int[] expectedMz = {10, 20, 100, 110, 150, 160, 170, 1000};
-
-        Assert.assertEquals(expectedMz.length, filtered.length);
-
-        for (int i = 0; i < expectedMz.length; i++) {
-            Assert.assertEquals(expectedMz[i], filtered[i].getMz());
-        }
-    }
-
     /**
      * Tests whether the consensus spectrum of the first 10 test spectra (all from the same peptide) are similar to the consensus.
      * @throws Exception
