@@ -134,24 +134,19 @@ public class SpectraClusterTool implements IProgressListener {
             // sort according to m/z
             spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
 
-            // cluster everything
-            float[] thresholds = {0.99f, 0.98f, 0.95f, 0.995f};
+            Path thisResult = Paths.get(finalResultFile.getAbsolutePath());
 
-            for (float t : thresholds) {
-                Path thisResult = Paths.get(finalResultFile.getAbsolutePath() + '_' + String.valueOf(t));
+            IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
+                    startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
+                    new MinNumberComparisonsAssessor(10_000), nInitiallySharedPeaks);
 
-                IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
-                        startThreshold, t, rounds, new CombinedFisherIntensityTest(),
-                        new MinNumberComparisonsAssessor(10_000), nInitiallySharedPeaks);
+            ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
-                ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
+            IClusterWriter writer = new DotClusteringWriter(thisResult, false, localStorage);
+            writer.appendClusters(clusters);
+            writer.close();
 
-                IClusterWriter writer = new DotClusteringWriter(thisResult, false, localStorage);
-                writer.appendClusters(clusters);
-                writer.close();
-
-                System.out.println("Results written to " + thisResult.toString());
-            }
+            System.out.println("Results written to " + thisResult.toString());
 
 
         } catch (MissingParameterException e) {
