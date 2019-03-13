@@ -243,12 +243,12 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
      *
      */
     private void generateConsensusSpectrum(){
-
         if (allPeaksInCluster.length < 1) {
             consensusPeaks = new BinaryPeak[0];
         }
         consensusPeaks = adaptPeakWithNoiseFilterIntensities(allPeaksInCluster, nSpectra);
 
+        setIsDirty(false);
     }
 
     /**
@@ -313,7 +313,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     /**
      * Adapt the peak intensities in allPeaksInCluster using the following formula:
-     * I = I * (0.95 + 0.05 * (1 + pi)^5) . This probability cames from the FrankEtAll manuscript.
+     * I = I * (0.95 + 0.05 * (1 + pi)^5) . This probability comes from the FrankEtAll manuscript.
      *
      *
      * @param peaks This are all the peaks in the following consensus cluster.
@@ -321,7 +321,6 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
      * @return A clean array with {@link BinaryConsensusPeak}
      */
     protected  BinaryConsensusPeak[] adaptPeakWithNoiseFilterIntensities(BinaryConsensusPeak[] peaks, int nSpectra) {
-
         BinaryConsensusPeak[] adaptedPeaks = new BinaryConsensusPeak[peaks.length];
 
         double doubleSpectra = (double) nSpectra;

@@ -30,6 +30,8 @@ import org.spectra.cluster.util.DefaultParameters;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -135,6 +137,8 @@ public class SpectraClusterTool implements IProgressListener {
             int nInitiallySharedPeaks = defaultParameters.getNInitiallySharedPeaks();
 
             /** Perform clustering **/
+            LocalDateTime startTime = LocalDateTime.now();
+
             IRawSpectrumFunction loadingFilter = new RemoveImpossiblyHighPeaksFunction()
                     .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
                     .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters.getNumberHigherPeaks())));
@@ -159,6 +163,9 @@ public class SpectraClusterTool implements IProgressListener {
                 spectra.add(iterator.next());
             }
 
+            LocalDateTime loadingCompleteTime = LocalDateTime.now();
+            log.debug(String.format("Loaded spectra in %d seconds", Duration.between(startTime, loadingCompleteTime).getSeconds()));
+
             // sort according to m/z
             spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
 
@@ -172,11 +179,17 @@ public class SpectraClusterTool implements IProgressListener {
             log.debug("Clustering files...");
             ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
+            LocalDateTime clusteringCompleteTime = LocalDateTime.now();
+            log.debug(String.format("Clustering completed in %d seconds", Duration.between(loadingCompleteTime, clusteringCompleteTime).getSeconds()));
+
             IClusterWriter writer = new DotClusteringWriter(thisResult, false, localStorage);
             writer.appendClusters(clusters);
             writer.close();
 
+            log.debug(String.format("Results written in %d seconds", Duration.between(clusteringCompleteTime, LocalDateTime.now()).getSeconds()));
             System.out.println("Results written to " + thisResult.toString());
+
+            log.debug(String.format("Process completed in %d seconds", Duration.between(startTime, LocalDateTime.now()).getSeconds()));
 
             System.exit(0);
         } catch (MissingParameterException e) {
