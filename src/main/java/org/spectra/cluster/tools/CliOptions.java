@@ -17,8 +17,6 @@ public class CliOptions {
         CONFIG_FILE("config", "c"),
         OUTPUT_PATH("output.path", "o"),
 
-        INPUT_FILES("input.files", "i"),
-
         PRECURSOR_TOLERANCE("precursor.tolerance", "p"),
         FRAGMENT_TOLERANCE("fragment.tolerance", "f"),
 
@@ -79,13 +77,6 @@ public class CliOptions {
                 .withLongOpt(OPTIONS.CONFIG_FILE.getLongValue())
                 .create(OPTIONS.CONFIG_FILE.getValue());
         options.addOption(config);
-
-        Option inputFiles = OptionBuilder
-                .hasArgs(5)
-                .withDescription("Input files to be analyzed. If more than one file is provided it should be with space ")
-                .withLongOpt(OPTIONS.INPUT_FILES.getLongValue())
-                .create(OPTIONS.INPUT_FILES.getValue());
-        options.addOption(inputFiles);
 
         Option fragmentTolerance = OptionBuilder
                 .hasArg()
@@ -189,7 +180,7 @@ public class CliOptions {
          * ADVANCED OPTIONS
          */
         Option xMinComparisons = OptionBuilder
-                .withDescription("(Experimental option) Sets the minimum number of comparisons used to calculate the probability that incorrect spectra are clustered.")
+                .withDescription("(Experimental option) Sets the minimum number of comparisons used to calculate the probability that incorrect spectra are clustered. This number is derived from the data and the set value used as a minimum.")
                 .hasArg()
                 .withLongOpt(OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getLongValue())
                 .create(OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue());

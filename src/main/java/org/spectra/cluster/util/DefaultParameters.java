@@ -32,6 +32,7 @@ public class DefaultParameters {
     private Float thresholdStart;
     private Float thresholdEnd;
     private int nInitiallySharedPeaks;
+    private int minNumberOfComparisons;
 
 
     public DefaultParameters(){
@@ -69,6 +70,8 @@ public class DefaultParameters {
             this.filterReportPeaks = Boolean.parseBoolean(properties.getProperty("filters.remove.reporter.peaks"));
         if(properties.containsKey("initially.shared.peaks"))
             this.nInitiallySharedPeaks = Integer.parseInt(properties.getProperty("initially.shared.peaks"));
+        if(properties.contains("x.min.comparisons"))
+            this.minNumberOfComparisons = Integer.parseInt(properties.getProperty("x.min.comparisons"));
     }
 
     public Properties readProperties() throws URISyntaxException {

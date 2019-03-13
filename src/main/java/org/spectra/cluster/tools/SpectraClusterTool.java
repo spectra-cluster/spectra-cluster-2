@@ -1,7 +1,11 @@
 package org.spectra.cluster.tools;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.PosixParser;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
+import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.MissingParameterException;
@@ -64,12 +68,11 @@ public class SpectraClusterTool implements IProgressListener {
             }
 
             // File input
-            String[] peakFiles;
-            if (commandLine.hasOption(CliOptions.OPTIONS.INPUT_FILES.getValue())) {
-                peakFiles = commandLine.getOptionValues(CliOptions.OPTIONS.INPUT_FILES.getValue());
-            }else{
+            String[] peakFiles = commandLine.getArgs();
+
+            if (peakFiles.length < 1) {
                 printUsage();
-                throw new MissingParameterException("Missing required option " + CliOptions.OPTIONS.OUTPUT_PATH.getValue());
+                throw new MissingParameterException("Missing input files");
             }
 
             // RESULT FILE PATH
@@ -99,16 +102,33 @@ public class SpectraClusterTool implements IProgressListener {
                 endThreshold = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.END_THRESHOLD.getValue()));
 
             // PRECURSOR TOLERANCE
+            // TODO: Add support for precursor tolerance
             double precursorTolerance = defaultParameters.getPrecursorIonTolerance();
             if (commandLine.hasOption(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue())) {
                 precursorTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue()));
             }
+            // convert the precursor tolerance to int space
+            int binnedPrecursorTolerance = (int) Math.round(precursorTolerance * (double) BasicIntegerNormalizer.MZ_CONSTANT);
 
-            // PRECURSOR TOLERANCE
+            // FRAGMENT TOLERANCE
+            // TODO: Add support for fragment tolerance
             double fragmentTolerance = defaultParameters.getFragmentIonTolerance();
             if (commandLine.hasOption(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue())) {
                 fragmentTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue()));
             }
+
+            /**
+             * Advanced options
+             */
+            // MIN NUMBER OF COMPARISONS
+            int minNumberComparisons = defaultParameters.getMinNumberOfComparisons();
+            if (commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue())) {
+                minNumberComparisons = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue()));
+            }
+
+            SpectraPerBinNumberComparisonAssessor numberOfComparisonAssessor = new SpectraPerBinNumberComparisonAssessor(
+                    binnedPrecursorTolerance * 2, minNumberComparisons, BasicIntegerNormalizer.MZ_CONSTANT * 2500
+            );
 
             int nInitiallySharedPeaks = defaultParameters.getNInitiallySharedPeaks();
 
@@ -124,7 +144,12 @@ public class SpectraClusterTool implements IProgressListener {
 
             MzSpectraReader reader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),
                     new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, inputFiles);
+
+            // set the comparison assessor as listener to count the spectra per bin
+            reader.addSpectrumListener(numberOfComparisonAssessor);
+
             Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(localStorage);
+
             List<IBinarySpectrum> spectra = new ArrayList<>(1_000);
 
             while (iterator.hasNext()) {
@@ -136,7 +161,8 @@ public class SpectraClusterTool implements IProgressListener {
 
             Path thisResult = Paths.get(finalResultFile.getAbsolutePath());
 
-            IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
+            IClusteringEngine engine = new GreedyClusteringEngine(
+                    binnedPrecursorTolerance,
                     startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
                     new MinNumberComparisonsAssessor(10_000), nInitiallySharedPeaks);
 
