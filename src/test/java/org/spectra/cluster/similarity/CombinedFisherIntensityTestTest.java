@@ -45,7 +45,8 @@ public class CombinedFisherIntensityTestTest {
                 new RemoveImpossiblyHighPeaksFunction()
                     .specAndThen(new RemovePrecursorPeaksFunction(0.5))
                     .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))),
-                GreedyClusteringEngine.COMPARISON_FILTER);
+                // disable comparison filter
+                (IBinarySpectrum s) -> s);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator(storage);
         impSpectra = new ArrayList<>(50);
@@ -126,7 +127,7 @@ public class CombinedFisherIntensityTestTest {
             // score differences are caused by
             // 1) binning and the thereby caused different number of peaks and different fragment tolerance
             // 2) different intensity normalisation in the original spectra-cluster code
-            Assert.assertEquals(orgScore, score, 5);
+            Assert.assertEquals(String.format("Different scores for %d: org = %.2f, new = %.2f", i, orgScore, score), orgScore, score, 5);
 
         }
     }
@@ -153,7 +154,7 @@ public class CombinedFisherIntensityTestTest {
         for (int i = 1; i < impSpectra.size(); i++) {
             double score = similarity.correlation(firstSpec, impSpectra.get(i));
             // only accept very high scores
-            Assert.assertTrue(score > 100);
+            Assert.assertTrue(String.format("Score for %d is too low (%.2f)", i, score), score > 100);
             scores.add(score);
         }
 

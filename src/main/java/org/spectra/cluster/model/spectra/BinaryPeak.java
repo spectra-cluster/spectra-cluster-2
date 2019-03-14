@@ -29,7 +29,7 @@ public class BinaryPeak implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!BinaryPeak.class.isInstance(o)) return false;
         BinaryPeak that = (BinaryPeak) o;
         return mz == that.mz;
     }

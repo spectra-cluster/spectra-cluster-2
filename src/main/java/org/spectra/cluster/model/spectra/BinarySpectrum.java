@@ -14,6 +14,8 @@ public class BinarySpectrum implements IBinarySpectrum {
     private final int precursorCharge;
     private final IBinarySpectrumFunction comparisonFilter;
     private Set<BinaryPeak> comparisonPeakSet;
+    private int minComparisonMz;
+    private int maxComparisonMz;
 
     private BinaryPeak[] peaks;
 
@@ -153,9 +155,37 @@ public class BinarySpectrum implements IBinarySpectrum {
         if (comparisonPeakSet == null) {
             addRanks(peaks,false);
             IBinarySpectrum filteredSpectrum = comparisonFilter.apply(this);
+
+            if (filteredSpectrum.getPeaks().length < 1) {
+                return Collections.emptySet();
+            }
+
+            // update max and min m/z
+            minComparisonMz = filteredSpectrum.getPeaks()[0].mz;
+            maxComparisonMz = filteredSpectrum.getPeaks()[filteredSpectrum.getPeaks().length - 1].mz;
+
+            // store the set
             comparisonPeakSet = Arrays.stream(filteredSpectrum.getPeaks()).collect(Collectors.toSet());
         }
 
         return Collections.unmodifiableSet(comparisonPeakSet);
+    }
+
+    @Override
+    public int getMinComparisonMz() {
+        if (comparisonPeakSet == null) {
+            getComparisonPeakSet();
+        }
+
+        return minComparisonMz;
+    }
+
+    @Override
+    public int getMaxComparisonMz() {
+        if (comparisonPeakSet == null) {
+            getComparisonPeakSet();
+        }
+
+        return maxComparisonMz;
     }
 }

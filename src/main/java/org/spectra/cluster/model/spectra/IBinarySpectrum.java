@@ -1,7 +1,6 @@
 package org.spectra.cluster.model.spectra;
 
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -88,4 +87,16 @@ public interface IBinarySpectrum extends Serializable, Cloneable {
      * @return The IBinarySpectrumFunction used as a comparison filter
      */
     IBinarySpectrumFunction getComparisonFilter();
+
+    /**
+     * Get the minimum m/z of the filtered peaks
+     * @return The minimum m/z
+     */
+    int getMinComparisonMz();
+
+    /**
+     * Get the maximum m/z of the filtered peaks
+     * @return The maximum m/z
+     */
+    int getMaxComparisonMz();
 }

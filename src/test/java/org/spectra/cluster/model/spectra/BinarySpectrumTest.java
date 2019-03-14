@@ -21,7 +21,8 @@ import java.util.Objects;
 public class BinarySpectrumTest {
 
     Iterator<Spectrum> specIt = null;
-    IBinarySpectrum binarySpectrum = new BinarySpectrum(345567, 2, new BinaryPeak[6], GreedyClusteringEngine.COMPARISON_FILTER);
+    BinaryPeak[] peakList = {new BinaryPeak(1, 1), new BinaryPeak(2, 1), new BinaryPeak(3, 1), new BinaryPeak(4, 1), new BinaryPeak(5, 1), new BinaryPeak(6, 1)};
+    IBinarySpectrum binarySpectrum = new BinarySpectrum(345567, 2, peakList, GreedyClusteringEngine.COMPARISON_FILTER);
 
 
     @Before

@@ -7,7 +7,10 @@ import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the combined FisherIntensity test as it
@@ -25,6 +28,7 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
     @Override
     public double correlation(IBinarySpectrum spectrum1, IBinarySpectrum spectrum2) {
         // use copies since these will be changed
+        // FIXME: This causes the hashes to be re-created
         Set<BinaryPeak> peakSet1 = new HashSet<>(spectrum1.getComparisonFilteredPeaks());
         Set<BinaryPeak> peakSet2 = new HashSet<>(spectrum2.getComparisonFilteredPeaks());
 
@@ -37,16 +41,12 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
             return 0;
         }
 
-        // sort the peaks according to m/z
-        BinaryPeak[] peaks1 = peakSet1.stream().sorted(Comparator.comparingInt(BinaryPeak::getMz)).toArray(BinaryPeak[]::new);
-        BinaryPeak[] peaks2 = peakSet2.stream().sorted(Comparator.comparingInt(BinaryPeak::getMz)).toArray(BinaryPeak[]::new);
-
         // calculate the hypergeometric score
-        int minBin = Math.min(peaks1[0].getMz(), peaks2[0].getMz());
-        int maxBin = Math.max(peaks1[peaks1.length - 1].getMz(), peaks2[peaks2.length - 1].getMz());
+        int minBin = Math.min(spectrum1.getMinComparisonMz(), spectrum2.getMinComparisonMz());
+        int maxBin = Math.max(spectrum1.getMaxComparisonMz(), spectrum2.getMaxComparisonMz());
 
-        int morePeaks = peakSet1.size();
-        int lessPeaks = peakSet2.size();
+        int morePeaks = spectrum1.getComparisonFilteredPeaks().size();
+        int lessPeaks = spectrum2.getComparisonFilteredPeaks().size();
 
         if (morePeaks < lessPeaks) {
             morePeaks = peakSet2.size();
@@ -63,10 +63,23 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
             hgtScore = 1;
         }
 
+        // create the list of intensities
+        int[] intensities1 = new int[peakSet1.size()];
+        int[] intensities2 = new int[peakSet1.size()];
+        Map<Integer, Integer> intensityMap2 = peakSet2.stream().collect(Collectors.toMap(BinaryPeak::getMz, BinaryPeak::getIntensity));
+        int counter = 0;
+
+        for (BinaryPeak p : peakSet1) {
+            intensities1[counter] = p.getIntensity();
+            intensities2[counter] = intensityMap2.get(p.getMz());
+            counter++;
+        }
+
+
         // calculate the fisher p
         double kendallP = assessKendallCorrelation(
-                Arrays.stream(peaks1).mapToInt(BinaryPeak::getIntensity).toArray(),
-                Arrays.stream(peaks2).mapToInt(BinaryPeak::getIntensity).toArray());
+                intensities1,
+                intensities2);
 
         // combine the two
         return combineProbabilities(hgtScore, kendallP);

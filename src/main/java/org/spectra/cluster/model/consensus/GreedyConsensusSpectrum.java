@@ -46,6 +46,8 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     // The peaks after the comparison filter was applied
     private Set<BinaryPeak> comparisonFilteredPeaks;
     private final IBinarySpectrumFunction comparisonFilter;
+    private int minComparisonMz;
+    private int maxComparisonMz;
 
     // All peaks in the Cluster
     private BinaryConsensusPeak[] allPeaksInCluster = new BinaryConsensusPeak[0];
@@ -420,9 +422,29 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         // create the Set if necessary
         if (comparisonFilteredPeaks == null) {
             IBinarySpectrum filteredSpectrum = comparisonFilter.apply(this);
+            minComparisonMz = filteredSpectrum.getPeaks()[0].getMz();
+            maxComparisonMz = filteredSpectrum.getPeaks()[filteredSpectrum.getPeaks().length - 1].getMz();
             comparisonFilteredPeaks = Arrays.stream(filteredSpectrum.getPeaks()).collect(Collectors.toSet());
         }
 
         return Collections.unmodifiableSet(comparisonFilteredPeaks);
+    }
+
+    @Override
+    public int getMinComparisonMz() {
+        if (isDirty() || comparisonFilteredPeaks == null) {
+            getComparisonFilteredPeaks();
+        }
+
+        return minComparisonMz;
+    }
+
+    @Override
+    public int getMaxComparisonMz() {
+        if (isDirty() || comparisonFilteredPeaks == null) {
+            getComparisonFilteredPeaks();
+        }
+
+        return maxComparisonMz;
     }
 }

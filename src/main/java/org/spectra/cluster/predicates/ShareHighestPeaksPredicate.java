@@ -5,7 +5,6 @@ import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 

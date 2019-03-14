@@ -61,7 +61,7 @@ public class ObjectSizeFetcherTest {
         long size = sizeOf.deepSizeOf(spectrumList);
         long binarySize = sizeOf.deepSizeOf(binarySpectrumList);
 
-        Assert.assertTrue(binarySize * 3 < size);
+        Assert.assertTrue(binarySize * 2.9 < size);
 
     }
 
