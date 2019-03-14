@@ -50,7 +50,8 @@ public class BinaryClusterStorageTest {
                 new MaxPeakNormalizer(),
                 new BasicIntegerNormalizer(),
                 new HighestPeakPerBinFunction(),
-                loadingFilter);
+                loadingFilter,
+                GreedyClusteringEngine.COMPARISON_FILTER);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
 
         while (iterator.hasNext()) {

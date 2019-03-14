@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
@@ -47,12 +48,12 @@ public class JaccardCorrelationTest {
         spectrum1 = specIt.next();
 
         binarySpectrum1 = new BinarySpectrum((int)spectrum1.getPrecursorMZ().doubleValue(), spectrum1.getPrecursorCharge(),
-                binnerNormalizer.normalizePeaks(spectrum1.getPeakList()));
+                binnerNormalizer.normalizePeaks(spectrum1.getPeakList()), GreedyClusteringEngine.COMPARISON_FILTER);
 
         spectrum2 = specIt.next();
 
         binarySpectrum2 = new BinarySpectrum((int)spectrum2.getPrecursorMZ().doubleValue(), spectrum2.getPrecursorCharge(),
-                binnerNormalizer.normalizePeaks(spectrum1.getPeakList()));
+                binnerNormalizer.normalizePeaks(spectrum1.getPeakList()), GreedyClusteringEngine.COMPARISON_FILTER);
 
         /* Read the Spectra from similar files **/
         uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("most_similar_1.mgf")).toURI();
@@ -88,7 +89,7 @@ public class JaccardCorrelationTest {
     @Test
     public void testJaccardInSyntheticPeptides() throws Exception {
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("synthetic_first_pool_3xHCD_R1.mgf")).toURI();
-        MzSpectraReader reader = new MzSpectraReader(new File(uri));
+        MzSpectraReader reader = new MzSpectraReader(new File(uri), GreedyClusteringEngine.COMPARISON_FILTER);
 
         Iterator<IBinarySpectrum> specIt = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> spectra = new ArrayList<>();

@@ -49,7 +49,8 @@ public class GreedyClusteringEngineTest {
                 new MaxPeakNormalizer(),
                 new BasicIntegerNormalizer(),
                 new HighestPeakPerBinFunction(),
-                loadingFilter);
+                loadingFilter,
+                GreedyClusteringEngine.COMPARISON_FILTER);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
 
         while (iterator.hasNext()) {
@@ -206,7 +207,7 @@ public class GreedyClusteringEngineTest {
         // load the spectra
         IPropertyStorage localStorage = new InMemoryPropertyStorage();
         MzSpectraReader reader = new MzSpectraReader(mgfFile, new TideBinner(), new MaxPeakNormalizer(),
-                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter);
+                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, GreedyClusteringEngine.COMPARISON_FILTER);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(localStorage);
         List<IBinarySpectrum> spectra = new ArrayList<>(1_000);
 
@@ -248,7 +249,7 @@ public class GreedyClusteringEngineTest {
         // load the spectra
         IPropertyStorage localStorage = new InMemoryPropertyStorage();
         MzSpectraReader reader = new MzSpectraReader(mgfFile, new TideBinner(), new MaxPeakNormalizer(),
-                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter);
+                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, GreedyClusteringEngine.COMPARISON_FILTER);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(localStorage);
         List<IBinarySpectrum> spectra = new ArrayList<>(1_000);
 

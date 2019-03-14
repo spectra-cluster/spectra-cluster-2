@@ -23,8 +23,7 @@ import java.util.Comparator;
  */
 
 public class HighestIntensityNPeaksFunction implements IBinarySpectrumFunction {
-
-    public int numberOfPeaks;
+    private int numberOfPeaks;
 
     /**
      * Constructor with the Number of highestPeaks
@@ -40,12 +39,17 @@ public class HighestIntensityNPeaksFunction implements IBinarySpectrumFunction {
         if(binarySpectrum.getPeaks().length < numberOfPeaks)
             return binarySpectrum;
 
-        Arrays.parallelSort(binarySpectrum.getPeaks(), (o1, o2) -> Integer.compare(o2.getIntensity(), o1.getIntensity()));
-        BinaryPeak[] peaks = Arrays.copyOfRange(binarySpectrum.getPeaks(), 0, numberOfPeaks );
+        BinaryPeak[] retainedPeaks = new BinaryPeak[numberOfPeaks];
+        int storedPeaks = 0;
 
-        // sort according to m/z again
-        Arrays.sort(peaks, Comparator.comparingInt(BinaryPeak::getMz));
+        // this does not change the m/z order
+        for (BinaryPeak p : binarySpectrum.getPeaks()) {
+            if (p.getRank() <= numberOfPeaks) {
+                retainedPeaks[storedPeaks++] = p;
+            }
+        }
 
-        return new BinarySpectrum(binarySpectrum, peaks);
+        // create the filtered spectrum - peak ranks do not change
+        return new BinarySpectrum(binarySpectrum, retainedPeaks, false);
     }
 }

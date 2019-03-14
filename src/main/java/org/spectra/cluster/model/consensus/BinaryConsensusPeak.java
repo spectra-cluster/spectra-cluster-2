@@ -34,4 +34,11 @@ public class BinaryConsensusPeak extends BinaryPeak {
     public BinaryConsensusPeak(BinaryConsensusPeak peak) {
         this(peak.getMz(), peak.getIntensity(), peak.getCount());
     }
+
+    @Override
+    public BinaryConsensusPeak copy() {
+        BinaryConsensusPeak copy = new BinaryConsensusPeak(mz, intensity, count);
+        copy.setRank(rank);
+        return copy;
+    }
 }

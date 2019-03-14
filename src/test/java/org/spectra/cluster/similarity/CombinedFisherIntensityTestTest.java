@@ -44,7 +44,8 @@ public class CombinedFisherIntensityTestTest {
                 new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(),
                 new RemoveImpossiblyHighPeaksFunction()
                     .specAndThen(new RemovePrecursorPeaksFunction(0.5))
-                    .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))));
+                    .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))),
+                GreedyClusteringEngine.COMPARISON_FILTER);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator(storage);
         impSpectra = new ArrayList<>(50);
@@ -63,7 +64,7 @@ public class CombinedFisherIntensityTestTest {
 
         // get the spectra
         File peakList = new File(Objects.requireNonNull(CombinedFisherIntensityTestTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
-        MzSpectraReader reader = new MzSpectraReader(peakList);
+        MzSpectraReader reader = new MzSpectraReader(peakList, GreedyClusteringEngine.COMPARISON_FILTER);
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> allSpectra = new ArrayList<>();
 

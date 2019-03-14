@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.io.properties.IPropertyStorage;
 import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
@@ -39,7 +40,7 @@ public class MzSpectraReaderTest {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         File mgfFile = new File(uri);
-        spectraReader = new MzSpectraReader(mgfFile);
+        spectraReader = new MzSpectraReader(mgfFile, GreedyClusteringEngine.COMPARISON_FILTER);
     }
 
     @Test
@@ -59,7 +60,7 @@ public class MzSpectraReaderTest {
     @Test
     public void testNoNullSpectra() throws Exception {
         File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile);
+        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
 
         while (iterator.hasNext()) {
@@ -77,7 +78,7 @@ public class MzSpectraReaderTest {
     @Test
     public void testPropertyLoading() throws Exception {
         File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile);
+        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
 
         IPropertyStorage storage = new InMemoryPropertyStorage();
 
@@ -110,7 +111,7 @@ public class MzSpectraReaderTest {
     @Test
     public void testSpectrumListener() throws Exception {
         File testFile = new File(getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile);
+        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
         SpectraPerBinNumberComparisonAssessor assessor = new SpectraPerBinNumberComparisonAssessor(
                 BasicIntegerNormalizer.MZ_CONSTANT, 1, BasicIntegerNormalizer.MZ_CONSTANT * 5000);
 

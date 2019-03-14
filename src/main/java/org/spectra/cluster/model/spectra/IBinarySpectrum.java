@@ -1,6 +1,10 @@
 package org.spectra.cluster.model.spectra;
 
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
+import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
+
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -72,5 +76,16 @@ public interface IBinarySpectrum extends Serializable, Cloneable {
      */
     BinaryPeak[] getCopyPeaks();
 
+    /**
+     * Returns a set containing the binary peaks
+     * after the comparison filter was applied.
+     * @return A Set with the peaks after the comparison filter was applied.
+     */
+    Set<BinaryPeak> getComparisonFilteredPeaks();
 
+    /**
+     * Returns the comparison filter used by the spectrum
+     * @return The IBinarySpectrumFunction used as a comparison filter
+     */
+    IBinarySpectrumFunction getComparisonFilter();
 }
