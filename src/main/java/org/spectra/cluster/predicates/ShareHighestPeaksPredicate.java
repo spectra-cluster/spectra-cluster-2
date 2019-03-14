@@ -18,19 +18,15 @@ public class ShareHighestPeaksPredicate implements IComparisonPredicate<IBinaryS
 
     @Override
     public boolean test(IBinarySpectrum s1, IBinarySpectrum s2) {
-        // get the nHighestPeaks from both spectra
-        // we need a copy since we will be changing the sort order
-        BinaryPeak[] peaks1 = Arrays.copyOf(s1.getPeaks(), s1.getPeaks().length);
-        BinaryPeak[] peaks2 = Arrays.copyOf(s2.getPeaks(), s2.getPeaks().length);
+        Set<Integer> mz1 = Arrays.stream(s1.getPeaks())
+                .filter((BinaryPeak p) -> p.getRank() <= nHighestPeaks)
+                .mapToInt(BinaryPeak::getMz)
+                .boxed()
+                .collect(Collectors.toSet());
 
-        // sort according to intensity
-        Arrays.sort(peaks1, Comparator.comparingInt(BinaryPeak::getIntensity).reversed());
-        Arrays.sort(peaks2, Comparator.comparingInt(BinaryPeak::getIntensity).reversed());
-
-        // extract the highest N peaks from spectrum 1
-        Set<Integer> mz1 = Arrays.stream(peaks1).limit(nHighestPeaks).mapToInt(BinaryPeak::getMz).boxed().collect(Collectors.toSet());
-
-        // check if any are shared
-        return Arrays.stream(peaks2).limit(nHighestPeaks).mapToInt(BinaryPeak::getMz).anyMatch(mz1::contains);
+        return Arrays.stream(s2.getPeaks())
+                .filter((BinaryPeak p) -> p.getRank() <= nHighestPeaks)
+                .mapToInt(BinaryPeak::getMz)
+                .anyMatch(mz1::contains);
     }
 }
