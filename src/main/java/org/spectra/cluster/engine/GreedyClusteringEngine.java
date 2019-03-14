@@ -134,7 +134,6 @@ public class GreedyClusteringEngine implements IClusteringEngine {
             }
             lastMz = clusterToMerge.getPrecursorMz();
 
-            IBinarySpectrum filteredSpectrumToAdd = COMPARISON_FILTER.apply(clusterToMerge.getConsensusSpectrum());
             boolean isClusterMerged = false;
 
             // compare against all existing cluster
@@ -154,8 +153,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
 
                 // calculate the score
                 // TODO: in the previous version we stored all filtered consensus spectra of existing clusters
-                IBinarySpectrum existingSpectrum = COMPARISON_FILTER.apply(existingCluster.getConsensusSpectrum());
-                double similarity = similarityMeasure.correlation(filteredSpectrumToAdd, existingSpectrum);
+                double similarity = similarityMeasure.correlation(clusterToMerge.getConsensusSpectrum(), existingCluster.getConsensusSpectrum());
 
                 // if it is a save match, merge the cluster
                 if (cdf.isSaveMatch(similarity, numberOfComparisonAssessor.getNumberOfComparisons(clusterToMerge.getPrecursorMz(), mergedClusterSize - mergedClusterPrecursorOffset + 1), similarityThreshold)) {

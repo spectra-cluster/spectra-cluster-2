@@ -56,6 +56,34 @@ public class CombinedFisherIntensityTestTest {
     }
 
     @Test
+    public void testHashSetRetaining() {
+        BinaryPeak p1 = new BinaryPeak(1, 10);
+        BinaryPeak p2 = new BinaryPeak(1, 20);
+        BinaryPeak p3 = new BinaryPeak(2, 30);
+        BinaryPeak p4 = new BinaryPeak(3, 40);
+
+        Set<BinaryPeak> set1 = new HashSet<>(1);
+        set1.add(p1);
+        set1.add(p3);
+        Assert.assertEquals(2, set1.size());
+
+        Set<BinaryPeak> set2 = new HashSet<>(1);
+        set2.add(p2);
+        set2.add(p4);
+        Assert.assertEquals(2, set2.size());
+
+        // this should not change p1
+        set1.retainAll(set2);
+        Assert.assertEquals(1, set1.size());
+        Assert.assertEquals(10, set1.iterator().next().getIntensity());
+
+        // set 2 should also only contain p2
+        set2.retainAll(set1);
+        Assert.assertEquals(1, set2.size());
+        Assert.assertEquals(20, set2.iterator().next().getIntensity());
+    }
+
+    @Test
     public void testScoreGeneration() throws Exception {
         // read the original scores
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("same_sequence_cluster_scores.tsv")).toURI();

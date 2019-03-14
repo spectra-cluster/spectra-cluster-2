@@ -7,8 +7,7 @@ import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Implementation of the combined FisherIntensity test as it
@@ -25,58 +24,40 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
 
     @Override
     public double correlation(IBinarySpectrum spectrum1, IBinarySpectrum spectrum2) {
-        int index1 = 0;
-        int index2 = 0;
-        List<Integer> sharedIntensitySpec1 = new ArrayList<>(20);
-        List<Integer> sharedIntensitySpec2 = new ArrayList<>(20);
+        // use copies since these will be changed
+        Set<BinaryPeak> peakSet1 = new HashSet<>(spectrum1.getComparisonFilteredPeaks());
+        Set<BinaryPeak> peakSet2 = new HashSet<>(spectrum2.getComparisonFilteredPeaks());
 
-        BinaryPeak[] peaks1 = spectrum1.getPeaks();
-        BinaryPeak[] peaks2 = spectrum2.getPeaks();
-
-        // get the shared peak indexes
-        for (; index1 < peaks1.length; index1++) {
-            int mzSpec1 = peaks1[index1].getMz();
-
-            for (; index2 < peaks2.length; index2++) {
-                int mzSpec2 = peaks2[index2].getMz();
-
-                if (mzSpec1 < mzSpec2) {
-                    break;
-                }
-                if (mzSpec2 < mzSpec1) {
-                    continue;
-                }
-
-                // now both are equal
-                sharedIntensitySpec1.add(peaks1[index1].getIntensity());
-                sharedIntensitySpec2.add(peaks2[index2].getIntensity());
-                index2++;
-                break;
-            }
-        }
+        // retain shared peaks
+        peakSet1.retainAll(peakSet2);
+        peakSet2.retainAll(peakSet1);
 
         // return 0 if no intensities are shared
-        if (sharedIntensitySpec1.size() < 1) {
+        if (peakSet1.size() < 1) {
             return 0;
         }
+
+        // sort the peaks according to m/z
+        BinaryPeak[] peaks1 = peakSet1.stream().sorted(Comparator.comparingInt(BinaryPeak::getMz)).toArray(BinaryPeak[]::new);
+        BinaryPeak[] peaks2 = peakSet2.stream().sorted(Comparator.comparingInt(BinaryPeak::getMz)).toArray(BinaryPeak[]::new);
 
         // calculate the hypergeometric score
         int minBin = Math.min(peaks1[0].getMz(), peaks2[0].getMz());
         int maxBin = Math.max(peaks1[peaks1.length - 1].getMz(), peaks2[peaks2.length - 1].getMz());
 
-        int morePeaks = peaks1.length;
-        int lessPeaks = peaks2.length;
+        int morePeaks = peakSet1.size();
+        int lessPeaks = peakSet2.size();
 
         if (morePeaks < lessPeaks) {
-            morePeaks = peaks2.length;
-            lessPeaks = peaks1.length;
+            morePeaks = peakSet2.size();
+            lessPeaks = peakSet1.size();
         }
 
         // the (maxBin - minBin) * 2 formula is used to keep the scores consistent with version
         // 1.x where the bins were evaluated based on the set fragment tolerance. Estimating based
-        // on fragment tolerance leads to roughly twise as many bins.
+        // on fragment tolerance leads to roughly twice as many bins.
         // -- JG 08.10.2018
-        double hgtScore = new HyperGeometric((maxBin - minBin) * 2, morePeaks, lessPeaks, RANDOM_ENGINE).pdf(sharedIntensitySpec1.size());
+        double hgtScore = new HyperGeometric((maxBin - minBin) * 2, morePeaks, lessPeaks, RANDOM_ENGINE).pdf(peakSet1.size());
 
         if (hgtScore == 0) {
             hgtScore = 1;
@@ -84,11 +65,10 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
 
         // calculate the fisher p
         double kendallP = assessKendallCorrelation(
-                sharedIntensitySpec1.stream().mapToInt(Integer::intValue).toArray(),
-                sharedIntensitySpec2.stream().mapToInt(Integer::intValue).toArray());
+                Arrays.stream(peaks1).mapToInt(BinaryPeak::getIntensity).toArray(),
+                Arrays.stream(peaks2).mapToInt(BinaryPeak::getIntensity).toArray());
 
         // combine the two
-
         return combineProbabilities(hgtScore, kendallP);
     }
 
