@@ -153,6 +153,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
                 }
 
                 // calculate the score
+                // TODO: in the previous version we stored all filtered consensus spectra of existing clusters
                 IBinarySpectrum existingSpectrum = comparisonFilter.apply(existingCluster.getConsensusSpectrum());
                 double similarity = similarityMeasure.correlation(filteredSpectrumToAdd, existingSpectrum);
 

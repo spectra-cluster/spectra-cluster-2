@@ -1,7 +1,12 @@
 package org.spectra.cluster.tools;
 
-import org.apache.commons.cli.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.PosixParser;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
+import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.MissingParameterException;
@@ -25,6 +30,8 @@ import org.spectra.cluster.util.DefaultParameters;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -38,6 +45,7 @@ import java.util.*;
  *
  * @author ypriverol on 18/10/2018.
  */
+@Slf4j
 public class SpectraClusterTool implements IProgressListener {
 
     public static final boolean DELETE_TEMPORARY_CLUSTERING_RESULTS = true;
@@ -64,12 +72,11 @@ public class SpectraClusterTool implements IProgressListener {
             }
 
             // File input
-            String[] peakFiles;
-            if (commandLine.hasOption(CliOptions.OPTIONS.INPUT_FILES.getValue())) {
-                peakFiles = commandLine.getOptionValues(CliOptions.OPTIONS.INPUT_FILES.getValue());
-            }else{
+            String[] peakFiles = commandLine.getArgs();
+
+            if (peakFiles.length < 1) {
                 printUsage();
-                throw new MissingParameterException("Missing required option " + CliOptions.OPTIONS.OUTPUT_PATH.getValue());
+                throw new MissingParameterException("Missing input files");
             }
 
             // RESULT FILE PATH
@@ -99,20 +106,39 @@ public class SpectraClusterTool implements IProgressListener {
                 endThreshold = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.END_THRESHOLD.getValue()));
 
             // PRECURSOR TOLERANCE
+            // TODO: Add support for precursor tolerance
             double precursorTolerance = defaultParameters.getPrecursorIonTolerance();
             if (commandLine.hasOption(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue())) {
                 precursorTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue()));
             }
+            // convert the precursor tolerance to int space
+            int binnedPrecursorTolerance = (int) Math.round(precursorTolerance * (double) BasicIntegerNormalizer.MZ_CONSTANT);
 
-            // PRECURSOR TOLERANCE
+            // FRAGMENT TOLERANCE
+            // TODO: Add support for fragment tolerance
             double fragmentTolerance = defaultParameters.getFragmentIonTolerance();
             if (commandLine.hasOption(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue())) {
                 fragmentTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue()));
             }
 
+            /**
+             * Advanced options
+             */
+            // MIN NUMBER OF COMPARISONS
+            int minNumberComparisons = defaultParameters.getMinNumberOfComparisons();
+            if (commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue())) {
+                minNumberComparisons = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue()));
+            }
+
+            SpectraPerBinNumberComparisonAssessor numberOfComparisonAssessor = new SpectraPerBinNumberComparisonAssessor(
+                    binnedPrecursorTolerance * 2, minNumberComparisons, BasicIntegerNormalizer.MZ_CONSTANT * 2500
+            );
+
             int nInitiallySharedPeaks = defaultParameters.getNInitiallySharedPeaks();
 
             /** Perform clustering **/
+            LocalDateTime startTime = LocalDateTime.now();
+
             IRawSpectrumFunction loadingFilter = new RemoveImpossiblyHighPeaksFunction()
                     .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
                     .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters.getNumberHigherPeaks())));
@@ -124,36 +150,48 @@ public class SpectraClusterTool implements IProgressListener {
 
             MzSpectraReader reader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),
                     new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, inputFiles);
+
+            // set the comparison assessor as listener to count the spectra per bin
+            reader.addSpectrumListener(numberOfComparisonAssessor);
+
             Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(localStorage);
+
             List<IBinarySpectrum> spectra = new ArrayList<>(1_000);
 
+            log.debug(String.format("Loading spectra from %d file(s)...", inputFiles.length));
             while (iterator.hasNext()) {
                 spectra.add(iterator.next());
             }
 
+            LocalDateTime loadingCompleteTime = LocalDateTime.now();
+            log.debug(String.format("Loaded spectra in %d seconds", Duration.between(startTime, loadingCompleteTime).getSeconds()));
+
             // sort according to m/z
             spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
 
-            // cluster everything
-            float[] thresholds = {0.99f, 0.98f, 0.95f, 0.995f};
+            Path thisResult = Paths.get(finalResultFile.getAbsolutePath());
 
-            for (float t : thresholds) {
-                Path thisResult = Paths.get(finalResultFile.getAbsolutePath() + '_' + String.valueOf(t));
+            IClusteringEngine engine = new GreedyClusteringEngine(
+                    binnedPrecursorTolerance,
+                    startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
+                    new MinNumberComparisonsAssessor(10_000), nInitiallySharedPeaks);
 
-                IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
-                        startThreshold, t, rounds, new CombinedFisherIntensityTest(),
-                        new MinNumberComparisonsAssessor(10_000), nInitiallySharedPeaks);
+            log.debug("Clustering files...");
+            ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
-                ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
+            LocalDateTime clusteringCompleteTime = LocalDateTime.now();
+            log.debug(String.format("Clustering completed in %d seconds", Duration.between(loadingCompleteTime, clusteringCompleteTime).getSeconds()));
 
-                IClusterWriter writer = new DotClusteringWriter(thisResult, false, localStorage);
-                writer.appendClusters(clusters);
-                writer.close();
+            IClusterWriter writer = new DotClusteringWriter(thisResult, false, localStorage);
+            writer.appendClusters(clusters);
+            writer.close();
 
-                System.out.println("Results written to " + thisResult.toString());
-            }
+            log.debug(String.format("Results written in %d seconds", Duration.between(clusteringCompleteTime, LocalDateTime.now()).getSeconds()));
+            System.out.println("Results written to " + thisResult.toString());
 
+            log.debug(String.format("Process completed in %d seconds", Duration.between(startTime, LocalDateTime.now()).getSeconds()));
 
+            System.exit(0);
         } catch (MissingParameterException e) {
             System.out.println("Error: " + e.getMessage() + "\n\n");
             printUsage();
