@@ -23,28 +23,64 @@ public class StreamIteratorConverter<K, T> implements Iterator<T> {
     private final Converter<? super ITuple, ? extends IBinarySpectrum> converter;
     private final Iterator<Tuple<File, Iterator<Spectrum>>> iterator;
     private ITuple currentTuple;
+    // cache the spectrum to enable filtering
+    private ITuple nextSpectrum;
 
     public StreamIteratorConverter(Stream<Tuple<File, Iterator<Spectrum>>> iterator, Converter<? super ITuple, ? extends IBinarySpectrum> converter) {
         this.converter = converter;
         this.iterator = iterator.iterator();
-        if(this.iterator.hasNext())
+        if (this.iterator.hasNext())
             currentTuple = this.iterator.next();
+        if (currentTuple != null)
+            this.nextSpectrum = fetchNextValidSpectrum();
+        else
+            // no spectra to fetch?
+            this.nextSpectrum = null;
+    }
+
+    private ITuple fetchNextValidSpectrum() {
+        ITuple s = fetchNextSpectrum();
+
+        if (s == null) {
+            return null;
+        }
+
+        // check whether it is valid
+        Spectrum spec = (Spectrum) s.getValue();
+
+        if (!isSpecValid(spec)) {
+            return fetchNextValidSpectrum();
+        }
+
+        return s;
+    }
+
+    private boolean isSpecValid(Spectrum s) {
+        return s.getPrecursorCharge() != null && s.getPrecursorMZ() != null;
+    }
+
+    private ITuple fetchNextSpectrum() {
+        if(((Iterator)currentTuple.getValue()).hasNext())
+            return new Tuple(currentTuple.getKey(), ((Iterator)currentTuple.getValue()).next());
+        if(this.iterator.hasNext()){
+            currentTuple = this.iterator.next();
+            if(((Iterator)currentTuple.getValue()).hasNext())
+                return new Tuple(currentTuple.getKey(), ((Iterator)currentTuple.getValue()).next());
+        }
+        return null;
     }
 
     public boolean hasNext() {
-        if(((Iterator)currentTuple.getValue()).hasNext())
-            return true;
-        if(this.iterator.hasNext()){
-            currentTuple = this.iterator.next();
-            return true;
-        }
-        return false;
+        return nextSpectrum != null;
     }
 
     public T next() {
         try {
-            ITuple value = new Tuple(currentTuple.getKey(), ((Iterator)currentTuple.getValue()).next());
-            return (T) converter.convert(value);
+            // convert the current spectrum
+            T result = (T) converter.convert(nextSpectrum);
+            // move to the next spectrum
+            nextSpectrum = fetchNextValidSpectrum();
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         }
