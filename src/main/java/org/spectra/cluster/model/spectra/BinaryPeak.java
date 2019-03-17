@@ -25,6 +25,13 @@ public class BinaryPeak implements Serializable {
     protected final int intensity;
     /** The peaks' rank in the spectrum where 1 is the highest peak and 0 if the rank isn't set **/
     protected int rank = 0;
+    protected final int mzHash;
+
+    public BinaryPeak(int mz, int intensity) {
+        this.mz = mz;
+        this.intensity = intensity;
+        this.mzHash = Objects.hash(this.mz);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -36,7 +43,7 @@ public class BinaryPeak implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mz);
+        return mzHash;
     }
 
     /**
