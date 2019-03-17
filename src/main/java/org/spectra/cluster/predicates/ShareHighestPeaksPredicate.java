@@ -4,9 +4,8 @@ import lombok.Data;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * This predicate tests whether the two spectra share any of the N highest peaks.
@@ -17,15 +16,27 @@ public class ShareHighestPeaksPredicate implements IComparisonPredicate<IBinaryS
 
     @Override
     public boolean test(IBinarySpectrum s1, IBinarySpectrum s2) {
-        Set<Integer> mz1 = Arrays.stream(s1.getPeaks())
-                .filter((BinaryPeak p) -> p.getRank() <= nHighestPeaks)
-                .mapToInt(BinaryPeak::getMz)
-                .boxed()
-                .collect(Collectors.toSet());
+        // store the highest peaks in a set
+        Set<Integer> mz1 = new HashSet<>(nHighestPeaks + 4, 0.95f);
+        for (BinaryPeak p : s1.getPeaks()) {
+            if (p.getRank() <= nHighestPeaks) {
+                mz1.add(p.getMz());
+            }
+            if (mz1.size() >= nHighestPeaks) {
+                break;
+            }
+        }
 
-        return Arrays.stream(s2.getPeaks())
-                .filter((BinaryPeak p) -> p.getRank() <= nHighestPeaks)
-                .mapToInt(BinaryPeak::getMz)
-                .anyMatch(mz1::contains);
+        // test if there is any match
+        for (BinaryPeak p : s2.getPeaks()) {
+            if (p.getRank() > nHighestPeaks) {
+                continue;
+            }
+            if (mz1.contains(p.getMz())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
