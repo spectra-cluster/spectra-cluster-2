@@ -33,8 +33,8 @@ public class GreedySpectralClusterTest {
         }
 
         Assert.assertEquals(GreedySpectralCluster.SAVED_COMPARISON_MATCHES, cluster.getComparisonMatches().size());
-        Assert.assertTrue(cluster.isInBestComparisonResults("30"));
-        Assert.assertFalse(cluster.isInBestComparisonResults("10"));
+        Assert.assertTrue(cluster.isKnownComparisonMatch("30"));
+        Assert.assertFalse(cluster.isKnownComparisonMatch("10"));
     }
 
     @Test
