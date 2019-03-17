@@ -10,7 +10,6 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of the combined FisherIntensity test as it
@@ -28,9 +27,8 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
     @Override
     public double correlation(IBinarySpectrum spectrum1, IBinarySpectrum spectrum2) {
         // use copies since these will be changed
-        // FIXME: This causes the hashes to be re-created
-        Set<BinaryPeak> peakSet1 = new HashSet<>(spectrum1.getComparisonFilteredPeaks());
-        Set<BinaryPeak> peakSet2 = new HashSet<>(spectrum2.getComparisonFilteredPeaks());
+        Set<BinaryPeak> peakSet1 = new HashSet<>(spectrum1.getComparisonFilteredPeaks().keySet());
+        Set<BinaryPeak> peakSet2 = new HashSet<>(spectrum2.getComparisonFilteredPeaks().keySet());
 
         // retain shared peaks
         peakSet1.retainAll(peakSet2);
@@ -64,14 +62,14 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
         }
 
         // create the list of intensities
+        Map<BinaryPeak, BinaryPeak> comparisonPeaks2 = spectrum2.getComparisonFilteredPeaks();
         int[] intensities1 = new int[peakSet1.size()];
-        int[] intensities2 = new int[peakSet1.size()];
-        Map<Integer, Integer> intensityMap2 = peakSet2.stream().collect(Collectors.toMap(BinaryPeak::getMz, BinaryPeak::getIntensity));
+        int[] intensities2 = new int[peakSet2.size()];
         int counter = 0;
 
         for (BinaryPeak p : peakSet1) {
             intensities1[counter] = p.getIntensity();
-            intensities2[counter] = intensityMap2.get(p.getMz());
+            intensities2[counter] = comparisonPeaks2.get(p).getIntensity();
             counter++;
         }
 

@@ -7,6 +7,7 @@ import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +45,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     // The peaks of the GreedyConsensusSpectrum
     private BinaryPeak[] consensusPeaks;
     // The peaks after the comparison filter was applied
-    private Set<BinaryPeak> comparisonFilteredPeaks;
+    private Map<BinaryPeak, BinaryPeak> comparisonFilteredPeaks;
     private final IBinarySpectrumFunction comparisonFilter;
     private int minComparisonMz;
     private int maxComparisonMz;
@@ -414,7 +415,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     }
 
     @Override
-    public Set<BinaryPeak> getComparisonFilteredPeaks() {
+    public Map<BinaryPeak, BinaryPeak> getComparisonFilteredPeaks() {
         if (isDirty()) {
             generateConsensusSpectrum();
         }
@@ -424,10 +425,11 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             IBinarySpectrum filteredSpectrum = comparisonFilter.apply(this);
             minComparisonMz = filteredSpectrum.getPeaks()[0].getMz();
             maxComparisonMz = filteredSpectrum.getPeaks()[filteredSpectrum.getPeaks().length - 1].getMz();
-            comparisonFilteredPeaks = Arrays.stream(filteredSpectrum.getPeaks()).collect(Collectors.toSet());
+            comparisonFilteredPeaks = Arrays.stream(filteredSpectrum.getPeaks())
+                    .collect(Collectors.toMap(Function.identity(), peak -> peak));
         }
 
-        return Collections.unmodifiableSet(comparisonFilteredPeaks);
+        return Collections.unmodifiableMap(comparisonFilteredPeaks);
     }
 
     @Override

@@ -4,6 +4,7 @@ import lombok.Data;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -13,7 +14,7 @@ public class BinarySpectrum implements IBinarySpectrum {
     private final int precursorMZ;
     private final int precursorCharge;
     private final IBinarySpectrumFunction comparisonFilter;
-    private Set<BinaryPeak> comparisonPeakSet;
+    private Map<BinaryPeak, BinaryPeak> comparisonPeakSet;
     private int minComparisonMz;
     private int maxComparisonMz;
 
@@ -151,13 +152,13 @@ public class BinarySpectrum implements IBinarySpectrum {
     }
 
     @Override
-    public Set<BinaryPeak> getComparisonFilteredPeaks() {
+    public Map<BinaryPeak, BinaryPeak> getComparisonFilteredPeaks() {
         if (comparisonPeakSet == null) {
             addRanks(peaks,false);
             IBinarySpectrum filteredSpectrum = comparisonFilter.apply(this);
 
             if (filteredSpectrum.getPeaks().length < 1) {
-                return Collections.emptySet();
+                return Collections.emptyMap();
             }
 
             // update max and min m/z
@@ -165,10 +166,12 @@ public class BinarySpectrum implements IBinarySpectrum {
             maxComparisonMz = filteredSpectrum.getPeaks()[filteredSpectrum.getPeaks().length - 1].mz;
 
             // store the set
-            comparisonPeakSet = Arrays.stream(filteredSpectrum.getPeaks()).collect(Collectors.toSet());
+            comparisonPeakSet = Arrays
+                    .stream(filteredSpectrum.getPeaks())
+                    .collect(Collectors.toMap(Function.identity(), peak -> peak));
         }
 
-        return Collections.unmodifiableSet(comparisonPeakSet);
+        return Collections.unmodifiableMap(comparisonPeakSet);
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.spectra.cluster.model.spectra;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -80,7 +80,7 @@ public interface IBinarySpectrum extends Serializable, Cloneable {
      * after the comparison filter was applied.
      * @return A Set with the peaks after the comparison filter was applied.
      */
-    Set<BinaryPeak> getComparisonFilteredPeaks();
+    Map<BinaryPeak, BinaryPeak> getComparisonFilteredPeaks();
 
     /**
      * Returns the comparison filter used by the spectrum

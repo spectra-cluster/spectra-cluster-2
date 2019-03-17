@@ -3,7 +3,7 @@ package org.spectra.cluster.predicates;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Assesses whether two cluster share at least N spectra of
@@ -19,10 +19,14 @@ public class ShareNComparisonPeaksPredicate implements IComparisonPredicate<IClu
     @Override
     public boolean test(ICluster o1, ICluster o2) {
         int nShared = 0;
-        Set<BinaryPeak> peaks1 = o1.getConsensusSpectrum().getComparisonFilteredPeaks();
-        for(BinaryPeak p : o2.getConsensusSpectrum().getComparisonFilteredPeaks()) {
-            if (peaks1.contains(p)) {
+        Map<BinaryPeak, BinaryPeak> peaks1 = o1.getConsensusSpectrum().getComparisonFilteredPeaks();
+        for(BinaryPeak p : o2.getConsensusSpectrum().getComparisonFilteredPeaks().keySet()) {
+            if (peaks1.keySet().contains(p)) {
                 nShared++;
+            }
+
+            if (nShared >= minSharedPeaks) {
+                return true;
             }
         }
 
