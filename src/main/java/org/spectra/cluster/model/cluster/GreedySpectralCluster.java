@@ -208,21 +208,6 @@ public class GreedySpectralCluster implements ICluster {
         bestComparisonMatchIds = null;
     }
 
-    /**
-     * Checks whether a given spectrum id is part of the
-     * best similarity matches.
-     *
-     * @param id The other cluster's id
-     * @return Boolean indicating whether the comparison scored among the top N
-     */
-    public boolean isInBestComparisonResults(String id) {
-        if (bestComparisonMatchIds == null) {
-            bestComparisonMatchIds = bestComparisonMatches.stream().map(ComparisonMatch::getSpectrumId).collect(Collectors.toSet());
-        }
-
-        return bestComparisonMatchIds.contains(id);
-    }
-
     @Override
     public List<ComparisonMatch> getComparisonMatches() {
         return Collections.unmodifiableList(bestComparisonMatches);
@@ -246,8 +231,11 @@ public class GreedySpectralCluster implements ICluster {
 
     @Override
     public boolean isKnownComparisonMatch(String clusterId) {
-        return bestComparisonMatches.size() != 0 && bestComparisonMatches.stream().anyMatch(comparisonMatch -> comparisonMatch.getSpectrumId().equals(clusterId));
+        if (bestComparisonMatchIds == null) {
+            bestComparisonMatchIds = bestComparisonMatches.stream().map(ComparisonMatch::getSpectrumId).collect(Collectors.toSet());
+        }
 
+        return bestComparisonMatchIds.contains(clusterId);
     }
 
     @Override
