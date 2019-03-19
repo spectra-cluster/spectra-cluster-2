@@ -4,6 +4,7 @@ import cern.jet.random.HyperGeometric;
 import cern.jet.random.engine.RandomEngine;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
@@ -170,5 +171,20 @@ public class CombinedFisherIntensityTestTest {
         ICluster[] clusters = engine.clusterSpectra(impSpectra.toArray(new IBinarySpectrum[0]));
 
         Assert.assertEquals(1, clusters.length);
+    }
+
+    @Test
+    @Ignore
+    public void testScoreBenchmark() throws Exception {
+        IBinarySpectrumSimilarity similarity = new CombinedFisherIntensityTest();
+
+        for (int rounds = 0; rounds < 1000_000; rounds++) {
+            for (int j = 0; j < impSpectra.size(); j++) {
+                for (int i = 1; i < impSpectra.size(); i++) {
+                    double score = similarity.correlation(impSpectra.get(j), impSpectra.get(i));
+                    Assert.assertNotNull(score);
+                }
+            }
+        }
     }
 }

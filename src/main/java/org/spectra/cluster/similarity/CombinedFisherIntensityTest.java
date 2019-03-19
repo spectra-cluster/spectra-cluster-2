@@ -18,11 +18,39 @@ import java.util.Set;
 public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
 
     private final KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
+    /** Cached ChiSquareDistribution for the HGT score calculation */
     protected final ChiSquaredDistribution chiSquaredDistribution = new ChiSquaredDistribution(4); // always 4 degrees of freedom
-
+    /** Static RandomEngine since it is not used */
     protected final static RandomEngine RANDOM_ENGINE = RandomEngine.makeDefault();
-
+    /** Define a maximum score which is returned if infinity is reached */
     public static final double MAX_SCORE = 200;
+    /** Value for an extremely low score */
+    public static final double BAD_SCORE = 0;
+
+    /** Minimum number of shared peaks required to calculate the score. Otherwise BAD_SCORE is returned */
+    private final int minSharedPeaks;
+    /** Maximum hgt probability above which no Kendall correlation is calculated */
+    private final double maxHgt;
+
+    /**
+     * Create a new CombinedFisherIntensityTest similarity function.
+     * @param minSharedPeaks The minimum number of shared peaks to calculate the score.
+     * @param maxHgt The maximum allowed p-value for the HGT test. If the HGT score is above this
+     *               p-value, the Kendall correlation is not calculated and only the HGT score returned
+     */
+    public CombinedFisherIntensityTest(int minSharedPeaks, double maxHgt) {
+        // minSharedPeaks must not be below 1
+        this.minSharedPeaks = (minSharedPeaks >= 1 ? minSharedPeaks : 1);
+        this.maxHgt = maxHgt;
+    }
+
+    /**
+     * Creates a CombinedFisherIntensityTest with disabled additional filtering
+     */
+    public CombinedFisherIntensityTest() {
+        this.minSharedPeaks = 1;
+        this.maxHgt = 2; // impossibly high
+    }
 
     @Override
     public double correlation(IBinarySpectrum spectrum1, IBinarySpectrum spectrum2) {
@@ -35,8 +63,8 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
         peakSet2.retainAll(peakSet1);
 
         // return 0 if no intensities are shared
-        if (peakSet1.size() < 1) {
-            return 0;
+        if (peakSet1.size() < minSharedPeaks) {
+            return BAD_SCORE;
         }
 
         // calculate the hypergeometric score
@@ -61,6 +89,11 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
             hgtScore = 1;
         }
 
+        // only return the hgtScore if it is above the allowed maximum
+        if (hgtScore > maxHgt) {
+            return -Math.log(hgtScore);
+        }
+
         // create the list of intensities
         Map<BinaryPeak, BinaryPeak> comparisonPeaks2 = spectrum2.getComparisonFilteredPeaks();
         int[] intensities1 = new int[peakSet1.size()];
@@ -72,7 +105,6 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
             intensities2[counter] = comparisonPeaks2.get(p).getIntensity();
             counter++;
         }
-
 
         // calculate the fisher p
         double kendallP = assessKendallCorrelation(
