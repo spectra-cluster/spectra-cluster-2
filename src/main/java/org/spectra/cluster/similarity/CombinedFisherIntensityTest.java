@@ -7,8 +7,9 @@ import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of the combined FisherIntensity test as it
@@ -17,78 +18,100 @@ import java.util.List;
 public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
 
     private final KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
+    /** Cached ChiSquareDistribution for the HGT score calculation */
     protected final ChiSquaredDistribution chiSquaredDistribution = new ChiSquaredDistribution(4); // always 4 degrees of freedom
-
+    /** Static RandomEngine since it is not used */
     protected final static RandomEngine RANDOM_ENGINE = RandomEngine.makeDefault();
-
+    /** Define a maximum score which is returned if infinity is reached */
     public static final double MAX_SCORE = 200;
+    /** Value for an extremely low score */
+    public static final double BAD_SCORE = 0;
+
+    /** Minimum number of shared peaks required to calculate the score. Otherwise BAD_SCORE is returned */
+    private final int minSharedPeaks;
+    /** Maximum hgt probability above which no Kendall correlation is calculated */
+    private final double maxHgt;
+
+    /**
+     * Create a new CombinedFisherIntensityTest similarity function.
+     * @param minSharedPeaks The minimum number of shared peaks to calculate the score.
+     * @param maxHgt The maximum allowed p-value for the HGT test. If the HGT score is above this
+     *               p-value, the Kendall correlation is not calculated and only the HGT score returned
+     */
+    public CombinedFisherIntensityTest(int minSharedPeaks, double maxHgt) {
+        // minSharedPeaks must not be below 1
+        this.minSharedPeaks = (minSharedPeaks >= 1 ? minSharedPeaks : 1);
+        this.maxHgt = maxHgt;
+    }
+
+    /**
+     * Creates a CombinedFisherIntensityTest with disabled additional filtering
+     */
+    public CombinedFisherIntensityTest() {
+        this.minSharedPeaks = 1;
+        this.maxHgt = 2; // impossibly high
+    }
 
     @Override
     public double correlation(IBinarySpectrum spectrum1, IBinarySpectrum spectrum2) {
-        int index1 = 0;
-        int index2 = 0;
-        List<Integer> sharedIntensitySpec1 = new ArrayList<>(20);
-        List<Integer> sharedIntensitySpec2 = new ArrayList<>(20);
+        // use copies since these will be changed
+        Set<BinaryPeak> peakSet1 = new HashSet<>(spectrum1.getComparisonFilteredPeaks().keySet());
+        Set<BinaryPeak> peakSet2 = new HashSet<>(spectrum2.getComparisonFilteredPeaks().keySet());
 
-        BinaryPeak[] peaks1 = spectrum1.getPeaks();
-        BinaryPeak[] peaks2 = spectrum2.getPeaks();
-
-        // get the shared peak indexes
-        for (; index1 < peaks1.length; index1++) {
-            int mzSpec1 = peaks1[index1].getMz();
-
-            for (; index2 < peaks2.length; index2++) {
-                int mzSpec2 = peaks2[index2].getMz();
-
-                if (mzSpec1 < mzSpec2) {
-                    break;
-                }
-                if (mzSpec2 < mzSpec1) {
-                    continue;
-                }
-
-                // now both are equal
-                sharedIntensitySpec1.add(peaks1[index1].getIntensity());
-                sharedIntensitySpec2.add(peaks2[index2].getIntensity());
-                index2++;
-                break;
-            }
-        }
+        // retain shared peaks
+        peakSet1.retainAll(peakSet2);
+        peakSet2.retainAll(peakSet1);
 
         // return 0 if no intensities are shared
-        if (sharedIntensitySpec1.size() < 1) {
-            return 0;
+        if (peakSet1.size() < minSharedPeaks) {
+            return BAD_SCORE;
         }
 
         // calculate the hypergeometric score
-        int minBin = Math.min(peaks1[0].getMz(), peaks2[0].getMz());
-        int maxBin = Math.max(peaks1[peaks1.length - 1].getMz(), peaks2[peaks2.length - 1].getMz());
+        int minBin = Math.min(spectrum1.getMinComparisonMz(), spectrum2.getMinComparisonMz());
+        int maxBin = Math.max(spectrum1.getMaxComparisonMz(), spectrum2.getMaxComparisonMz());
 
-        int morePeaks = peaks1.length;
-        int lessPeaks = peaks2.length;
+        int morePeaks = spectrum1.getComparisonFilteredPeaks().size();
+        int lessPeaks = spectrum2.getComparisonFilteredPeaks().size();
 
         if (morePeaks < lessPeaks) {
-            morePeaks = peaks2.length;
-            lessPeaks = peaks1.length;
+            morePeaks = peakSet2.size();
+            lessPeaks = peakSet1.size();
         }
 
         // the (maxBin - minBin) * 2 formula is used to keep the scores consistent with version
         // 1.x where the bins were evaluated based on the set fragment tolerance. Estimating based
-        // on fragment tolerance leads to roughly twise as many bins.
+        // on fragment tolerance leads to roughly twice as many bins.
         // -- JG 08.10.2018
-        double hgtScore = new HyperGeometric((maxBin - minBin) * 2, morePeaks, lessPeaks, RANDOM_ENGINE).pdf(sharedIntensitySpec1.size());
+        double hgtScore = new HyperGeometric((maxBin - minBin) * 2, morePeaks, lessPeaks, RANDOM_ENGINE).pdf(peakSet1.size());
 
         if (hgtScore == 0) {
             hgtScore = 1;
         }
 
+        // only return the hgtScore if it is above the allowed maximum
+        if (hgtScore > maxHgt) {
+            return -Math.log(hgtScore);
+        }
+
+        // create the list of intensities
+        Map<BinaryPeak, BinaryPeak> comparisonPeaks2 = spectrum2.getComparisonFilteredPeaks();
+        int[] intensities1 = new int[peakSet1.size()];
+        int[] intensities2 = new int[peakSet2.size()];
+        int counter = 0;
+
+        for (BinaryPeak p : peakSet1) {
+            intensities1[counter] = p.getIntensity();
+            intensities2[counter] = comparisonPeaks2.get(p).getIntensity();
+            counter++;
+        }
+
         // calculate the fisher p
         double kendallP = assessKendallCorrelation(
-                sharedIntensitySpec1.stream().mapToInt(Integer::intValue).toArray(),
-                sharedIntensitySpec2.stream().mapToInt(Integer::intValue).toArray());
+                intensities1,
+                intensities2);
 
         // combine the two
-
         return combineProbabilities(hgtScore, kendallP);
     }
 

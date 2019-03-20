@@ -30,7 +30,7 @@ public class DotClusteringWriterTest {
     @Before
     public void setUp() throws Exception {
         File mgfFile = new File(DotClusteringWriterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
-        MzSpectraReader reader = new MzSpectraReader(mgfFile);
+        MzSpectraReader reader = new MzSpectraReader(mgfFile, GreedyClusteringEngine.COMPARISON_FILTER);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(storage);
 
         while (iterator.hasNext()) {

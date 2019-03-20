@@ -4,6 +4,7 @@ import org.ehcache.sizeof.SizeOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
@@ -48,7 +49,8 @@ public class ObjectSizeFetcherTest {
             binarySpectrumList[count] = new BinarySpectrum(
                     (precursorNormalizer).binValue(spec.getPrecursorMZ()),
                     spec.getPrecursorCharge(),
-                    factory.normalizePeaks(spec.getPeakList()));
+                    factory.normalizePeaks(spec.getPeakList()),
+                    GreedyClusteringEngine.COMPARISON_FILTER);
             count++;
         }
     }
@@ -59,7 +61,7 @@ public class ObjectSizeFetcherTest {
         long size = sizeOf.deepSizeOf(spectrumList);
         long binarySize = sizeOf.deepSizeOf(binarySpectrumList);
 
-        Assert.assertTrue(binarySize * 3 < size);
+        Assert.assertTrue(binarySize * 2 < size);
 
     }
 

@@ -29,6 +29,7 @@ import java.util.Comparator;
 @Slf4j
 public class GreedyClusteringEngine implements IClusteringEngine {
     public final static IBinarySpectrumSimilarity DEFAULT_SIMILARITY_MEASURE = new CombinedFisherIntensityTest();
+    public final static IBinarySpectrumFunction COMPARISON_FILTER = new FractionTicFilterFunction();
 
     private final int precursorTolerance;
     private final float thresholdStart;
@@ -38,7 +39,6 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     private final CumulativeDistributionFunction cdf;
     private final INumberOfComparisonAssessor numberOfComparisonAssessor;
     private final IComparisonPredicate<ICluster> firstRoundPredicate;
-    private final IBinarySpectrumFunction comparisonFilter = new FractionTicFilterFunction();
     // TODO: Add a factory for consensus spectrum builder so we can add them as a parameter
     // private final IConsensusSpectrumBuilder consensusSpectrumBuilder;
 
@@ -134,7 +134,6 @@ public class GreedyClusteringEngine implements IClusteringEngine {
             }
             lastMz = clusterToMerge.getPrecursorMz();
 
-            IBinarySpectrum filteredSpectrumToAdd = comparisonFilter.apply(clusterToMerge.getConsensusSpectrum());
             boolean isClusterMerged = false;
 
             // compare against all existing cluster
@@ -154,8 +153,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
 
                 // calculate the score
                 // TODO: in the previous version we stored all filtered consensus spectra of existing clusters
-                IBinarySpectrum existingSpectrum = comparisonFilter.apply(existingCluster.getConsensusSpectrum());
-                double similarity = similarityMeasure.correlation(filteredSpectrumToAdd, existingSpectrum);
+                double similarity = similarityMeasure.correlation(clusterToMerge.getConsensusSpectrum(), existingCluster.getConsensusSpectrum());
 
                 // if it is a save match, merge the cluster
                 if (cdf.isSaveMatch(similarity, numberOfComparisonAssessor.getNumberOfComparisons(clusterToMerge.getPrecursorMz(), mergedClusterSize - mergedClusterPrecursorOffset + 1), similarityThreshold)) {
@@ -188,7 +186,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
      */
     private GreedySpectralCluster[] convertSpectraToCluster(IBinarySpectrum[] spectra) {
         return Arrays.stream(spectra).map(s -> {
-            ICluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum(s.getUUI()));
+            ICluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum(s.getUUI(), COMPARISON_FILTER));
             cluster.addSpectra(s);
             return cluster;
         }).toArray(GreedySpectralCluster[]::new);

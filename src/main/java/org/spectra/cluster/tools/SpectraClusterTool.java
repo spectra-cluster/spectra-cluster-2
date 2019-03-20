@@ -149,7 +149,8 @@ public class SpectraClusterTool implements IProgressListener {
                     .toArray(File[]::new);
 
             MzSpectraReader reader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),
-                    new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, inputFiles);
+                    new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
+                    GreedyClusteringEngine.COMPARISON_FILTER, inputFiles);
 
             // set the comparison assessor as listener to count the spectra per bin
             reader.addSpectrumListener(numberOfComparisonAssessor);

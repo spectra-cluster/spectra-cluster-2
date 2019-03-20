@@ -2,6 +2,7 @@ package org.spectra.cluster.filter.binaryspectrum;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -22,7 +23,7 @@ public class FractionTicFilterFunctionTest {
                 new BinaryPeak(8, 8)
         };
 
-        BinarySpectrum spectrum = new BinarySpectrum(1, 1, testPeaks);
+        BinarySpectrum spectrum = new BinarySpectrum(1, 1, testPeaks, GreedyClusteringEngine.COMPARISON_FILTER);
 
         IBinarySpectrum filtered = function.apply(spectrum);
 

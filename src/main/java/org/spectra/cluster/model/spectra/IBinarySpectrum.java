@@ -1,6 +1,9 @@
 package org.spectra.cluster.model.spectra;
 
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
+
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -72,5 +75,28 @@ public interface IBinarySpectrum extends Serializable, Cloneable {
      */
     BinaryPeak[] getCopyPeaks();
 
+    /**
+     * Returns a set containing the binary peaks
+     * after the comparison filter was applied.
+     * @return A Set with the peaks after the comparison filter was applied.
+     */
+    Map<BinaryPeak, BinaryPeak> getComparisonFilteredPeaks();
 
+    /**
+     * Returns the comparison filter used by the spectrum
+     * @return The IBinarySpectrumFunction used as a comparison filter
+     */
+    IBinarySpectrumFunction getComparisonFilter();
+
+    /**
+     * Get the minimum m/z of the filtered peaks
+     * @return The minimum m/z
+     */
+    int getMinComparisonMz();
+
+    /**
+     * Get the maximum m/z of the filtered peaks
+     * @return The maximum m/z
+     */
+    int getMaxComparisonMz();
 }

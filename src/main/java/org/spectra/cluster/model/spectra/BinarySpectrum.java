@@ -1,9 +1,11 @@
 package org.spectra.cluster.model.spectra;
 
 import lombok.Data;
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -11,6 +13,10 @@ public class BinarySpectrum implements IBinarySpectrum {
     private final String uui;
     private final int precursorMZ;
     private final int precursorCharge;
+    private final IBinarySpectrumFunction comparisonFilter;
+    private Map<BinaryPeak, BinaryPeak> comparisonPeakSet;
+    private int minComparisonMz;
+    private int maxComparisonMz;
 
     private BinaryPeak[] peaks;
 
@@ -20,12 +26,14 @@ public class BinarySpectrum implements IBinarySpectrum {
      * @param precursorMZ The precursor m/z as integer
      * @param precursorCharge The precursor charge
      * @param peaks The peaklist
+     * @param comparisonFilter The comparison filter to apply to the spectrum
      */
-    public BinarySpectrum(String uui, int precursorMZ, int precursorCharge, BinaryPeak[] peaks) {
+    public BinarySpectrum(String uui, int precursorMZ, int precursorCharge, BinaryPeak[] peaks, IBinarySpectrumFunction comparisonFilter) {
         this.uui = uui;
         this.precursorMZ = precursorMZ;
         this.precursorCharge = precursorCharge;
         this.peaks = Arrays.copyOf(peaks, peaks.length);
+        this.comparisonFilter = comparisonFilter;
     }
 
     /**
@@ -33,9 +41,10 @@ public class BinarySpectrum implements IBinarySpectrum {
      * @param precursorMZ The precursor m/z as integer
      * @param precursorCharge The precursor charge
      * @param peaks The peaklist
+     * @param comparisonFilter The comparison filter to apply to the spectrum
      */
-    public BinarySpectrum(int precursorMZ, int precursorCharge, BinaryPeak[] peaks) {
-        this(UUID.randomUUID().toString(), precursorMZ, precursorCharge, peaks);
+    public BinarySpectrum(int precursorMZ, int precursorCharge, BinaryPeak[] peaks, IBinarySpectrumFunction comparisonFilter) {
+        this(UUID.randomUUID().toString(), precursorMZ, precursorCharge, peaks, comparisonFilter);
     }
 
     /**
@@ -44,11 +53,41 @@ public class BinarySpectrum implements IBinarySpectrum {
      * @param spectrum The IBinarySpectrum to copy the properties from.
      * @param peakList The new peaklist to use. The spectrum object will create a copy of this peaklist.
      */
-    public BinarySpectrum(IBinarySpectrum spectrum, BinaryPeak[] peakList) {
+    public BinarySpectrum(IBinarySpectrum spectrum, BinaryPeak[] peakList, boolean updateRanks) {
         this.uui = spectrum.getUUI();
         this.precursorMZ = spectrum.getPrecursorMz();
         this.precursorCharge = spectrum.getPrecursorCharge();
         this.peaks = Arrays.copyOf(peakList, peakList.length);
+        this.comparisonFilter = spectrum.getComparisonFilter();
+
+        if (updateRanks) {
+            addRanks(this.peaks,true);
+        }
+    }
+
+    /**
+     * Adds the rank to all peaks if required
+     * @param peaks The peak array to which the ranks will be added
+     * @param force If set to true, ranks are updated even if the peaks already contain ranks
+     */
+    public static void addRanks(BinaryPeak[] peaks, boolean force) {
+        if (peaks.length < 1) {
+            return;
+        }
+        // if the first peak has a rank, assume that all peaks have one
+        if (!force && peaks[0].getRank() > 0) {
+            return;
+        }
+
+        // sort according to intensity
+        Arrays.parallelSort(peaks, Comparator.comparingInt(BinaryPeak::getIntensity).reversed());
+
+        for (int i = 0; i < peaks.length; i++) {
+            peaks[i].setRank(i + 1);
+        }
+
+        // sort according to m/z again
+        Arrays.parallelSort(peaks, Comparator.comparingInt(BinaryPeak::getMz));
     }
 
     @Override
@@ -58,11 +97,13 @@ public class BinarySpectrum implements IBinarySpectrum {
 
     @Override
     public BinaryPeak[] getPeaks() {
+        addRanks(peaks,false);
         return peaks;
     }
 
     @Override
     public BinaryPeak[] getCopyPeaks() {
+        addRanks(peaks,false);
         return Arrays.copyOf(peaks, peaks.length);
     }
 
@@ -110,5 +151,44 @@ public class BinarySpectrum implements IBinarySpectrum {
         return Arrays.stream(peaks).mapToInt(BinaryPeak::getIntensity).toArray();
     }
 
+    @Override
+    public Map<BinaryPeak, BinaryPeak> getComparisonFilteredPeaks() {
+        if (comparisonPeakSet == null) {
+            addRanks(peaks,false);
+            IBinarySpectrum filteredSpectrum = comparisonFilter.apply(this);
 
+            if (filteredSpectrum.getPeaks().length < 1) {
+                return Collections.emptyMap();
+            }
+
+            // update max and min m/z
+            minComparisonMz = filteredSpectrum.getPeaks()[0].mz;
+            maxComparisonMz = filteredSpectrum.getPeaks()[filteredSpectrum.getPeaks().length - 1].mz;
+
+            // store the set
+            comparisonPeakSet = Arrays
+                    .stream(filteredSpectrum.getPeaks())
+                    .collect(Collectors.toMap(Function.identity(), peak -> peak));
+        }
+
+        return Collections.unmodifiableMap(comparisonPeakSet);
+    }
+
+    @Override
+    public int getMinComparisonMz() {
+        if (comparisonPeakSet == null) {
+            getComparisonPeakSet();
+        }
+
+        return minComparisonMz;
+    }
+
+    @Override
+    public int getMaxComparisonMz() {
+        if (comparisonPeakSet == null) {
+            getComparisonPeakSet();
+        }
+
+        return maxComparisonMz;
+    }
 }
