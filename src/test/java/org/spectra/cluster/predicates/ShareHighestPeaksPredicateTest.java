@@ -3,6 +3,7 @@ package org.spectra.cluster.predicates;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
@@ -21,7 +22,7 @@ public class ShareHighestPeaksPredicateTest {
     @Before
     public void setUp() throws Exception {
         testFile = new File(Objects.requireNonNull(ShareHighestPeaksPredicate.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI()));
-        MzSpectraReader reader = new MzSpectraReader(testFile);
+        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
         spectra = new ArrayList<>(50);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
 
@@ -38,7 +39,7 @@ public class ShareHighestPeaksPredicateTest {
                 new BinaryPeak(2, 3),
                 new BinaryPeak(3, 3)
         };
-        BinarySpectrum wrongSpec = new BinarySpectrum(12, 2, wrongPeaks);
+        BinarySpectrum wrongSpec = new BinarySpectrum(12, 2, wrongPeaks, GreedyClusteringEngine.COMPARISON_FILTER);
 
         Assert.assertTrue(comparisonPredicate.test(spectra.get(0), spectra.get(1)));
 

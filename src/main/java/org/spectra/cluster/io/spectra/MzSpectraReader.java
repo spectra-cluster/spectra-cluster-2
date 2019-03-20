@@ -103,6 +103,8 @@ public class MzSpectraReader {
 
     private final IRawSpectrumFunction loadingFilter;
 
+    private final IBinarySpectrumFunction comparisonFilter;
+
     /**
      * Create a Reader from a file. The file type accepted are mgf or mzml
      * @param files File to be read
@@ -112,7 +114,8 @@ public class MzSpectraReader {
                             IIntegerNormalizer intensityBinner,
                             BasicIntegerNormalizer precursorNormalizer,
                             IBinarySpectrumFunction peaksPerMzWindowFilter,
-                            IRawSpectrumFunction loadingFilter, File ... files ) throws Exception {
+                            IRawSpectrumFunction loadingFilter,
+                            IBinarySpectrumFunction comparisonFilter, File ... files ) throws Exception {
         this.inputFiles = new ConcurrentHashMap<>();
 
         Arrays.stream(files).parallel().forEach( file -> {
@@ -154,6 +157,7 @@ public class MzSpectraReader {
         this.peaksPerMzWindowFilter = peaksPerMzWindowFilter;
         this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
         this.loadingFilter = loadingFilter;
+        this.comparisonFilter = comparisonFilter;
     }
 
     /**
@@ -165,7 +169,8 @@ public class MzSpectraReader {
                             IIntegerNormalizer intensityBinner,
                             BasicIntegerNormalizer precursorNormalizer,
                             IBinarySpectrumFunction peaksPerMzWindowFilter,
-                            IRawSpectrumFunction loadingFilter) throws Exception {
+                            IRawSpectrumFunction loadingFilter,
+                            IBinarySpectrumFunction comparisonFilter) throws Exception {
         try{
             JMzReader jMzReader = null;
             Class<?> peakListclass = isValidPeakListFile(file);
@@ -201,6 +206,7 @@ public class MzSpectraReader {
         this.peaksPerMzWindowFilter = peaksPerMzWindowFilter;
         this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
         this.loadingFilter = loadingFilter;
+        this.comparisonFilter = comparisonFilter;
     }
 
     /**
@@ -211,12 +217,13 @@ public class MzSpectraReader {
      *
      * @param file Spectra file to read.
      */
-    public MzSpectraReader(File file) throws Exception {
+    public MzSpectraReader(File file, IBinarySpectrumFunction comparisonFilter) throws Exception {
         this(file, new TideBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(),
                 new RemoveImpossiblyHighPeaksFunction()
                 // TODO: set fragment tolerance
                 .specAndThen(new RemovePrecursorPeaksFunction(0.5))
-                .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))));
+                .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))),
+                comparisonFilter);
     }
 
     /**
@@ -256,7 +263,8 @@ public class MzSpectraReader {
             IBinarySpectrum s = new BinarySpectrum(
                     ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
                     (spectrum.getPrecursorCharge() != null) ? spectrum.getPrecursorCharge() : 0,
-                    factory.normalizePeaks(spectrum.getPeakList()));
+                    factory.normalizePeaks(spectrum.getPeakList()),
+                    comparisonFilter);
 
             // save spectrum properties
             if (propertyStorage != null) {

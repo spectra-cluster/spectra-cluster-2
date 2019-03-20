@@ -1,10 +1,14 @@
 package org.spectra.cluster.model.consensus;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.model.spectra.BinaryPeak;
+import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This is a greedy version of the FrankEtAlConsensusSpectrumBuilder. It only supports the addition of spectra but not their removal.
@@ -40,6 +44,11 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     // The peaks of the GreedyConsensusSpectrum
     private BinaryPeak[] consensusPeaks;
+    // The peaks after the comparison filter was applied
+    private Map<BinaryPeak, BinaryPeak> comparisonFilteredPeaks;
+    private final IBinarySpectrumFunction comparisonFilter;
+    private int minComparisonMz;
+    private int maxComparisonMz;
 
     // All peaks in the Cluster
     private BinaryConsensusPeak[] allPeaksInCluster = new BinaryConsensusPeak[0];
@@ -69,23 +78,25 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
      * @param minPeaksToKeep       The minimum number of peaks that should always be retained.
      * @param peaksPerWindowToKeep The minimum number of peaks to keep within the m/z window size.
      * @param windowSize           The m/z window size for the peak filter to use.
+     * @param comparisonFitler     The filter function to use for the comparisons.
      */
-    public GreedyConsensusSpectrum(String id, int minPeaksToKeep, int peaksPerWindowToKeep, int windowSize) {
+    public GreedyConsensusSpectrum(String id, int minPeaksToKeep, int peaksPerWindowToKeep, int windowSize, IBinarySpectrumFunction comparisonFitler) {
         this.id = id;
         this.minPeaksToKeep = minPeaksToKeep;
         this.peaksPerWindowToKeep = peaksPerWindowToKeep;
         this.windowSize = windowSize;
+        this.comparisonFilter = comparisonFitler;
     }
 
-    public GreedyConsensusSpectrum(String id) {
-        this(id, MIN_PEAKS_TO_KEEP, DEFAULT_PEAKS_TO_KEEP, NOISE_FILTER_INCREMENT);
+    public GreedyConsensusSpectrum(String id, IBinarySpectrumFunction comparisonFilter) {
+        this(id, MIN_PEAKS_TO_KEEP, DEFAULT_PEAKS_TO_KEEP, NOISE_FILTER_INCREMENT, comparisonFilter);
     }
 
     /**
      * Create a new consensus spectrum builder with a random id and the default values.
      */
-    public GreedyConsensusSpectrum() {
-        this(UUID.randomUUID().toString());
+    public GreedyConsensusSpectrum(IBinarySpectrumFunction comparisonFilter) {
+        this(UUID.randomUUID().toString(), comparisonFilter);
     }
 
     /**
@@ -235,6 +246,9 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         }
         consensusPeaks = adaptPeakWithNoiseFilterIntensities(allPeaksInCluster, nSpectra);
 
+        // invalidate the comparison peaks
+        comparisonFilteredPeaks = null;
+
         setIsDirty(false);
     }
 
@@ -263,6 +277,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         }
 
         if (adaptedPeaks.length < minPeaksToKeep || adaptedPeaks.length < 1) {
+            BinarySpectrum.addRanks(adaptedPeaks, true);
             return adaptedPeaks;
         }
 
@@ -294,10 +309,11 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             }
         }
 
-        return peaksToKeep
-                .stream()
-                .sorted(Comparator.comparingInt(BinaryPeak::getMz))
-                .toArray(BinaryConsensusPeak[]::new);
+        // add the ranks since the sort order was lost anyways
+        BinaryConsensusPeak[] peakArray = peaksToKeep.toArray(new BinaryConsensusPeak[0]);
+        BinarySpectrum.addRanks(peakArray, true);
+
+        return peakArray;
     }
 
     /**
@@ -391,5 +407,46 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             generateConsensusSpectrum();
 
         return Arrays.copyOf(consensusPeaks, consensusPeaks.length);
+    }
+
+    @Override
+    public IBinarySpectrumFunction getComparisonFilter() {
+        return comparisonFilter;
+    }
+
+    @Override
+    public Map<BinaryPeak, BinaryPeak> getComparisonFilteredPeaks() {
+        if (isDirty()) {
+            generateConsensusSpectrum();
+        }
+
+        // create the Set if necessary
+        if (comparisonFilteredPeaks == null) {
+            IBinarySpectrum filteredSpectrum = comparisonFilter.apply(this);
+            minComparisonMz = filteredSpectrum.getPeaks()[0].getMz();
+            maxComparisonMz = filteredSpectrum.getPeaks()[filteredSpectrum.getPeaks().length - 1].getMz();
+            comparisonFilteredPeaks = Arrays.stream(filteredSpectrum.getPeaks())
+                    .collect(Collectors.toMap(Function.identity(), peak -> peak));
+        }
+
+        return Collections.unmodifiableMap(comparisonFilteredPeaks);
+    }
+
+    @Override
+    public int getMinComparisonMz() {
+        if (isDirty() || comparisonFilteredPeaks == null) {
+            getComparisonFilteredPeaks();
+        }
+
+        return minComparisonMz;
+    }
+
+    @Override
+    public int getMaxComparisonMz() {
+        if (isDirty() || comparisonFilteredPeaks == null) {
+            getComparisonFilteredPeaks();
+        }
+
+        return maxComparisonMz;
     }
 }

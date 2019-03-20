@@ -55,9 +55,13 @@ public class FractionTicFilterFunction implements IBinarySpectrumFunction {
         int filteredPeaksSize = 0;
         int explainedTic = 0;
 
-        for (BinaryPeak aPeaklist : peaklist) {
-            explainedTic += aPeaklist.getIntensity();
-            filteredPeaks[filteredPeaksSize++] = aPeaklist;
+        for (BinaryPeak peak : peaklist) {
+            explainedTic += peak.getIntensity();
+            // copy the peak since it now has a new rank
+            BinaryPeak filteredPeak = peak.copy();
+            filteredPeaks[filteredPeaksSize++] = filteredPeak;
+            // update the rank afterwards since it's 1-based
+            filteredPeak.setRank(filteredPeaksSize);
 
             double relExplainedTic = explainedTic / totalIntensity;
 
@@ -73,6 +77,6 @@ public class FractionTicFilterFunction implements IBinarySpectrumFunction {
         // re-sort according to m/z
         Arrays.sort(filteredPeaks, Comparator.comparingInt(BinaryPeak::getMz));
 
-        return new BinarySpectrum(binarySpectrum, filteredPeaks);
+        return new BinarySpectrum(binarySpectrum, filteredPeaks, false);
     }
 }

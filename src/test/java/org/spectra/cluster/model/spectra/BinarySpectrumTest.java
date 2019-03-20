@@ -4,6 +4,7 @@ package org.spectra.cluster.model.spectra;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
 import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
@@ -20,7 +21,8 @@ import java.util.Objects;
 public class BinarySpectrumTest {
 
     Iterator<Spectrum> specIt = null;
-    IBinarySpectrum binarySpectrum = new BinarySpectrum(345567, 2, new BinaryPeak[6]);
+    BinaryPeak[] peakList = {new BinaryPeak(1, 1), new BinaryPeak(2, 1), new BinaryPeak(3, 1), new BinaryPeak(4, 1), new BinaryPeak(5, 1), new BinaryPeak(6, 1)};
+    IBinarySpectrum binarySpectrum = new BinarySpectrum(345567, 2, peakList, GreedyClusteringEngine.COMPARISON_FILTER);
 
 
     @Before
@@ -36,7 +38,7 @@ public class BinarySpectrumTest {
     public void readBinarySpectrum() {
 
         Spectrum spectrum = specIt.next();
-        BinarySpectrum binarySpectrum = new BinarySpectrum((int)spectrum.getPrecursorMZ().doubleValue(), spectrum.getPrecursorCharge(), new BinaryPeak[0]);
+        BinarySpectrum binarySpectrum = new BinarySpectrum((int)spectrum.getPrecursorMZ().doubleValue(), spectrum.getPrecursorCharge(), new BinaryPeak[0], GreedyClusteringEngine.COMPARISON_FILTER);
         Assert.assertEquals(2, binarySpectrum.getPrecursorCharge());
 
     }
@@ -69,7 +71,7 @@ public class BinarySpectrumTest {
     @Test
     public void testPeakSortOrder() throws Exception{
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MzSpectraReader reader = new MzSpectraReader(new File(uri));
+        MzSpectraReader reader = new MzSpectraReader(new File(uri), GreedyClusteringEngine.COMPARISON_FILTER);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         IBinarySpectrum spectrum = spectrumIterator.next();

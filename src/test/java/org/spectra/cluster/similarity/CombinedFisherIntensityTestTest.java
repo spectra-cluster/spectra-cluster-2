@@ -45,7 +45,9 @@ public class CombinedFisherIntensityTestTest {
                 new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(),
                 new RemoveImpossiblyHighPeaksFunction()
                     .specAndThen(new RemovePrecursorPeaksFunction(0.5))
-                    .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))));
+                    .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))),
+                // disable comparison filter
+                (IBinarySpectrum s) -> s);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator(storage);
         impSpectra = new ArrayList<>(50);
@@ -53,6 +55,34 @@ public class CombinedFisherIntensityTestTest {
         while (spectrumIterator.hasNext()) {
             impSpectra.add(spectrumIterator.next());
         }
+    }
+
+    @Test
+    public void testHashSetRetaining() {
+        BinaryPeak p1 = new BinaryPeak(1, 10);
+        BinaryPeak p2 = new BinaryPeak(1, 20);
+        BinaryPeak p3 = new BinaryPeak(2, 30);
+        BinaryPeak p4 = new BinaryPeak(3, 40);
+
+        Set<BinaryPeak> set1 = new HashSet<>(1);
+        set1.add(p1);
+        set1.add(p3);
+        Assert.assertEquals(2, set1.size());
+
+        Set<BinaryPeak> set2 = new HashSet<>(1);
+        set2.add(p2);
+        set2.add(p4);
+        Assert.assertEquals(2, set2.size());
+
+        // this should not change p1
+        set1.retainAll(set2);
+        Assert.assertEquals(1, set1.size());
+        Assert.assertEquals(10, set1.iterator().next().getIntensity());
+
+        // set 2 should also only contain p2
+        set2.retainAll(set1);
+        Assert.assertEquals(1, set2.size());
+        Assert.assertEquals(20, set2.iterator().next().getIntensity());
     }
 
     @Test
@@ -64,7 +94,7 @@ public class CombinedFisherIntensityTestTest {
 
         // get the spectra
         File peakList = new File(Objects.requireNonNull(CombinedFisherIntensityTestTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
-        MzSpectraReader reader = new MzSpectraReader(peakList);
+        MzSpectraReader reader = new MzSpectraReader(peakList, GreedyClusteringEngine.COMPARISON_FILTER);
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> allSpectra = new ArrayList<>();
 
@@ -98,7 +128,7 @@ public class CombinedFisherIntensityTestTest {
             // score differences are caused by
             // 1) binning and the thereby caused different number of peaks and different fragment tolerance
             // 2) different intensity normalisation in the original spectra-cluster code
-            Assert.assertEquals(orgScore, score, 5);
+            Assert.assertEquals(String.format("Different scores for %d: org = %.2f, new = %.2f", i, orgScore, score), orgScore, score, 5);
 
         }
     }
@@ -125,7 +155,7 @@ public class CombinedFisherIntensityTestTest {
         for (int i = 1; i < impSpectra.size(); i++) {
             double score = similarity.correlation(firstSpec, impSpectra.get(i));
             // only accept very high scores
-            Assert.assertTrue(score > 100);
+            Assert.assertTrue(String.format("Score for %d is too low (%.2f)", i, score), score > 100);
             scores.add(score);
         }
 

@@ -2,6 +2,7 @@ package org.spectra.cluster.cdf;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.MzSpectraReaderTest;
@@ -46,7 +47,8 @@ public class SpectraPerBinNumberComparisonAssessorTest {
                 .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(40)));
 
         MzSpectraReader reader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),
-                normalizer, new HighestPeakPerBinFunction(), loadingFilter, testFile);
+                normalizer, new HighestPeakPerBinFunction(), loadingFilter, GreedyClusteringEngine.COMPARISON_FILTER,
+                testFile);
 
         SpectraPerBinNumberComparisonAssessor assessor = new SpectraPerBinNumberComparisonAssessor(
                 (int) Math.round(BasicIntegerNormalizer.MZ_CONSTANT * 0.5), 0, 2500 * BasicIntegerNormalizer.MZ_CONSTANT);

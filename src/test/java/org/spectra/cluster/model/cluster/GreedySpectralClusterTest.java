@@ -2,6 +2,7 @@ package org.spectra.cluster.model.cluster;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 public class GreedySpectralClusterTest {
     @Test
     public void testSavingComparisonMatches() {
-        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("Test"));
+        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("Test", GreedyClusteringEngine.COMPARISON_FILTER));
 
         Assert.assertEquals("Test", cluster.getId());
         Assert.assertEquals(0, cluster.getClusteredSpectraCount());
@@ -39,7 +40,7 @@ public class GreedySpectralClusterTest {
     @Test
     public void testAddingSpectra() throws Exception {
         File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile);
+        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> spectra = new ArrayList<>();
@@ -49,7 +50,7 @@ public class GreedySpectralClusterTest {
         }
 
         // add all spectra to one cluster
-        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("test"));
+        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
         cluster.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
         Assert.assertEquals(spectra.size(), cluster.getClusteredSpectraCount());

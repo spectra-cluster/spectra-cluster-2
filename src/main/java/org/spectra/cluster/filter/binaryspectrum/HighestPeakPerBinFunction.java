@@ -50,6 +50,6 @@ public class HighestPeakPerBinFunction implements IBinarySpectrumFunction {
         filteredPeaks.add(highestPeakInCurrentWindow);
 
         // create a copy
-        return new BinarySpectrum(binarySpectrum, filteredPeaks.toArray(new BinaryPeak[0]));
+        return new BinarySpectrum(binarySpectrum, filteredPeaks.toArray(new BinaryPeak[0]), true);
     }
 }
