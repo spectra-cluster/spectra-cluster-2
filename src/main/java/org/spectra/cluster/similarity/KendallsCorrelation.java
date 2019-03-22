@@ -23,11 +23,9 @@ package org.spectra.cluster.similarity;
 
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.util.FastMath;
-import org.apache.commons.math3.util.Pair;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.function.Function;
 
 /**
  * Implementation of Kendall's Tau-b rank correlation</a>.
@@ -70,45 +68,31 @@ import java.util.function.Function;
  *
  * @since 3.3
  */
-public class KendallsCorrelation implements ISimilarity {
+public class KendallsCorrelation {
     /**
      * Computes the Kendall's Tau rank correlation coefficient between the two arrays.
      *
-     * @param xArray first data array
-     * @param yArray second data array
      * @return Returns Kendall's Tau rank correlation coefficient for the two arrays
      * @throws DimensionMismatchException if the arrays lengths do not match
      */
 
-    @Override
-    public double correlation(final int[] xArray, final int[] yArray)
+    public double correlation(IntPair[] pairs)
             throws DimensionMismatchException {
+        final int n = pairs.length;
+        final int numPairs = sum(n - 1);
 
-        if (xArray.length != yArray.length) {
-            throw new DimensionMismatchException(xArray.length, yArray.length);
-        }
+        Arrays.sort(pairs, Comparator.comparingInt(IntPair::getFirst).thenComparingInt(IntPair::getSecond));
 
-        final int n = xArray.length;
-        final long numPairs = sum(n - 1);
-
-        @SuppressWarnings("unchecked")
-        Pair<Integer, Integer>[] pairs = new Pair[n];
-        for (int i = 0; i < n; i++) {
-            pairs[i] = new Pair<>(xArray[i], yArray[i]);
-        }
-
-        Arrays.sort(pairs, Comparator.comparing((Function<Pair<Integer, Integer>, Integer>) Pair::getFirst).thenComparing(Pair::getSecond));
-
-        long tiedXPairs = 0;
-        long tiedXYPairs = 0;
-        long consecutiveXTies = 1;
-        long consecutiveXYTies = 1;
-        Pair<Integer, Integer> prev = pairs[0];
+        int tiedXPairs = 0;
+        int tiedXYPairs = 0;
+        int consecutiveXTies = 1;
+        int consecutiveXYTies = 1;
+        IntPair prev = pairs[0];
         for (int i = 1; i < n; i++) {
-            final Pair<Integer, Integer> curr = pairs[i];
-            if (curr.getFirst().equals(prev.getFirst())) {
+            final IntPair curr = pairs[i];
+            if (curr.getFirst() == prev.getFirst()) {
                 consecutiveXTies++;
-                if (curr.getSecond().equals(prev.getSecond())) {
+                if (curr.getSecond() == prev.getSecond()) {
                     consecutiveXYTies++;
                 } else {
                     tiedXYPairs += sum(consecutiveXYTies - 1);
@@ -127,7 +111,7 @@ public class KendallsCorrelation implements ISimilarity {
 
         int swaps = 0;
         @SuppressWarnings("unchecked")
-        Pair<Integer, Integer>[] pairsDestination = new Pair[n];
+        IntPair[] pairsDestination = new IntPair[n];
         for (int segmentSize = 1; segmentSize < n; segmentSize <<= 1) {
             for (int offset = 0; offset < n; offset += 2 * segmentSize) {
                 int i = offset;
@@ -139,7 +123,7 @@ public class KendallsCorrelation implements ISimilarity {
                 while (i < iEnd || j < jEnd) {
                     if (i < iEnd) {
                         if (j < jEnd) {
-                            if (pairs[i].getSecond().compareTo(pairs[j].getSecond()) <= 0) {
+                            if (pairs[i].getSecond() <= pairs[j].getSecond()) {
                                 pairsDestination[copyLocation] = pairs[i];
                                 i++;
                             } else {
@@ -158,17 +142,17 @@ public class KendallsCorrelation implements ISimilarity {
                     copyLocation++;
                 }
             }
-            final Pair<Integer, Integer>[] pairsTemp = pairs;
+            final IntPair[] pairsTemp = pairs;
             pairs = pairsDestination;
             pairsDestination = pairsTemp;
         }
 
-        long tiedYPairs = 0;
-        long consecutiveYTies = 1;
+        int tiedYPairs = 0;
+        int consecutiveYTies = 1;
         prev = pairs[0];
         for (int i = 1; i < n; i++) {
-            final Pair<Integer, Integer> curr = pairs[i];
-            if (curr.getSecond().equals(prev.getSecond())) {
+            final IntPair curr = pairs[i];
+            if (curr.getSecond() == prev.getSecond()) {
                 consecutiveYTies++;
             } else {
                 tiedYPairs += sum(consecutiveYTies - 1);
@@ -178,7 +162,7 @@ public class KendallsCorrelation implements ISimilarity {
         }
         tiedYPairs += sum(consecutiveYTies - 1);
 
-        final long concordantMinusDiscordant = numPairs - tiedXPairs - tiedYPairs + tiedXYPairs - 2 * swaps;
+        final int concordantMinusDiscordant = numPairs - tiedXPairs - tiedYPairs + tiedXYPairs - 2 * swaps;
         final double nonTiedPairsMultiplied = (numPairs - tiedXPairs) * (double) (numPairs - tiedYPairs);
         return concordantMinusDiscordant / FastMath.sqrt(nonTiedPairsMultiplied);
     }
@@ -190,8 +174,10 @@ public class KendallsCorrelation implements ISimilarity {
      * @param n the summation end
      * @return the sum of the number from 1 to n
      */
-    private static long sum(long n) {
-        return n * (n + 1) / 2L;
+    private static int sum(int n) {
+        return n * (n + 1) / 2;
     }
+
+
 }
 
