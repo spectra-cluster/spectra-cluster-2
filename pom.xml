@@ -14,7 +14,7 @@
        <colt.version>1.2.0</colt.version>
        <junit.version>4.12</junit.version>
        <common-collections.version>3.2.2</common-collections.version>
-       <jmzreader.version>2.0.4</jmzreader.version>
+       <jmzreader.version>2.0.7-SNAPSHOT</jmzreader.version>
        <commons-math3.version>3.5</commons-math3.version>
        <commons-cli.version>1.2</commons-cli.version>
     </properties>
@@ -209,6 +209,11 @@
             <id>pst-release</id>
             <name>EBI Nexus Repository</name>
             <url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-release</url>
+        </repository>
+        <repository>
+            <id>pst-snapshots</id>
+            <name>EBI Nexus Snapshots Repository</name>
+            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-snapshots</url>
         </repository>
     </repositories>
 
