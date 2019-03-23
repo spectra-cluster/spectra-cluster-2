@@ -129,7 +129,7 @@ public class MzSpectraReader {
                 Class<?> peakListclass = isValidPeakListFile(file);
                 if( peakListclass != null){
                     if(peakListclass == MgfFile.class)
-                        jMzReader = new MgfFile(file);
+                        jMzReader = new MgfFile(file, false, true);
                     else if (peakListclass == AplFile.class)
                         jMzReader = new AplFile(file);
                     else if(peakListclass == Ms2File.class)
