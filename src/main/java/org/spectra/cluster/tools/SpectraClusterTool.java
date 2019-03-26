@@ -5,7 +5,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.PosixParser;
-import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
@@ -175,7 +174,7 @@ public class SpectraClusterTool implements IProgressListener {
             IClusteringEngine engine = new GreedyClusteringEngine(
                     binnedPrecursorTolerance,
                     startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
-                    new MinNumberComparisonsAssessor(10_000), nInitiallySharedPeaks);
+                    numberOfComparisonAssessor, nInitiallySharedPeaks);
 
             log.debug("Clustering files...");
             ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
