@@ -30,6 +30,8 @@ import java.io.File;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,10 +177,11 @@ public class CombinedFisherIntensityTestTest {
 
     @Test
     @Ignore
-    public void testScoreBenchmark() throws Exception {
+    public void testScoreBenchmark() {
         IBinarySpectrumSimilarity similarity = new CombinedFisherIntensityTest();
+        LocalDateTime start = LocalDateTime.now();
 
-        for (int rounds = 0; rounds < 1000_000; rounds++) {
+        for (int rounds = 0; rounds < 100000; rounds++) {
             for (int j = 0; j < impSpectra.size(); j++) {
                 for (int i = 1; i < impSpectra.size(); i++) {
                     double score = similarity.correlation(impSpectra.get(j), impSpectra.get(i));
@@ -186,5 +189,7 @@ public class CombinedFisherIntensityTestTest {
                 }
             }
         }
+
+        System.out.println(String.format("Took %d seconds", Duration.between(start, LocalDateTime.now()).getSeconds()));
     }
 }
