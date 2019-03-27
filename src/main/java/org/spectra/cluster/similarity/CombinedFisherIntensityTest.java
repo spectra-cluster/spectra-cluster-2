@@ -4,6 +4,7 @@ import cern.jet.random.HyperGeometric;
 import cern.jet.random.Normal;
 import cern.jet.random.engine.RandomEngine;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
+import org.apache.commons.math3.util.FastMath;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
@@ -68,8 +69,8 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
         }
 
         // calculate the hypergeometric score
-        int minBin = Math.min(spectrum1.getMinComparisonMz(), spectrum2.getMinComparisonMz());
-        int maxBin = Math.max(spectrum1.getMaxComparisonMz(), spectrum2.getMaxComparisonMz());
+        int minBin = FastMath.min(spectrum1.getMinComparisonMz(), spectrum2.getMinComparisonMz());
+        int maxBin = FastMath.max(spectrum1.getMaxComparisonMz(), spectrum2.getMaxComparisonMz());
 
         int morePeaks = spectrum1.getComparisonFilteredPeaks().size();
         int lessPeaks = spectrum2.getComparisonFilteredPeaks().size();
@@ -91,25 +92,20 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
 
         // only return the hgtScore if it is above the allowed maximum
         if (hgtScore > maxHgt) {
-            return -Math.log(hgtScore);
+            return -FastMath.log(hgtScore);
         }
 
         // create the list of intensities
         Map<BinaryPeak, BinaryPeak> comparisonPeaks2 = spectrum2.getComparisonFilteredPeaks();
-        int[] intensities1 = new int[peakSet1.size()];
-        int[] intensities2 = new int[peakSet2.size()];
-        int counter = 0;
+        IntPair[] pairs = new IntPair[peakSet1.size()];
 
+        int counter = 0;
         for (BinaryPeak p : peakSet1) {
-            intensities1[counter] = p.getIntensity();
-            intensities2[counter] = comparisonPeaks2.get(p).getIntensity();
-            counter++;
+            pairs[counter++] = new IntPair(p.getIntensity(), comparisonPeaks2.get(p).getIntensity());
         }
 
         // calculate the fisher p
-        double kendallP = assessKendallCorrelation(
-                intensities1,
-                intensities2);
+        double kendallP = assessKendallCorrelation(pairs);
 
         // combine the two
         return combineProbabilities(hgtScore, kendallP);
@@ -123,7 +119,7 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
      */
     private double combineProbabilities(double p1, double p2) {
         // combine the p-values using Fisher's method
-        double combined = -2 * (Math.log(p1) + Math.log(p2));
+        double combined = -2 * (FastMath.log(p1) + FastMath.log(p2));
         double pValue;
 
         if (combined == 0)
@@ -139,18 +135,16 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
             return MAX_SCORE;
         }
 
-        return -Math.log(pValue);
+        return -FastMath.log(pValue);
     }
 
     /**
      * Assess the Kendall Tau's correlation converted to a probability score.
-     * @param sharedIntensitySpec1 A list of intensities for spectrum 1
-     * @param sharedIntensitySpec2 A list of intensities for spectrum 2
      * @return Probability as a double
      */
-    private double assessKendallCorrelation(int[] sharedIntensitySpec1, int[] sharedIntensitySpec2) {
+    private double assessKendallCorrelation(IntPair[] pairs) {
         // get the Tau score
-        double correlation = kendallsCorrelation.correlation(sharedIntensitySpec1, sharedIntensitySpec2);
+        double correlation = kendallsCorrelation.correlation(pairs);
 
         // map to p-value
         // if the correlation cannot be calculated, assume that there is none
@@ -160,14 +154,14 @@ public class CombinedFisherIntensityTest implements IBinarySpectrumSimilarity {
 
         // convert correlation into probability using the distribution used in Peptidome
         // Normal Distribution with mean = 0 and SD^2 = 2(2k + 5)/9k(k − 1)
-        double k = (double) sharedIntensitySpec1.length;
+        double k = (double) pairs.length;
 
         // this cannot be calculated for only 1 shared peak
         if (k == 1)
             return 1;
 
         double sdSquare = (2 * (2 * k + 5)) / (9 * k * (k - 1) );
-        double sd = Math.sqrt(sdSquare);
+        double sd = FastMath.sqrt(sdSquare);
 
         Normal normal = new Normal(0, sd, RANDOM_ENGINE);
         double probability = normal.cdf(correlation);

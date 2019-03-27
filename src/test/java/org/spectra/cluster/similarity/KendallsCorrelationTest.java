@@ -50,26 +50,23 @@ public class KendallsCorrelationTest {
             }
 
             // create the list of integers
-            int[] intens1 = new int[nPeaks];
-            int[] intens2 = new int[nPeaks];
-
             List<Double> allIntens1 = new ArrayList<>(s1.getPeakList().values());
             List<Double> allIntens2 = new ArrayList<>(s2.getPeakList().values());
 
             double[] doubles1 = new double[nPeaks];
             double[] doubles2 = new double[nPeaks];
+            IntPair[] pairs = new IntPair[nPeaks];
 
             for (int j = 0; j < nPeaks; j++) {
                 doubles1[j] = Math.round(allIntens1.get(j));
-                intens1[j] = (int) Math.round(allIntens1.get(j));
-
                 doubles2[j] = Math.round(allIntens2.get(j));
-                intens2[j] = (int) Math.round(allIntens2.get(j));
+
+                pairs[j] = new IntPair((int) Math.round(allIntens1.get(j)), (int) Math.round(allIntens2.get(j)));
             }
 
             // compare the taus
             double kOrg = orgKendall.correlation(doubles1, doubles2);
-            double kNew = myKendall.correlation(intens1, intens2);
+            double kNew = myKendall.correlation(pairs);
 
             Assert.assertEquals(kOrg, kNew, 0.0000001);
 
