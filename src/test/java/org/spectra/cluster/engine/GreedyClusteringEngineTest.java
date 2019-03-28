@@ -16,6 +16,7 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
@@ -105,7 +106,7 @@ public class GreedyClusteringEngineTest {
     public void testClustering() throws Exception {
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
-                new MinNumberComparisonsAssessor(10000), 5);
+                new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5));
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
@@ -232,7 +233,7 @@ public class GreedyClusteringEngineTest {
         // cluster everything
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
-                new MinNumberComparisonsAssessor(10_000), 5);
+                new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5));
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
@@ -268,7 +269,7 @@ public class GreedyClusteringEngineTest {
 
             IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                     1, t, 5, new CombinedFisherIntensityTest(),
-                    new MinNumberComparisonsAssessor(10_000), 5);
+                    new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5));
 
             ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 

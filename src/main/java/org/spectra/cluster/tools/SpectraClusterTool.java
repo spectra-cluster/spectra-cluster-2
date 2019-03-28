@@ -21,6 +21,9 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.predicates.IComparisonPredicate;
+import org.spectra.cluster.predicates.SameChargePredicate;
+import org.spectra.cluster.predicates.ShareNComparisonPeaksPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.tools.utils.IProgressListener;
 import org.spectra.cluster.tools.utils.ProgressUpdate;
@@ -120,6 +123,12 @@ public class SpectraClusterTool implements IProgressListener {
                 fragmentTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue()));
             }
 
+            // IGNORE CHARGE STATE
+            boolean ignoreCharge = defaultParameters.isIgnoreCharge();
+            if (commandLine.hasOption(CliOptions.OPTIONS.IGNORE_CHARGE.getValue())) {
+                ignoreCharge = true;
+            }
+
             /**
              * Advanced options
              */
@@ -169,12 +178,18 @@ public class SpectraClusterTool implements IProgressListener {
             // sort according to m/z
             spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
 
+            // create the comparison predicate for the first round
+            IComparisonPredicate<ICluster> firstRoundPredicate = new ShareNComparisonPeaksPredicate(nInitiallySharedPeaks);
+            if (!ignoreCharge) {
+                firstRoundPredicate = new SameChargePredicate().and(firstRoundPredicate);
+            }
+
             Path thisResult = Paths.get(finalResultFile.getAbsolutePath());
 
             IClusteringEngine engine = new GreedyClusteringEngine(
                     binnedPrecursorTolerance,
                     startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
-                    numberOfComparisonAssessor, nInitiallySharedPeaks);
+                    numberOfComparisonAssessor, firstRoundPredicate);
 
             log.debug("Clustering files...");
             ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));

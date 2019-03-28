@@ -33,6 +33,8 @@ public class CliOptions {
         REUSE_BINARY_FILES("reuse.binary.files", "u"),
         REMOVE_REPORTER_PEAKS("remove.reporters", "rr"),
 
+        IGNORE_CHARGE("ignore.charge", "ic"),
+
         FAST_MODE("fast_mode", "fm"),
         FILTER("filter", "ft"),
         HELP("help", "h"),
@@ -145,6 +147,12 @@ public class CliOptions {
                 .withLongOpt(OPTIONS.REUSE_BINARY_FILES.getLongValue())
                 .create(OPTIONS.REUSE_BINARY_FILES.getValue());
         options.addOption(reuseBinaryFiles);
+
+        Option ignoreCharge = OptionBuilder
+                .withDescription("If set, the spectra's charge state is ignored")
+                .withLongOpt(OPTIONS.IGNORE_CHARGE.getLongValue())
+                .create(OPTIONS.IGNORE_CHARGE.getValue());
+        options.addOption(ignoreCharge);
 
         Option fastMode = OptionBuilder
                 .withDescription("If this option is set the 'fast mode' is enabled. In this mode, the radical peak filtering used for the comparison function is already applied during spectrum conversion. Thereby, the clustering and consensus spectrum quality is slightly decreased but speed increases 2-3 fold.")

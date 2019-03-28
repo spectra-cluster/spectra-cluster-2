@@ -13,6 +13,7 @@ import org.spectra.cluster.io.properties.InMemoryPropertyStorage;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
@@ -43,7 +44,7 @@ public class DotClusteringWriterTest {
 
     @Test
     public void testWritingClustering() throws Exception {
-        IClusteringEngine engine = new GreedyClusteringEngine(10_000, 1, 0.99f, 5, new CombinedFisherIntensityTest(), new MinNumberComparisonsAssessor(10000), 5);
+        IClusteringEngine engine = new GreedyClusteringEngine(10_000, 1, 0.99f, 5, new CombinedFisherIntensityTest(), new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5));
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 

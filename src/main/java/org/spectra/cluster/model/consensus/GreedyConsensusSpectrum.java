@@ -1,6 +1,7 @@
 package org.spectra.cluster.model.consensus;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.math3.util.FastMath;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
@@ -126,7 +127,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         }
 
         // update the average charge
-        averageCharge = sumCharge / nSpectra;
+        averageCharge = FastMath.round(sumCharge / (float) nSpectra);
 
         setIsDirty(true);
     }

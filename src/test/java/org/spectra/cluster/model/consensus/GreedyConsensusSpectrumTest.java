@@ -286,4 +286,27 @@ public class GreedyConsensusSpectrumTest {
         consensusSpectrum.addConsensusSpectrum(consensusSpectrum2);
         Assert.assertEquals(precursorMz, consensusSpectrum.getPrecursorMz());
     }
+
+    @Test
+    public void testAverageChargeApproach() {
+        int sumCharge = 10;
+        int nSpectra = 5;
+
+        Assert.assertEquals(2, Math.round(sumCharge / (float) nSpectra));
+
+        sumCharge += 1;
+        nSpectra++;
+
+        Assert.assertEquals(2, Math.round(sumCharge / (float) nSpectra));
+
+        sumCharge = 5;
+        nSpectra = 5;
+
+        Assert.assertEquals(1, Math.round(sumCharge / (float) nSpectra));
+
+        nSpectra++;
+        sumCharge += 2;
+
+        Assert.assertEquals(1, Math.round(sumCharge / (float) nSpectra));
+    }
 }
