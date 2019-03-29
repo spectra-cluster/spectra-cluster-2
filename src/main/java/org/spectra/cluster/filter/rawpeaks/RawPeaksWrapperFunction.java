@@ -1,6 +1,7 @@
 package org.spectra.cluster.filter.rawpeaks;
 
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
+
+import org.bigbio.pgatk.io.common.Spectrum;
 
 import java.util.Map;
 
