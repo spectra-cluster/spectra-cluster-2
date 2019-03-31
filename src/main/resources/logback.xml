@@ -14,7 +14,12 @@
         </encoder>
     </appender>
 
-    <root level="info">
+    <logger name="org.bigbio.pgatk.io" level="info">
+        <appender-ref ref="SPECTRA_CLUSTER-FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="debug">
         <appender-ref ref="SPECTRA_CLUSTER-FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>
