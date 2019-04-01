@@ -1,14 +1,14 @@
 package org.spectra.cluster.similarity;
 
+import org.bigbio.pgatk.io.common.PgatkIOException;
+import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.normalizer.IIntegerNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
-import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
@@ -23,12 +23,11 @@ public class KendallsCorrelationTest {
     List<Spectrum> spectra = new ArrayList<>();
 
     @Before
-    public void setUp() throws JMzReaderException, URISyntaxException {
+    public void setUp() throws URISyntaxException, PgatkIOException {
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI();
-        MgfFile mgfFile = new MgfFile(new File(uri));
-        Iterator<Spectrum> spectrumIterator = mgfFile.getSpectrumIterator();
-        while (spectrumIterator.hasNext()) {
-            spectra.add(spectrumIterator.next());
+        MgfIterableReader mgfFile = new MgfIterableReader(new File(uri), true, false, true);
+        while (mgfFile.hasNext()) {
+            spectra.add(mgfFile.next());
         }
     }
 

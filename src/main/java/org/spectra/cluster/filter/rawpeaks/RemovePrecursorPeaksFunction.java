@@ -1,8 +1,7 @@
 package org.spectra.cluster.filter.rawpeaks;
 
+import org.bigbio.pgatk.io.common.Spectrum;
 import org.spectra.cluster.util.Masses;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-
 import java.util.HashMap;
 import java.util.Map;
 

@@ -2,6 +2,8 @@ package org.spectra.cluster.similarity;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,9 +16,6 @@ import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.LSHBinner;
 import org.spectra.cluster.normalizer.SequestBinner;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
-
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ public class JaccardCorrelationTest {
     Spectrum spectrum1 = null;
     Spectrum spectrum2 = null;
 
-    Iterator<Spectrum> specIt;
     FactoryNormalizer binnerNormalizer = new FactoryNormalizer(new SequestBinner(), new BasicIntegerNormalizer());
 
 
@@ -41,25 +39,22 @@ public class JaccardCorrelationTest {
     public void setUp() throws Exception {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MgfFile mgfFile = new MgfFile(new File(uri));
+        MgfIterableReader mgfFile = new MgfIterableReader(new File(uri), true, false, true);
 
-        specIt = mgfFile.getSpectrumIterator();
 
-        spectrum1 = specIt.next();
+        spectrum1 = mgfFile.next();
 
         binarySpectrum1 = new BinarySpectrum((int)spectrum1.getPrecursorMZ().doubleValue(), spectrum1.getPrecursorCharge(),
                 binnerNormalizer.normalizePeaks(spectrum1.getPeakList()), GreedyClusteringEngine.COMPARISON_FILTER);
 
-        spectrum2 = specIt.next();
+        spectrum2 = mgfFile.next();
 
         binarySpectrum2 = new BinarySpectrum((int)spectrum2.getPrecursorMZ().doubleValue(), spectrum2.getPrecursorCharge(),
                 binnerNormalizer.normalizePeaks(spectrum1.getPeakList()), GreedyClusteringEngine.COMPARISON_FILTER);
 
         /* Read the Spectra from similar files **/
         uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("most_similar_1.mgf")).toURI();
-        mgfFile = new MgfFile(new File(uri));
-        specIt = mgfFile.getSpectrumIterator();
-
+        mgfFile = new MgfIterableReader(new File(uri), true, false, true);
 
     }
 

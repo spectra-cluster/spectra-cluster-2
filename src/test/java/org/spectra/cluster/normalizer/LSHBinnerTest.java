@@ -1,12 +1,12 @@
 package org.spectra.cluster.normalizer;
 
+import org.bigbio.pgatk.io.common.PgatkIOException;
+import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
-import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
@@ -29,21 +29,21 @@ import java.util.stream.Collectors;
  */
 public class LSHBinnerTest {
 
-    Iterator<Spectrum> specIt = null;
+    private MgfIterableReader mgfFile;
 
     @Before
-    public void setUp() throws JMzReaderException, URISyntaxException {
+    public void setUp() throws URISyntaxException, PgatkIOException {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MgfFile mgfFile = new MgfFile(new File(uri));
-        specIt = mgfFile.getSpectrumIterator();
+         mgfFile = new MgfIterableReader(new File(uri), true, false, true);
+
 
     }
 
     @Test
     public void LSHBinner() {
 
-        Spectrum spectrum = specIt.next();
+        Spectrum spectrum = mgfFile.next();
         LSHBinner kernelsHLS = LSHBinner.getInstance();
 
         SequestBinner binner = new SequestBinner();

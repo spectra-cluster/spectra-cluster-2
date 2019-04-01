@@ -1,12 +1,12 @@
 package org.spectra.cluster.normalizer;
 
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
+import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
@@ -34,14 +34,9 @@ public class CumulativeIntensityNormalizerTest {
     @Before
     public void setUp() throws Exception {
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MgfFile mgfFile = new MgfFile(new File(uri));
-        Iterator<Spectrum> specIt = mgfFile.getSpectrumIterator();
+        MgfIterableReader mgfFile = new MgfIterableReader(new File(uri), true, false, true);
 
-        if (!specIt.hasNext()) {
-            throw new Exception("Failed to load spectra");
-        }
-
-        testSpectrum = specIt.next();
+        testSpectrum = mgfFile.next();
     }
 
     @Test
