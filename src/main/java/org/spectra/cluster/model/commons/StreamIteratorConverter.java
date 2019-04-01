@@ -1,7 +1,9 @@
 package org.spectra.cluster.model.commons;
 
+import org.bigbio.pgatk.io.common.MzIterableReader;
+import org.bigbio.pgatk.io.common.Spectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
+
 
 import java.io.File;
 import java.util.Iterator;
@@ -21,12 +23,12 @@ import java.util.stream.Stream;
 public class StreamIteratorConverter<K, T> implements Iterator<T> {
 
     private final Converter<? super ITuple, ? extends IBinarySpectrum> converter;
-    private final Iterator<Tuple<File, Iterator<Spectrum>>> iterator;
+    private final Iterator<Tuple<File, MzIterableReader>> iterator;
     private ITuple currentTuple;
     // cache the spectrum to enable filtering
     private ITuple nextSpectrum;
 
-    public StreamIteratorConverter(Stream<Tuple<File, Iterator<Spectrum>>> iterator, Converter<? super ITuple, ? extends IBinarySpectrum> converter) {
+    public StreamIteratorConverter(Stream<Tuple<File, MzIterableReader>> iterator, Converter<? super ITuple, ? extends IBinarySpectrum> converter) {
         this.converter = converter;
         this.iterator = iterator.iterator();
         if (this.iterator.hasNext())

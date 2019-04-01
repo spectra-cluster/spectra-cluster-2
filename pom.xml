@@ -9,14 +9,16 @@
     <name>Mass spectra cluster algorithm</name>
 
     <properties>
-       <java.version>1.8</java.version>
-       <lombock.version>1.18.2</lombock.version>
-       <colt.version>1.2.0</colt.version>
-       <junit.version>4.12</junit.version>
-       <common-collections.version>3.2.2</common-collections.version>
-       <jmzreader.version>2.0.7-SNAPSHOT</jmzreader.version>
-       <commons-math3.version>3.5</commons-math3.version>
-       <commons-cli.version>1.2</commons-cli.version>
+        <java.version>1.8</java.version>
+        <lombock.version>1.18.2</lombock.version>
+        <colt.version>1.2.0</colt.version>
+        <junit.version>4.12</junit.version>
+        <common-collections.version>3.2.2</common-collections.version>
+        <commons-math3.version>3.5</commons-math3.version>
+        <commons-cli.version>1.2</commons-cli.version>
+        <pgatk-io.version>1.0.0-SNAPSHOT</pgatk-io.version>
+        <slf4j.version>1.7.25</slf4j.version>
+        <logback.version>1.2.3</logback.version>
     </properties>
 
     <dependencies>
@@ -26,6 +28,28 @@
             <artifactId>lombok</artifactId>
             <version>${lombock.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
 
         <!-- Injecting Properties -->
         <dependency>
@@ -62,12 +86,6 @@
         </dependency>
 
         <dependency>
-            <groupId>uk.ac.ebi.pride.tools</groupId>
-            <artifactId>jmzreader</artifactId>
-            <version>${jmzreader.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
             <version>${commons-cli.version}</version>
@@ -90,6 +108,12 @@
             <groupId>info.debatty</groupId>
             <artifactId>java-lsh</artifactId>
             <version>RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bigbio.pgatk</groupId>
+            <artifactId>pgatk-io</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -123,11 +147,13 @@
                     <include>*.properties</include>
                     <include>*/*</include>
                     <include>*.tsv</include>
+                    <include>*.xml</include>
                 </includes>
             </resource>
         </resources>
 
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

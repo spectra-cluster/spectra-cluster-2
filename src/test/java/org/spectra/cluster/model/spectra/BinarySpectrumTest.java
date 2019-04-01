@@ -1,14 +1,14 @@
 package org.spectra.cluster.model.spectra;
 
 
+import org.bigbio.pgatk.io.common.PgatkIOException;
+import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
-import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
@@ -20,24 +20,23 @@ import java.util.Objects;
 
 public class BinarySpectrumTest {
 
-    Iterator<Spectrum> specIt = null;
     BinaryPeak[] peakList = {new BinaryPeak(1, 1), new BinaryPeak(2, 1), new BinaryPeak(3, 1), new BinaryPeak(4, 1), new BinaryPeak(5, 1), new BinaryPeak(6, 1)};
     IBinarySpectrum binarySpectrum = new BinarySpectrum(345567, 2, peakList, GreedyClusteringEngine.COMPARISON_FILTER);
+    private MgfIterableReader mgfFile;
 
 
     @Before
-    public void setUp() throws JMzReaderException, URISyntaxException {
+    public void setUp() throws URISyntaxException, PgatkIOException {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MgfFile mgfFile = new MgfFile(new File(uri));
-        specIt = mgfFile.getSpectrumIterator();
+         mgfFile = new MgfIterableReader(new File(uri), true, false, true);
 
     }
 
     @Test
     public void readBinarySpectrum() {
 
-        Spectrum spectrum = specIt.next();
+        Spectrum spectrum = mgfFile.next();
         BinarySpectrum binarySpectrum = new BinarySpectrum((int)spectrum.getPrecursorMZ().doubleValue(), spectrum.getPrecursorCharge(), new BinaryPeak[0], GreedyClusteringEngine.COMPARISON_FILTER);
         Assert.assertEquals(2, binarySpectrum.getPrecursorCharge());
 

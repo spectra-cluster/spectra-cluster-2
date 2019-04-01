@@ -1,10 +1,10 @@
 package org.spectra.cluster.filter.rawpeaks;
 
+import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
@@ -19,11 +19,10 @@ public class DeisotoperFunctionTest {
     @Before
     public void setUp() throws Exception {
         URI uri = Objects.requireNonNull(getClass().getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MgfFile mgfFile = new MgfFile(new File(uri));
-        Iterator<Spectrum> specIt = mgfFile.getSpectrumIterator();
+        MgfIterableReader mgfFile = new MgfIterableReader(new File(uri), true, false, true);
 
-        while (specIt.hasNext()) {
-            allSpectra.add(specIt.next());
+        while (mgfFile.hasNext()) {
+            allSpectra.add(mgfFile.next());
         }
     }
 

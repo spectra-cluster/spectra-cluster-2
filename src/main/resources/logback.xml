@@ -1,0 +1,26 @@
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <appender name="SPECTRA_CLUSTER-FILE" class="ch.qos.logback.core.FileAppender">
+        <file>log/spectra-cluster.log</file>
+
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.bigbio.pgatk.io" level="info">
+        <appender-ref ref="SPECTRA_CLUSTER-FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="debug">
+        <appender-ref ref="SPECTRA_CLUSTER-FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

@@ -1,6 +1,12 @@
 package org.spectra.cluster.io.spectra;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bigbio.pgatk.io.common.MzIterableReader;
+import org.bigbio.pgatk.io.common.Param;
+import org.bigbio.pgatk.io.common.PgatkIOException;
+import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.mgf.MgfIterableReader;
+import org.bigbio.pgatk.io.mgf.Ms2Query;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
@@ -13,19 +19,6 @@ import org.spectra.cluster.model.commons.Tuple;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.*;
-import uk.ac.ebi.pride.tools.apl_parser.AplFile;
-import uk.ac.ebi.pride.tools.dta_parser.DtaFile;
-import uk.ac.ebi.pride.tools.jmzreader.JMzReader;
-import uk.ac.ebi.pride.tools.jmzreader.JMzReaderException;
-import uk.ac.ebi.pride.tools.jmzreader.model.Param;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
-import uk.ac.ebi.pride.tools.mgf_parser.model.Ms2Query;
-import uk.ac.ebi.pride.tools.ms2_parser.Ms2File;
-import uk.ac.ebi.pride.tools.mzdata_wrapper.MzMlWrapper;
-import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLFile;
-import uk.ac.ebi.pride.tools.mzxml_parser.MzXMLParsingException;
-import uk.ac.ebi.pride.tools.pkl_parser.PklFile;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -90,7 +83,7 @@ public class MzSpectraReader {
         }
     }
 
-    private Map<File, JMzReader> inputFiles;
+    private Map<File, MzIterableReader> inputFiles;
 
     private FactoryNormalizer factory;
     /**
@@ -124,25 +117,26 @@ public class MzSpectraReader {
                 return;
             }
 
-            JMzReader jMzReader = null;
+            MzIterableReader jMzReader = null;
             try{
                 Class<?> peakListclass = isValidPeakListFile(file);
                 if( peakListclass != null){
-                    if(peakListclass == MgfFile.class)
-                        jMzReader = new MgfFile(file, false, true);
-                    else if (peakListclass == AplFile.class)
-                        jMzReader = new AplFile(file);
-                    else if(peakListclass == Ms2File.class)
-                        jMzReader = new Ms2File(file);
-                    else if(peakListclass == PklFile.class)
-                        jMzReader = new PklFile(file);
-                    else if(peakListclass == DtaFile.class)
-                        jMzReader = new PklFile(file);
-                    } else if(isValidMzML(file))
-                        jMzReader = new MzMlWrapper(file);
-                    else if(isValidmzXML(file))
-                        jMzReader = new MzXMLFile(file);
-                }catch (JMzReaderException | MzXMLParsingException e){
+                    if(peakListclass == MgfIterableReader.class)
+                        jMzReader = new MgfIterableReader(file, true, true, true);
+//                    else if (peakListclass == AplFile.class)
+//                        jMzReader = new AplFile(file);
+//                    else if(peakListclass == Ms2File.class)
+//                        jMzReader = new Ms2File(file);
+//                    else if(peakListclass == PklFile.class)
+//                        jMzReader = new PklFile(file);
+//                    else if(peakListclass == DtaFile.class)
+//                        jMzReader = new PklFile(file);
+//                    } else if(isValidMzML(file))
+//                        jMzReader = new MzMlWrapper(file);
+//                    else if(isValidmzXML(file))
+//                        jMzReader = new MzXMLFile(file);
+                }
+                }catch (PgatkIOException e){
                     String message = "The file type provided is not supported -- " +
                             Arrays.toString(MzFileType.values()) + ": " + e.getMessage();
                     log.error(message);
@@ -172,31 +166,31 @@ public class MzSpectraReader {
                             IRawSpectrumFunction loadingFilter,
                             IBinarySpectrumFunction comparisonFilter) throws Exception {
         try{
-            JMzReader jMzReader = null;
+            MzIterableReader jMzReader = null;
             Class<?> peakListclass = isValidPeakListFile(file);
-            if( peakListclass != null){
-                if(peakListclass == MgfFile.class)
-                    jMzReader = new MgfFile(file);
-                else if (peakListclass == AplFile.class)
-                    jMzReader = new AplFile(file);
-                else if(peakListclass == Ms2File.class)
-                    jMzReader = new Ms2File(file);
-                else if(peakListclass == PklFile.class)
-                    jMzReader = new PklFile(file);
-                else if(peakListclass == DtaFile.class)
-                    jMzReader = new PklFile(file);
-            } else if(isValidMzML(file))
-                jMzReader = new MzMlWrapper(file);
-            else if(isValidmzXML(file))
-                jMzReader = new MzXMLFile(file);
-
+            if( peakListclass != null) {
+                if (peakListclass == MgfIterableReader.class)
+                    jMzReader = new MgfIterableReader(file, true, false, true);
+//                else if (peakListclass == AplFile.class)
+//                    jMzReader = new AplFile(file);
+//                else if(peakListclass == Ms2File.class)
+//                    jMzReader = new Ms2File(file);
+//                else if(peakListclass == PklFile.class)
+//                    jMzReader = new PklFile(file);
+//                else if(peakListclass == DtaFile.class)
+//                    jMzReader = new PklFile(file);
+//            } else if(isValidMzML(file))
+//                jMzReader = new MzMlWrapper(file);
+//            else if(isValidmzXML(file))
+//                jMzReader = new MzXMLFile(file);
+            }
             if(jMzReader != null){
                 this.inputFiles = new ConcurrentHashMap<>();
                 this.inputFiles.put(file, jMzReader);
             }else{
                 throw new SpectraClusterException("The provided file is not supported --" + file.getAbsolutePath());
             }
-        }catch (JMzReaderException e){
+        }catch (PgatkIOException e){
             String message = "The file type provided is not support -- " + Arrays.toString(MzFileType.values());
             log.error(message);
             throw new Exception(message);
@@ -244,9 +238,9 @@ public class MzSpectraReader {
      * @return Iterator of {@link BinarySpectrum} spectra
      */
     public Iterator<IBinarySpectrum> readBinarySpectraIterator(IPropertyStorage propertyStorage) {
-        Stream<Tuple<File, Iterator<Spectrum>>> iteratorStream = inputFiles
+        Stream<Tuple<File, MzIterableReader>> iteratorStream = inputFiles
                 .entrySet().stream()
-                .map(x -> new Tuple<>(x.getKey(), x.getValue().getSpectrumIterator()))
+                .map(x -> new Tuple<>(x.getKey(), x.getValue()))
                 .collect(Collectors.toList())
                 .stream();
 
@@ -268,7 +262,7 @@ public class MzSpectraReader {
 
             // save spectrum properties
             if (propertyStorage != null) {
-                for (Param param: spectrum.getAdditional().getParams()) {
+                for (Param param: spectrum.getAdditional()) {
                     propertyStorage.storeProperty(s.getUUI(), param.getName(), param.getValue());
 
                     // TODO: map the title and retention time from existing cvParams
@@ -304,22 +298,20 @@ public class MzSpectraReader {
     /**
      * Get the Class for the specific Peak List reader
      * @param file File to be read
-     * @return Class Reader {@link JMzReader} Adapter
+     * @return Class Reader {@link org.bigbio.pgatk.io.common.MzReader} Adapter
      */
     private static Class<?> isValidPeakListFile(File file){
 
         String filename = file.getName().toLowerCase();
 
-        if (filename.endsWith(MzFileType.DTA.getExtension()))
-            return DtaFile.class;
-        else if (filename.endsWith(MzFileType.MGF.getExtension()))
-            return MgfFile.class;
-        else if (filename.endsWith(MzFileType.MS2.getExtension()))
-            return Ms2File.class;
-        else if (filename.endsWith(MzFileType.PKL.getExtension()))
-            return PklFile.class;
-        else if (filename.endsWith(MzFileType.APL.getExtension()))
-            return AplFile.class;
+        if (filename.endsWith(MzFileType.MGF.getExtension()))
+            return MgfIterableReader.class;
+//        else if (filename.endsWith(MzFileType.MS2.getExtension()))
+//            return Ms2File.class;
+//        else if (filename.endsWith(MzFileType.PKL.getExtension()))
+//            return PklFile.class;
+//        else if (filename.endsWith(MzFileType.APL.getExtension()))
+//            return AplFile.class;
 
         return null;
     }

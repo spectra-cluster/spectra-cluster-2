@@ -1,5 +1,7 @@
 package org.spectra.cluster.utils.performance;
 
+import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.ehcache.sizeof.SizeOf;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,8 +12,6 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.SequestBinner;
-import uk.ac.ebi.pride.tools.jmzreader.model.Spectrum;
-import uk.ac.ebi.pride.tools.mgf_parser.MgfFile;
 
 import java.io.File;
 import java.net.URI;
@@ -36,15 +36,14 @@ public class ObjectSizeFetcherTest {
     public void setUp() throws Exception {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MgfFile mgfFile = new MgfFile(new File(uri));
-        Iterator<Spectrum> specIt = mgfFile.getSpectrumIterator();
+        MgfIterableReader mgfFile = new MgfIterableReader(new File(uri), true, false, true);
         spectrumList = new ArrayList<>();
         binarySpectrumList = new BinarySpectrum[2];
         BasicIntegerNormalizer precursorNormalizer = new BasicIntegerNormalizer();
         FactoryNormalizer factory = new FactoryNormalizer(new SequestBinner(), new BasicIntegerNormalizer());
         int count = 0;
-        while(specIt.hasNext()){
-            Spectrum spec = specIt.next();
+        while(mgfFile.hasNext()){
+            Spectrum spec = mgfFile.next();
             spectrumList.add(spec);
             binarySpectrumList[count] = new BinarySpectrum(
                     (precursorNormalizer).binValue(spec.getPrecursorMZ()),
