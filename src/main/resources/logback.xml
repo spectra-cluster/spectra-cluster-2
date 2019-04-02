@@ -2,7 +2,6 @@
 
     <appender name="SPECTRA_CLUSTER-FILE" class="ch.qos.logback.core.FileAppender">
         <file>log/spectra-cluster.log</file>
-
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
         </encoder>

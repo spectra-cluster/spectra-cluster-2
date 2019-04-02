@@ -43,13 +43,16 @@ public class LSHBinnerTest {
     @Test
     public void LSHBinner() {
 
-        Spectrum spectrum = mgfFile.next();
-        LSHBinner kernelsHLS = LSHBinner.getInstance();
+        if(mgfFile.hasNext()){
+            Spectrum spectrum = mgfFile.next();
+            LSHBinner kernelsHLS = LSHBinner.getInstance();
 
-        SequestBinner binner = new SequestBinner();
+            SequestBinner binner = new SequestBinner();
 
-        int[] values = kernelsHLS.getKernels(binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())));
-        Assert.assertEquals(10, values.length);
+            int[] values = kernelsHLS.getKernels(binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList())));
+            Assert.assertEquals(10, values.length);
+        }
+
 
     }
 }
