@@ -34,11 +34,15 @@ public class BasicMzBinnerTest {
     @Test
     public void binnedHighResMzPeaks() {
 
-        Spectrum spectrum = mgfFile.next();
-        BasicMzBinner binner = new BasicMzBinner();
+        if(mgfFile.hasNext()){
+            Spectrum spectrum = mgfFile.next();
+            BasicMzBinner binner = new BasicMzBinner();
 
-        int[] values = binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
-        Assert.assertEquals(88, values.length);
+            int[] values = binner.binDoubles(spectrum.getPeakList().entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+            Assert.assertEquals(88, values.length);
+        }
+
+
 
     }
 }

@@ -42,12 +42,14 @@ public class JaccardCorrelationTest {
         MgfIterableReader mgfFile = new MgfIterableReader(new File(uri), true, false, true);
 
 
-        spectrum1 = mgfFile.next();
+        if(mgfFile.hasNext())
+            spectrum1 = mgfFile.next();
 
         binarySpectrum1 = new BinarySpectrum((int)spectrum1.getPrecursorMZ().doubleValue(), spectrum1.getPrecursorCharge(),
                 binnerNormalizer.normalizePeaks(spectrum1.getPeakList()), GreedyClusteringEngine.COMPARISON_FILTER);
 
-        spectrum2 = mgfFile.next();
+        if(mgfFile.hasNext())
+            spectrum2 = mgfFile.next();
 
         binarySpectrum2 = new BinarySpectrum((int)spectrum2.getPrecursorMZ().doubleValue(), spectrum2.getPrecursorCharge(),
                 binnerNormalizer.normalizePeaks(spectrum1.getPeakList()), GreedyClusteringEngine.COMPARISON_FILTER);
