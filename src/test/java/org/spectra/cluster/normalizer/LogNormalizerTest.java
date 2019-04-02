@@ -24,8 +24,8 @@ public class LogNormalizerTest {
     public void setUp() throws Exception {
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         MgfIterableReader mgfFile = new MgfIterableReader(new File(uri), true, false, true);
-
-        testSpectrum = mgfFile.next();
+        if(mgfFile.hasNext())
+            testSpectrum = mgfFile.next();
     }
 
     @Test

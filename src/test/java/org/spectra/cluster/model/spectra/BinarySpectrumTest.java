@@ -35,10 +35,12 @@ public class BinarySpectrumTest {
 
     @Test
     public void readBinarySpectrum() {
+        if(mgfFile.hasNext()){
+            Spectrum spectrum = mgfFile.next();
+            BinarySpectrum binarySpectrum = new BinarySpectrum((int)spectrum.getPrecursorMZ().doubleValue(), spectrum.getPrecursorCharge(), new BinaryPeak[0], GreedyClusteringEngine.COMPARISON_FILTER);
+            Assert.assertEquals(2, binarySpectrum.getPrecursorCharge());
+        }
 
-        Spectrum spectrum = mgfFile.next();
-        BinarySpectrum binarySpectrum = new BinarySpectrum((int)spectrum.getPrecursorMZ().doubleValue(), spectrum.getPrecursorCharge(), new BinaryPeak[0], GreedyClusteringEngine.COMPARISON_FILTER);
-        Assert.assertEquals(2, binarySpectrum.getPrecursorCharge());
 
     }
 
