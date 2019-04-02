@@ -5,7 +5,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.PosixParser;
-import org.bigbio.pgatk.io.common.Spectrum;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
@@ -174,10 +173,11 @@ public class SpectraClusterTool implements IProgressListener {
             while (iterator.hasNext()) {
                 IBinarySpectrum spectrum = iterator.next();
                 spectra.add(spectrum);
+                count++;
             }
 
             LocalDateTime loadingCompleteTime = LocalDateTime.now();
-            log.debug(String.format("Loaded spectra in %d seconds", Duration.between(startTime, loadingCompleteTime).getSeconds()));
+            log.debug(String.format("Loaded %d spectra in %d seconds", count, Duration.between(startTime, loadingCompleteTime).getSeconds()));
 
             // sort according to m/z
             spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
