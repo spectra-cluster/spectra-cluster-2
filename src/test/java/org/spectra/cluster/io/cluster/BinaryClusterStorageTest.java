@@ -15,6 +15,7 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
@@ -65,7 +66,7 @@ public class BinaryClusterStorageTest {
 
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
-                new MinNumberComparisonsAssessor(10000), 5);
+                new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5));
 
         clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
     }

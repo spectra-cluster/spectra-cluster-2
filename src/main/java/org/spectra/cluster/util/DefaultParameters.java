@@ -31,6 +31,7 @@ public class DefaultParameters {
     private Integer numberHigherPeaks;
     private Double precursorIonTolerance;
     private Double fragmentIonTolerance;
+    private boolean ignoreCharge;
 
     private Float thresholdStart;
     private Float thresholdEnd;
@@ -67,6 +68,8 @@ public class DefaultParameters {
             this.binaryDirectory = properties.getProperty("binary.temp.directory");
         if(properties.containsKey("reuse.binary.files"))
             this.reuseBinary = Boolean.parseBoolean(properties.getProperty("reuse.binary.files"));
+        if(properties.contains("ignore.charge"))
+            this.ignoreCharge = Boolean.parseBoolean(properties.getProperty("ignore.charge"));
         if(properties.containsKey("cluster.fast.mode"))
             this.fastMode = Boolean.parseBoolean(properties.getProperty("cluster.fast.mode"));
         if(properties.containsKey("filters.remove.reporter.peaks"))

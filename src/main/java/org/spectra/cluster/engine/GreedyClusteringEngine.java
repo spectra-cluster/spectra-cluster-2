@@ -12,7 +12,6 @@ import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.predicates.ClusterIsKnownComparisonPredicate;
 import org.spectra.cluster.predicates.IComparisonPredicate;
-import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 
@@ -52,12 +51,14 @@ public class GreedyClusteringEngine implements IClusteringEngine {
      * @param clusteringRounds The number of clustering rounds to perform.
      * @param similarityMeasure The similarity measure to use
      * @param numberOfComparisonAssessor The numberOfComparisonAssessor to use during the clustering process.
-     * @param nInitiallySharedPeaks Number of highest peaks of which spectra have to share one to be compared.
+     * @param firstRoundPredicate Predicate to use in the first clustering round to decide whether spectra should be compare.
+     *                            In subsequent rounds only spectra that were compared previously are taken into consideration.
      * @throws Exception Thrown in case no CDF can be loaded for the passed similarity measure.
      */
     public GreedyClusteringEngine(int precursorTolerance, float thresholdStart, float thresholdEnd,
                                   int clusteringRounds, IBinarySpectrumSimilarity similarityMeasure,
-                                  INumberOfComparisonAssessor numberOfComparisonAssessor, int nInitiallySharedPeaks)
+                                  INumberOfComparisonAssessor numberOfComparisonAssessor,
+                                  IComparisonPredicate<ICluster> firstRoundPredicate)
             throws Exception {
         this.precursorTolerance = precursorTolerance;
         this.thresholdStart = 1 - thresholdStart;
@@ -65,7 +66,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         this.clusteringRounds = clusteringRounds;
         this.similarityMeasure = similarityMeasure;
         this.numberOfComparisonAssessor = numberOfComparisonAssessor;
-        this.firstRoundPredicate = new ShareHighestPeaksClusterPredicate(nInitiallySharedPeaks);
+        this.firstRoundPredicate = firstRoundPredicate;
 
         // some sanity checks
         if (thresholdEnd > thresholdStart) {
