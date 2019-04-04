@@ -1,8 +1,8 @@
 package org.spectra.cluster.io.cluster;
 
 import lombok.extern.slf4j.Slf4j;
-import org.spectra.cluster.io.properties.IPropertyStorage;
-import org.spectra.cluster.io.properties.StoredProperties;
+import org.bigbio.pgatk.io.properties.IPropertyStorage;
+import org.bigbio.pgatk.io.properties.StoredProperties;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.BinaryConsensusPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -19,10 +19,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This writer writes clusters to the .clustering
- * format as defined in the original spectra-cluster
- * project.
+ * This writer writes clusters to the .clustering format as defined in the original spectra-cluster project.
  */
+
 @Slf4j
 public class DotClusteringWriter implements IClusterWriter {
     private final boolean append;

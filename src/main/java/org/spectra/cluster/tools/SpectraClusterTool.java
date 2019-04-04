@@ -5,6 +5,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.PosixParser;
+import org.bigbio.pgatk.io.properties.IPropertyStorage;
+import org.bigbio.pgatk.io.properties.PropertyStorageFactory;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
@@ -13,8 +15,6 @@ import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.cluster.DotClusteringWriter;
 import org.spectra.cluster.io.cluster.IClusterWriter;
-import org.spectra.cluster.io.properties.IPropertyStorage;
-import org.spectra.cluster.io.properties.PropertyStorageFactory;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -129,6 +129,13 @@ public class SpectraClusterTool implements IProgressListener {
                 ignoreCharge = true;
             }
 
+            String tempFolder = defaultParameters.getBinaryDirectory();
+            if(commandLine.hasOption(CliOptions.OPTIONS.TEMP_DIRECTORY.getValue())){
+                tempFolder = commandLine.getOptionValue(CliOptions.OPTIONS.TEMP_DIRECTORY.getValue());
+            }else{
+                tempFolder = createTempFolderPath(finalResultFile, tempFolder);
+            }
+
             /**
              * Advanced options
              */
@@ -151,7 +158,7 @@ public class SpectraClusterTool implements IProgressListener {
                     .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
                     .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters.getNumberHigherPeaks())));
 
-            IPropertyStorage localStorage = PropertyStorageFactory.buildDynamicPropertyStorage();
+            IPropertyStorage localStorage = PropertyStorageFactory.buildDynamicPropertyStorage(new File(tempFolder));
             File[] inputFiles = Arrays.stream(peakFiles)
                     .map(File::new)
                     .toArray(File[]::new);
@@ -210,6 +217,9 @@ public class SpectraClusterTool implements IProgressListener {
 
             log.debug(String.format("Process completed in %d seconds", Duration.between(startTime, LocalDateTime.now()).getSeconds()));
 
+            // Close the property storage and delete folders and property files
+            localStorage.close();
+
             System.exit(0);
         } catch (MissingParameterException e) {
             System.out.println("Error: " + e.getMessage() + "\n\n");
@@ -267,6 +277,22 @@ public class SpectraClusterTool implements IProgressListener {
         formatter.printHelp("Spectra Cluster ",
                 "Clusters the spectra found in Mass Spectrometry file formats and writes the results in a text-based file.\n",
                 CliOptions.getOptions(), "\n\n", true);
+    }
+
+    private String createTempFolderPath(File outputFile, String tempFolder) {
+        //check directory
+        String finalPath;
+        String absolutePath = outputFile.getAbsolutePath();
+        absolutePath = new File(absolutePath).getParentFile().getAbsolutePath();
+        tempFolder = absolutePath + File.separator + tempFolder;
+        File directory = new File(tempFolder);
+        if(directory.exists())
+            finalPath = directory.getAbsolutePath();
+        else{
+            directory.mkdirs();
+            finalPath = directory.getAbsolutePath();
+        }
+        return finalPath;
     }
 
     @Override
