@@ -63,7 +63,7 @@ public class LSHBinner  {
     }
 
     /**
-     * Default LSHBinner use the @{@link SequestBinner} to normalize the mzValues and
+     * Default LSHBinner use the @{@link TideBinner} to normalize the mzValues and
      * default parameters to generate the {@link MinHash}.
      */
     private LSHBinner(){

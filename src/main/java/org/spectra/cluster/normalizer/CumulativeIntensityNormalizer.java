@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  *
  * @author ypriverol on 21/08/2018.
  */
-public class CumulativeIntensityNormalizer implements IIntegerNormalizer{
+public class CumulativeIntensityNormalizer implements IIntensityNormalizer {
     public static final int MAX_INTENSITY = 100000;
     private final int precision;
 

@@ -8,7 +8,7 @@ import java.util.List;
  * Normalizes peaks' intensities by setting the maximum
  * peak to a fixed number.
  */
-public class MaxPeakNormalizer implements IIntegerNormalizer {
+public class MaxPeakNormalizer implements IIntensityNormalizer {
     public static final int MAX_INTENSITY = 100000;
 
     @Getter

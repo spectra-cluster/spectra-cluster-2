@@ -103,8 +103,8 @@ public class MzSpectraReader {
      * @param files File to be read
      * @throws Exception File not supported
      */
-    public  MzSpectraReader(IIntegerNormalizer mzBinner,
-                            IIntegerNormalizer intensityBinner,
+    public  MzSpectraReader(IMzBinner mzBinner,
+                            IIntensityNormalizer intensityBinner,
                             BasicIntegerNormalizer precursorNormalizer,
                             IBinarySpectrumFunction peaksPerMzWindowFilter,
                             IRawSpectrumFunction loadingFilter,
@@ -159,8 +159,8 @@ public class MzSpectraReader {
      * @param file File to be read
      * @throws Exception File not supported
      */
-    public  MzSpectraReader(File file, IIntegerNormalizer mzBinner,
-                            IIntegerNormalizer intensityBinner,
+    public  MzSpectraReader(File file, IMzBinner mzBinner,
+                            IIntensityNormalizer intensityBinner,
                             BasicIntegerNormalizer precursorNormalizer,
                             IBinarySpectrumFunction peaksPerMzWindowFilter,
                             IRawSpectrumFunction loadingFilter,
@@ -205,7 +205,7 @@ public class MzSpectraReader {
 
     /**
      * Default constructor for MzSpectraReader. This implementation uses for Normalization the following Normalizer Helpers:
-     * - mz values are normalized using the {@link org.spectra.cluster.normalizer.SequestBinner}.
+     * - mz values are normalized using the {@link org.spectra.cluster.normalizer.TideBinner}.
      * - precursor mz is normalized using the {@link BasicIntegerNormalizer}.
      * - intensity values are normalized using the {@link MaxPeakNormalizer}.
      *

@@ -5,6 +5,7 @@ import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 import java.io.File;
 import java.net.URI;
 import java.util.*;
@@ -56,25 +57,18 @@ public class TideBinnerTest {
     }
 
     @Test
-    public void compareBinners() {
-        SequestBinner sequestBinner = new SequestBinner();
-        TideBinner tideBinner = new TideBinner();
+    public void testUnbinning() {
+        double[] valuesToBin = {0.01, 10.123, 100.123, 382.1231, 2982.1231};
 
-        for (Spectrum s : allSpectra) {
-            List<Double> mzValues = new ArrayList<>(s.getPeakList().keySet());
-            int[] sequestBins = sequestBinner.binDoubles(mzValues);
-            int[] tideBins = tideBinner.binDoubles(mzValues);
+        TideBinner binner = new TideBinner();
+        int[] bins = binner.binDoubles(Arrays.stream(valuesToBin).boxed().collect(Collectors.toList()));
+        double[] unbinned = binner.unbinValues(bins);
 
-            Assert.assertEquals(sequestBins.length, tideBins.length);
-
-            for (int i = 0; i < sequestBins.length; i++) {
-                if (sequestBins[i] != tideBins[i]) {
-                    if (verbose)
-                        System.out.println(String.format("Different bin for %.2f m/z %d -> %d", mzValues.get(i), sequestBins[i], tideBins[i]));
-                }
-
-                Assert.assertTrue(Math.abs(sequestBins[i] - tideBins[i]) <= 1);
-            }
-        }
+        Assert.assertEquals(valuesToBin.length, unbinned.length);
+        Assert.assertEquals(0.01, unbinned[0], 0.01);
+        Assert.assertEquals(10.1, unbinned[1], 0.1);
+        Assert.assertEquals(100.1, unbinned[2], 0.05);
+        Assert.assertEquals(382.1, unbinned[3], 0.1);
+        Assert.assertEquals(2982, unbinned[4], 2);
     }
 }

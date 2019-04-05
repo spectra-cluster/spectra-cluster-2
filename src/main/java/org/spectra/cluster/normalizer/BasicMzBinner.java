@@ -10,7 +10,7 @@ import java.util.List;
  * @author ypriverol
  */
 @Slf4j
-public class BasicMzBinner implements IIntegerNormalizer{
+public class BasicMzBinner implements IMzBinner {
 
     public static double HIG_RES_INTERVAL = 1.0F;
     private double binnerValue;
@@ -49,5 +49,14 @@ public class BasicMzBinner implements IIntegerNormalizer{
         return binIndexes;
     }
 
+    @Override
+    public double[] unbinValues(int[] valuesToUnbin) {
+        double[] unbinned = new double[valuesToUnbin.length];
 
+        for (int i = 0; i < valuesToUnbin.length; i++) {
+            unbinned[i] = (double) valuesToUnbin[i] * binnerValue;
+        }
+
+        return unbinned;
+    }
 }

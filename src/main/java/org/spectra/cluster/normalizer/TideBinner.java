@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author jg
  */
-public class TideBinner implements IIntegerNormalizer {
+public class TideBinner implements IMzBinner {
     public static final double BIN_WIDTH = 1.0005079;
     public static final double BIN_OFFSET = 0.68;
 
@@ -41,25 +41,31 @@ public class TideBinner implements IIntegerNormalizer {
     }
 
     /**
-     * Returns the upper and lower bound for the specified bin.
+     * Unbin the passed value
      * @param bin The bin's 0-based index.
-     * @return An array of doubles containing the [lower bound, upper bound]
+     * @return double
      */
-    public double[] getBinLimits(int bin) {
+    public double unbin(int bin) {
         // make sure the bin is a positive integer
         if (bin < 0) {
             throw new IllegalArgumentException("Bin must be a positive integer");
         }
 
-        double upperBound = 1.000508 * (0.18 + bin);
-        double lowerBound;
+        double binDouble = (double) bin;
 
-        if (bin == 0) {
-            lowerBound = 0;
-        } else {
-            lowerBound = 1.000508 * (0.18 + bin - 1);
+        double value = (binDouble - 1.0 + BIN_WIDTH) * (CHARGE * BIN_WIDTH) - (CHARGE - 1) * Masses.PROTON;
+
+        return value;
+    }
+
+    @Override
+    public double[] unbinValues(int[] valuesToUnbin) {
+        double[] unbinned = new double[valuesToUnbin.length];
+
+        for (int i = 0; i < valuesToUnbin.length; i++) {
+            unbinned[i] = unbin(valuesToUnbin[i]);
         }
 
-        return new double[] {lowerBound, upperBound};
+        return unbinned;
     }
 }
