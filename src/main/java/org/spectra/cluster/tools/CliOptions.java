@@ -18,7 +18,7 @@ public class CliOptions {
         OUTPUT_PATH("output.path", "o"),
 
         PRECURSOR_TOLERANCE("precursor.tolerance", "p"),
-        FRAGMENT_TOLERANCE("fragment.tolerance", "f"),
+        FRAGMENT_PRECISION("fragment.precision", "f"),
 
         MAJOR_PEAK_JOBS("major.peak.jobs", "m"),
 
@@ -82,9 +82,9 @@ public class CliOptions {
 
         Option fragmentTolerance = OptionBuilder
                 .hasArg()
-                .withDescription("Fragment ion tolerance in m/z to use for fragment peak matching")
-                .withLongOpt(OPTIONS.FRAGMENT_TOLERANCE.getLongValue())
-                .create(OPTIONS.FRAGMENT_TOLERANCE.getValue());
+                .withDescription("Fragment ion precision. May be \"high\" or \"low\".")
+                .withLongOpt(OPTIONS.FRAGMENT_PRECISION.getLongValue())
+                .create(OPTIONS.FRAGMENT_PRECISION.getValue());
         options.addOption(fragmentTolerance);
 
         Option precursorTolerance = OptionBuilder
