@@ -54,7 +54,7 @@ public class DefaultParameters {
     private void setProperties(Properties properties) {
         if(properties.containsKey("precursor.tolerance"))
             this.precursorIonTolerance = Double.parseDouble(properties.getProperty("precursor.tolerance").trim());
-        if(properties.containsKey("fragment.tolerance"))
+        if(properties.containsKey("fragment.precision"))
             this.fragmentIonPrecision = properties.getProperty("fragment.precision");
         if(properties.containsKey("threshold.start"))
             this.thresholdStart =  Float.parseFloat(properties.getProperty("threshold.start"));
