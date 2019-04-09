@@ -282,10 +282,7 @@ public class SpectraClusterTool implements IProgressListener {
     private String createTempFolderPath(File outputFile, String tempFolder) {
         //check directory
         String finalPath;
-        String absolutePath = outputFile.getAbsolutePath();
-        absolutePath = new File(absolutePath).getParentFile().getAbsolutePath();
-        tempFolder = absolutePath + File.separator + tempFolder;
-        File directory = new File(tempFolder);
+        File directory = new File(outputFile.getParentFile(), tempFolder);
         if(directory.exists())
             finalPath = directory.getAbsolutePath();
         else{
