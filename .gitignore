@@ -2,4 +2,8 @@
 *.iml
 
 target/
-*.log 
+*.log
+*.clustering
+=======
+*.log
+.spectra-cluster/
