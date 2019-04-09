@@ -64,11 +64,11 @@ public class DefaultParameters {
             this.numberHigherPeaks = Integer.parseInt(properties.getProperty("number.higher.peaks"));
         if(properties.containsKey("cluster.rounds"))
             this.clusterRounds = Integer.parseInt(properties.getProperty("cluster.rounds"));
-        if(properties.contains("binary.temp.directory"))
+        if(properties.containsKey("binary.temp.directory"))
             this.binaryDirectory = properties.getProperty("binary.temp.directory");
         if(properties.containsKey("reuse.binary.files"))
             this.reuseBinary = Boolean.parseBoolean(properties.getProperty("reuse.binary.files"));
-        if(properties.contains("ignore.charge"))
+        if(properties.containsKey("ignore.charge"))
             this.ignoreCharge = Boolean.parseBoolean(properties.getProperty("ignore.charge"));
         if(properties.containsKey("cluster.fast.mode"))
             this.fastMode = Boolean.parseBoolean(properties.getProperty("cluster.fast.mode"));
@@ -76,7 +76,7 @@ public class DefaultParameters {
             this.filterReportPeaks = Boolean.parseBoolean(properties.getProperty("filters.remove.reporter.peaks"));
         if(properties.containsKey("initially.shared.peaks"))
             this.nInitiallySharedPeaks = Integer.parseInt(properties.getProperty("initially.shared.peaks"));
-        if(properties.contains("x.min.comparisons"))
+        if(properties.containsKey("x.min.comparisons"))
             this.minNumberOfComparisons = Integer.parseInt(properties.getProperty("x.min.comparisons"));
     }
 

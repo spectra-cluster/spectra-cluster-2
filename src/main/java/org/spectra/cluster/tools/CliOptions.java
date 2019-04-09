@@ -40,6 +40,8 @@ public class CliOptions {
         HELP("help", "h"),
         VERBOSE("verbose", "v"),
 
+        TEMP_DIRECTORY("temp_directory", "tmp"),
+
         // Advanced options
         ADVANCED_MIN_NUMBER_COMPARISONS("x.min.comparisons", "mc"),
         ADVANCED_NUMBER_PREFILTERED_PEAKS("xn.prefiltered.peaks", "pp"),
