@@ -14,7 +14,7 @@ import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.CumulativeIntensityNormalizer;
-import org.spectra.cluster.normalizer.SequestBinner;
+import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 
@@ -138,7 +138,7 @@ public class GreedyConsensusSpectrumTest {
     @Test
     public void tesBenchaMarkPeakIntesityNormalization() throws Exception {
         File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
-        MzSpectraReader readerCummulative = new MzSpectraReader(testFile,new SequestBinner(), new CumulativeIntensityNormalizer(),
+        MzSpectraReader readerCummulative = new MzSpectraReader(testFile,new TideBinner(), new CumulativeIntensityNormalizer(),
                 new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
                 // don't filter the spectrum
                 (IBinarySpectrum s) -> s);
@@ -196,7 +196,7 @@ public class GreedyConsensusSpectrumTest {
     @Test
     public void tesBenchaMarkPeakIntesityNormalizationSytentic() throws Exception {
         File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("synthetic_first_pool_3xHCD_R1.mgf")).toURI());
-        MzSpectraReader readerCumulative = new MzSpectraReader(testFile,new SequestBinner(), new CumulativeIntensityNormalizer(),
+        MzSpectraReader readerCumulative = new MzSpectraReader(testFile,new TideBinner(), new CumulativeIntensityNormalizer(),
                 new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, GreedyClusteringEngine.COMPARISON_FILTER);
 
         Iterator<IBinarySpectrum> spectrumIterator = readerCumulative.readBinarySpectraIterator();

@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FactoryNormalizer {
 
-    private IIntegerNormalizer mzBinner;
-    private IIntegerNormalizer intensityBinner;
+    private IMzBinner mzBinner;
+    private IIntensityNormalizer intensityBinner;
 
     /**
      * Factory Normalizer
      */
-    public FactoryNormalizer(IIntegerNormalizer mzBinner, IIntegerNormalizer intensityBinner){
+    public FactoryNormalizer(IMzBinner mzBinner, IIntensityNormalizer intensityBinner){
         this.mzBinner = mzBinner;
         this.intensityBinner = intensityBinner;
     }

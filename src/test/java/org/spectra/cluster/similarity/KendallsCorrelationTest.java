@@ -8,13 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.normalizer.IIntegerNormalizer;
-import org.spectra.cluster.normalizer.SequestBinner;
+import org.spectra.cluster.normalizer.TideBinner;
 
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +34,7 @@ public class KendallsCorrelationTest {
     public void testCorrelation() {
         KendallsCorrelation myKendall = new KendallsCorrelation();
         org.apache.commons.math3.stat.correlation.KendallsCorrelation orgKendall = new org.apache.commons.math3.stat.correlation.KendallsCorrelation();
-        IIntegerNormalizer normalizer = new SequestBinner();
+        IIntegerNormalizer normalizer = new TideBinner();
 
         for (int i = 0; i < spectra.size() - 1; i++) {
             Spectrum s1 = spectra.get(i);

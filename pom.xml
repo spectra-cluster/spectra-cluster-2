@@ -10,7 +10,6 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <lombock.version>1.18.2</lombock.version>
         <colt.version>1.2.0</colt.version>
         <junit.version>4.12</junit.version>
         <common-collections.version>3.2.2</common-collections.version>
@@ -19,15 +18,10 @@
         <pgatk-io.version>1.0.0-SNAPSHOT</pgatk-io.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
+        <guava.version>21.0</guava.version>
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombock.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -50,20 +44,10 @@
             <version>${logback.version}</version>
         </dependency>
 
-
-        <!-- Injecting Properties -->
         <dependency>
-            <groupId>javax.enterprise</groupId>
-            <artifactId>cdi-api</artifactId>
-            <version>2.0.SP1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.xlate/property-inject -->
-        <dependency>
-            <groupId>io.xlate</groupId>
-            <artifactId>property-inject</artifactId>
-            <version>1.0.3</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
         <!-- -->
@@ -89,19 +73,6 @@
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
             <version>${commons-cli.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>chronicle-map</artifactId>
-            <version>3.16.4</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.iq80.leveldb/leveldb -->
-        <dependency>
-            <groupId>org.iq80.leveldb</groupId>
-            <artifactId>leveldb</artifactId>
-            <version>0.10</version>
         </dependency>
 
         <dependency>

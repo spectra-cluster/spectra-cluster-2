@@ -20,7 +20,7 @@ public class SpectraClusterToolTest {
         String[] args = {
               "-o", resultFile.toAbsolutePath().toString(),
               "-p", "1", // precursor tolerance
-              "-f", "0.5", // fragment tolerance
+              "-f", "low", // fragment tolerance
               "-mc", "0", // minimum comparisons (auto)
               "-s", "1", // start threshold
               "-e", "0.99", // end-threshold

@@ -18,9 +18,7 @@ import org.spectra.cluster.io.cluster.IClusterWriter;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
-import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
-import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.normalizer.*;
 import org.spectra.cluster.predicates.IComparisonPredicate;
 import org.spectra.cluster.predicates.SameChargePredicate;
 import org.spectra.cluster.predicates.ShareNComparisonPeaksPredicate;
@@ -118,9 +116,12 @@ public class SpectraClusterTool implements IProgressListener {
 
             // FRAGMENT TOLERANCE
             // TODO: Add support for fragment tolerance
-            double fragmentTolerance = defaultParameters.getFragmentIonTolerance();
-            if (commandLine.hasOption(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue())) {
-                fragmentTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_TOLERANCE.getValue()));
+            String fragmentPrecision = defaultParameters.getFragmentIonPrecision();
+            if (commandLine.hasOption(CliOptions.OPTIONS.FRAGMENT_PRECISION.getValue())) {
+                fragmentPrecision = commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_PRECISION.getValue());
+            }
+            if (!"high".equalsIgnoreCase(fragmentPrecision) && !"low".equalsIgnoreCase(fragmentPrecision)) {
+                throw new Exception("Invalid fragment precision set. Allowed values are 'low' and 'high'");
             }
 
             // IGNORE CHARGE STATE
@@ -154,6 +155,12 @@ public class SpectraClusterTool implements IProgressListener {
             /** Perform clustering **/
             LocalDateTime startTime = LocalDateTime.now();
 
+            // set an approximate fragment tolerance for the filters
+            double fragmentTolerance = (fragmentPrecision.equalsIgnoreCase("high")) ? 0.01 : 0.05;
+
+            // set the appropriate m/z binner
+            IMzBinner mzBinner = (fragmentPrecision.equalsIgnoreCase("high")) ? new HighResolutionMzBinner() : new TideBinner();
+
             IRawSpectrumFunction loadingFilter = new RemoveImpossiblyHighPeaksFunction()
                     .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
                     .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters.getNumberHigherPeaks())));
@@ -163,7 +170,7 @@ public class SpectraClusterTool implements IProgressListener {
                     .map(File::new)
                     .toArray(File[]::new);
 
-            MzSpectraReader reader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),
+            MzSpectraReader reader = new MzSpectraReader( mzBinner, new MaxPeakNormalizer(),
                     new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
                     GreedyClusteringEngine.COMPARISON_FILTER, inputFiles);
 
@@ -237,7 +244,7 @@ public class SpectraClusterTool implements IProgressListener {
     private void printSettings(File finalResultFile, int nMajorPeakJobs, float startThreshold,
                                float endThreshold, int rounds, boolean keepBinaryFiles, File binaryTmpDirectory,
                                String[] peaklistFilenames, boolean reUseBinaryFiles, boolean fastMode,
-                               List<String> addedFilters) {
+                               List<String> addedFilters, String fragmentPrecision) {
         System.out.println("Spectra Cluster API Version 2.0");
         System.out.println("Created by Yasset Perez-Riverol & Johannes Griss\n");
 
@@ -253,7 +260,7 @@ public class SpectraClusterTool implements IProgressListener {
 
         System.out.println("\nOther settings:");
         System.out.println("Precursor tolerance: " + defaultParameters.getPrecursorIonTolerance());
-        System.out.println("Fragment ion tolerance: " + defaultParameters.getFragmentIonTolerance());
+        System.out.println("Fragment ion precision: " + fragmentPrecision);
 
         // used filters
         System.out.print("Added filters: ");

@@ -11,12 +11,12 @@ import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.FactoryNormalizer;
-import org.spectra.cluster.normalizer.SequestBinner;
+import org.spectra.cluster.normalizer.MaxPeakNormalizer;
+import org.spectra.cluster.normalizer.TideBinner;
 
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,7 +40,7 @@ public class ObjectSizeFetcherTest {
         spectrumList = new ArrayList<>();
         binarySpectrumList = new BinarySpectrum[2];
         BasicIntegerNormalizer precursorNormalizer = new BasicIntegerNormalizer();
-        FactoryNormalizer factory = new FactoryNormalizer(new SequestBinner(), new BasicIntegerNormalizer());
+        FactoryNormalizer factory = new FactoryNormalizer(new TideBinner(), new MaxPeakNormalizer());
         int count = 0;
         while(mgfFile.hasNext()){
             Spectrum spec = mgfFile.next();
