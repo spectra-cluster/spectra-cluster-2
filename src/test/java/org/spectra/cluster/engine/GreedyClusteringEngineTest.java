@@ -12,6 +12,7 @@ import org.spectra.cluster.io.cluster.DotClusteringWriter;
 import org.spectra.cluster.io.cluster.IClusterWriter;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
+import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
@@ -106,7 +107,8 @@ public class GreedyClusteringEngineTest {
     public void testClustering() throws Exception {
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
-                new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5));
+                new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
+                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
@@ -233,7 +235,8 @@ public class GreedyClusteringEngineTest {
         // cluster everything
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
-                new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5));
+                new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5),
+                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
@@ -269,7 +272,8 @@ public class GreedyClusteringEngineTest {
 
             IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                     1, t, 5, new CombinedFisherIntensityTest(),
-                    new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5));
+                    new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5),
+                    GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
             ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
