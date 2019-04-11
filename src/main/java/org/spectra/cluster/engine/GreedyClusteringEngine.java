@@ -12,7 +12,6 @@ import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.predicates.ClusterIsKnownComparisonPredicate;
 import org.spectra.cluster.predicates.IComparisonPredicate;
-import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 
 import java.security.InvalidParameterException;
@@ -27,7 +26,6 @@ import java.util.Comparator;
  */
 @Slf4j
 public class GreedyClusteringEngine implements IClusteringEngine {
-    public final static IBinarySpectrumSimilarity DEFAULT_SIMILARITY_MEASURE = new CombinedFisherIntensityTest();
     public final static IBinarySpectrumFunction COMPARISON_FILTER = new FractionTicFilterFunction();
 
     private final int precursorTolerance;
@@ -38,6 +36,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     private final CumulativeDistributionFunction cdf;
     private final INumberOfComparisonAssessor numberOfComparisonAssessor;
     private final IComparisonPredicate<ICluster> firstRoundPredicate;
+    private final int consensusSpectrumNoiseFilterIncrement;
     // TODO: Add a factory for consensus spectrum builder so we can add them as a parameter
     // private final IConsensusSpectrumBuilder consensusSpectrumBuilder;
 
@@ -58,7 +57,8 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     public GreedyClusteringEngine(int precursorTolerance, float thresholdStart, float thresholdEnd,
                                   int clusteringRounds, IBinarySpectrumSimilarity similarityMeasure,
                                   INumberOfComparisonAssessor numberOfComparisonAssessor,
-                                  IComparisonPredicate<ICluster> firstRoundPredicate)
+                                  IComparisonPredicate<ICluster> firstRoundPredicate,
+                                  int consensusSpectrumNoiseFilterIncrement)
             throws Exception {
         this.precursorTolerance = precursorTolerance;
         this.thresholdStart = 1 - thresholdStart;
@@ -67,6 +67,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         this.similarityMeasure = similarityMeasure;
         this.numberOfComparisonAssessor = numberOfComparisonAssessor;
         this.firstRoundPredicate = firstRoundPredicate;
+        this.consensusSpectrumNoiseFilterIncrement = consensusSpectrumNoiseFilterIncrement;
 
         // some sanity checks
         if (thresholdEnd > thresholdStart) {
@@ -187,7 +188,11 @@ public class GreedyClusteringEngine implements IClusteringEngine {
      */
     private GreedySpectralCluster[] convertSpectraToCluster(IBinarySpectrum[] spectra) {
         return Arrays.stream(spectra).map(s -> {
-            ICluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum(s.getUUI(), COMPARISON_FILTER));
+            ICluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum(s.getUUI(),
+                    GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP ,
+                    GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
+                    consensusSpectrumNoiseFilterIncrement,
+                    COMPARISON_FILTER));
             cluster.addSpectra(s);
             return cluster;
         }).toArray(GreedySpectralCluster[]::new);

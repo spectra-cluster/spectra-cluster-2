@@ -156,7 +156,10 @@ public class SpectraClusterTool implements IProgressListener {
             LocalDateTime startTime = LocalDateTime.now();
 
             // set an approximate fragment tolerance for the filters
-            double fragmentTolerance = (fragmentPrecision.equalsIgnoreCase("high")) ? 0.01 : 0.05;
+            double fragmentTolerance = (fragmentPrecision.equalsIgnoreCase("high")) ? 0.01 : 0.5;
+
+            // set the window size for the noise filter
+            int windowSizeNoiseFilter = (fragmentPrecision.equalsIgnoreCase("high")) ? 3000 : 100;
 
             // set the appropriate m/z binner
             IMzBinner mzBinner = (fragmentPrecision.equalsIgnoreCase("high")) ? new HighResolutionMzBinner() : new TideBinner();
@@ -207,7 +210,8 @@ public class SpectraClusterTool implements IProgressListener {
             IClusteringEngine engine = new GreedyClusteringEngine(
                     binnedPrecursorTolerance,
                     startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
-                    numberOfComparisonAssessor, firstRoundPredicate);
+                    numberOfComparisonAssessor, firstRoundPredicate,
+                    windowSizeNoiseFilter);
 
             log.debug("Clustering files...");
             ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));

@@ -19,6 +19,7 @@ import org.spectra.cluster.filter.rawpeaks.RemoveImpossiblyHighPeaksFunction;
 import org.spectra.cluster.filter.rawpeaks.RemovePrecursorPeaksFunction;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
+import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -169,7 +170,8 @@ public class CombinedFisherIntensityTestTest {
         // perform the clustering
         GreedyClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5,
-                similarity, new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5));
+                similarity, new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5),
+                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         ICluster[] clusters = engine.clusterSpectra(impSpectra.toArray(new IBinarySpectrum[0]));
 

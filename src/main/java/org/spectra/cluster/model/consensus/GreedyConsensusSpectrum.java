@@ -69,7 +69,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     private final int minPeaksToKeep;
     private final int peaksPerWindowToKeep;
-    private final int windowSize;
+    private final int windowSizeBins;
 
 
     /**
@@ -78,15 +78,15 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
      * @param id                   The id to use
      * @param minPeaksToKeep       The minimum number of peaks that should always be retained.
      * @param peaksPerWindowToKeep The minimum number of peaks to keep within the m/z window size.
-     * @param windowSize           The m/z window size for the peak filter to use.
-     * @param comparisonFitler     The filter function to use for the comparisons.
+     * @param windowSizeBins           The window size to use for the noise filter. The unit is in number of m/z bins.
+     * @param comparisonFilter     The filter function to use for the comparisons.
      */
-    public GreedyConsensusSpectrum(String id, int minPeaksToKeep, int peaksPerWindowToKeep, int windowSize, IBinarySpectrumFunction comparisonFitler) {
+    public GreedyConsensusSpectrum(String id, int minPeaksToKeep, int peaksPerWindowToKeep, int windowSizeBins, IBinarySpectrumFunction comparisonFilter) {
         this.id = id;
         this.minPeaksToKeep = minPeaksToKeep;
         this.peaksPerWindowToKeep = peaksPerWindowToKeep;
-        this.windowSize = windowSize;
-        this.comparisonFilter = comparisonFitler;
+        this.windowSizeBins = windowSizeBins;
+        this.comparisonFilter = comparisonFilter;
     }
 
     public GreedyConsensusSpectrum(String id, IBinarySpectrumFunction comparisonFilter) {
@@ -287,13 +287,13 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         /**
          * The maxiumn number of peaks to keep will be, the number of intervals * number of peaks per interval.
          */
-        List<BinaryConsensusPeak> peaksToKeep = new ArrayList<>((maxMz / windowSize) * peaksPerWindowToKeep);
+        List<BinaryConsensusPeak> peaksToKeep = new ArrayList<>((maxMz / windowSizeBins) * peaksPerWindowToKeep);
 
         // Keep top N peaks per W m/z
-        for (int windowStart = 0; windowStart <= maxMz && peakIndex < adaptedPeaks.length; windowStart += windowSize) {
-            List<BinaryConsensusPeak> windowPeaks = new ArrayList<>((maxMz / windowSize) * peaksPerWindowToKeep);
+        for (int windowStart = 0; windowStart <= maxMz && peakIndex < adaptedPeaks.length; windowStart += windowSizeBins) {
+            List<BinaryConsensusPeak> windowPeaks = new ArrayList<>((maxMz / windowSizeBins) * peaksPerWindowToKeep);
 
-            for (; peakIndex < adaptedPeaks.length && adaptedPeaks[peakIndex].getMz() < windowStart + windowSize; peakIndex++) {
+            for (; peakIndex < adaptedPeaks.length && adaptedPeaks[peakIndex].getMz() < windowStart + windowSizeBins; peakIndex++) {
                 windowPeaks.add(adaptedPeaks[peakIndex]);
             }
 
