@@ -9,12 +9,15 @@ import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.bigbio.pgatk.io.mgf.Ms2Query;
 import org.bigbio.pgatk.io.properties.IPropertyStorage;
 import org.bigbio.pgatk.io.properties.StoredProperties;
+import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
+import org.spectra.cluster.model.cluster.ICluster;
+import org.spectra.cluster.model.commons.ClusterIteratorConverter;
 import org.spectra.cluster.model.commons.ITuple;
-import org.spectra.cluster.model.commons.StreamIteratorConverter;
+import org.spectra.cluster.model.commons.SpectrumIteratorConverter;
 import org.spectra.cluster.model.commons.Tuple;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -54,6 +57,8 @@ public class MzSpectraReader {
     private static final Pattern mzXmlHeaderPattern = Pattern.compile("^[^<]*(<\\?xml [^>]*>\\s*(<!--[^>]*-->\\s*)*)?<(mzXML) xmlns=.*", Pattern.MULTILINE);
 
     private final Set<ISpectrumListener> listener = new HashSet<>(5);
+
+    private final IClusteringEngine clusteringEngine;
 
     /** This enum type Capture the two file types supported in Spectra Cluster **/
     public enum MzFileType{
@@ -108,8 +113,10 @@ public class MzSpectraReader {
                             BasicIntegerNormalizer precursorNormalizer,
                             IBinarySpectrumFunction peaksPerMzWindowFilter,
                             IRawSpectrumFunction loadingFilter,
-                            IBinarySpectrumFunction comparisonFilter, File ... files ) throws Exception {
+                            IBinarySpectrumFunction comparisonFilter,
+                            IClusteringEngine clusteringEngine, File ... files ) throws Exception {
         this.inputFiles = new ConcurrentHashMap<>();
+        this.clusteringEngine = clusteringEngine;
 
         Arrays.stream(files).parallel().forEach( file -> {
             if (!file.exists()) {
@@ -164,7 +171,9 @@ public class MzSpectraReader {
                             BasicIntegerNormalizer precursorNormalizer,
                             IBinarySpectrumFunction peaksPerMzWindowFilter,
                             IRawSpectrumFunction loadingFilter,
-                            IBinarySpectrumFunction comparisonFilter) throws Exception {
+                            IBinarySpectrumFunction comparisonFilter, IClusteringEngine clusteringEngine) throws Exception {
+
+
         try{
             MzIterableReader jMzReader = null;
             Class<?> peakListclass = isValidPeakListFile(file);
@@ -201,6 +210,7 @@ public class MzSpectraReader {
         this.factory = new FactoryNormalizer(mzBinner, intensityBinner);
         this.loadingFilter = loadingFilter;
         this.comparisonFilter = comparisonFilter;
+        this.clusteringEngine = clusteringEngine;
     }
 
     /**
@@ -211,13 +221,22 @@ public class MzSpectraReader {
      *
      * @param file Spectra file to read.
      */
-    public MzSpectraReader(File file, IBinarySpectrumFunction comparisonFilter) throws Exception {
+    public MzSpectraReader(File file, IBinarySpectrumFunction comparisonFilter, IClusteringEngine clusteringEngine) throws Exception {
         this(file, new TideBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(),
                 new RemoveImpossiblyHighPeaksFunction()
                 // TODO: set fragment tolerance
                 .specAndThen(new RemovePrecursorPeaksFunction(0.5))
                 .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))),
-                comparisonFilter);
+                comparisonFilter, clusteringEngine);
+    }
+
+    public MzSpectraReader(File file, IBinarySpectrumFunction comparisonFilter) throws Exception {
+        this(file, new TideBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(),
+                new RemoveImpossiblyHighPeaksFunction()
+                        // TODO: set fragment tolerance
+                        .specAndThen(new RemovePrecursorPeaksFunction(0.5))
+                        .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(70))),
+                comparisonFilter, null);
     }
 
     /**
@@ -228,6 +247,37 @@ public class MzSpectraReader {
      */
     public Iterator<IBinarySpectrum> readBinarySpectraIterator() {
         return readBinarySpectraIterator(null);
+    }
+
+    /**
+     * Return the iterator with the {@link ICluster} transformed from the
+     * {@link Spectrum} file.
+     *
+     * @return Iterator of {@link ICluster} spectra
+     */
+    public Iterator<ICluster> readClusterIterator() {
+        return readClusterIterator(null);
+    }
+
+    /**
+     * Return the iterator with the {@link IBinarySpectrum} transformed from the
+     * {@link Spectrum} file.
+     * @param propertyStorage If set, spectrum properties are stored in this property storage.
+     *
+     * @return Iterator of {@link BinarySpectrum} spectra
+     */
+    public Iterator<ICluster> readClusterIterator(IPropertyStorage propertyStorage) {
+        Stream<Tuple<File, MzIterableReader>> iteratorStream = inputFiles
+                .entrySet().stream()
+                .map(x -> new Tuple<>(x.getKey(), x.getValue()))
+                .collect(Collectors.toList())
+                .stream();
+
+        return new ClusterIteratorConverter<Stream<ITuple>, ICluster>(iteratorStream, tupleSpectrum -> {
+
+            IBinarySpectrum s = storeIBinarySpectrun(propertyStorage, tupleSpectrum);
+            return clusteringEngine.createSingleSpectrumCluster(peaksPerMzWindowFilter.apply(s));
+        });
     }
 
     /**
@@ -244,61 +294,73 @@ public class MzSpectraReader {
                 .collect(Collectors.toList())
                 .stream();
 
-        return new StreamIteratorConverter<Stream<ITuple>, IBinarySpectrum>(iteratorStream, tupleSpectrum -> {
+        return new SpectrumIteratorConverter<Stream<ITuple>, IBinarySpectrum>(iteratorStream, tupleSpectrum -> {
 
-            File inputFile = (File) tupleSpectrum.getKey();
-            Spectrum spectrum = (Spectrum) tupleSpectrum.getValue();
-
-            // apply the initial loading filter
-            if (loadingFilter != null) {
-                spectrum = loadingFilter.apply(spectrum);
-            }
-
-            IBinarySpectrum s = new BinarySpectrum(
-                    ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
-                    (spectrum.getPrecursorCharge() != null) ? spectrum.getPrecursorCharge() : 0,
-                    factory.normalizePeaks(spectrum.getPeakList()),
-                    comparisonFilter);
-
-            // save spectrum properties
-            if (propertyStorage != null) {
-                for (Param param: spectrum.getAdditional()) {
-                    propertyStorage.storeProperty(s.getUUI(), param.getName(), param.getValue());
-
-                    // TODO: map the title and retention time from existing cvParams
-                    // current implementation might only work for MGF files.
-
-                    // TODO: add support for PTMs
-                }
-                // always store the original filename
-                propertyStorage.storeProperty(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
-
-                String spectrumId = spectrum.getId();
-
-                // make spectrum id PSI format compatible
-                if (spectrum instanceof Ms2Query) {
-                    spectrumId = "index=" + spectrumId;
-                }
-
-                propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
-                propertyStorage.storeProperty(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
-                propertyStorage.storeProperty(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
-            }
-
-            // call the listeners
-            for (ISpectrumListener spectrumListener : listener) {
-                spectrumListener.onNewSpectrum(s);
-            }
+            IBinarySpectrum s = storeIBinarySpectrun(propertyStorage, tupleSpectrum);
 
             return peaksPerMzWindowFilter.apply(s);
         });
+    }
+
+    /**
+     *
+     * @param propertyStorage Property Storage
+     * @param tupleSpectrum Spectrum Tuple
+     * @return IBinarySpectrum
+     */
+    private IBinarySpectrum storeIBinarySpectrun(IPropertyStorage propertyStorage, ITuple tupleSpectrum) throws Exception {
+
+        File inputFile = (File) tupleSpectrum.getKey();
+        Spectrum spectrum = (Spectrum) tupleSpectrum.getValue();
+
+        // apply the initial loading filter
+        if (loadingFilter != null) {
+            spectrum = loadingFilter.apply(spectrum);
+        }
+
+        IBinarySpectrum s = new BinarySpectrum(
+                ((BasicIntegerNormalizer)precursorNormalizer).binValue(spectrum.getPrecursorMZ()),
+                (spectrum.getPrecursorCharge() != null) ? spectrum.getPrecursorCharge() : 0,
+                factory.normalizePeaks(spectrum.getPeakList()),
+                comparisonFilter);
+
+        // save spectrum properties
+        if (propertyStorage != null) {
+            for (Param param: spectrum.getAdditional()) {
+                propertyStorage.storeProperty(s.getUUI(), param.getName(), param.getValue());
+
+                // TODO: map the title and retention time from existing cvParams
+                // current implementation might only work for MGF files.
+
+                // TODO: add support for PTMs
+            }
+            // always store the original filename
+            propertyStorage.storeProperty(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
+
+            String spectrumId = spectrum.getId();
+
+            // make spectrum id PSI format compatible
+            if (spectrum instanceof Ms2Query) {
+                spectrumId = "index=" + spectrumId;
+            }
+
+            propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
+            propertyStorage.storeProperty(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
+            propertyStorage.storeProperty(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
+        }
+
+        // call the listeners
+        for (ISpectrumListener spectrumListener : listener) {
+            spectrumListener.onNewSpectrum(s);
+        }
+
+        return s;
     }
 
 
     /**
      * Get the Class for the specific Peak List reader
      * @param file File to be read
-     * @return Class Reader {@link org.bigbio.pgatk.io.common.MzReader} Adapter
      */
     private static Class<?> isValidPeakListFile(File file){
 

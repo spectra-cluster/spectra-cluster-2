@@ -70,6 +70,8 @@ public interface ICluster extends Serializable {
 
     IConsensusSpectrumBuilder getConsensusSpectrumBuilder();
 
+    void saveComparisonResult(String id, float similarity);
+
     /**
      * The results of the last N comparisons.
      * @return A list of ComparisonMatchS

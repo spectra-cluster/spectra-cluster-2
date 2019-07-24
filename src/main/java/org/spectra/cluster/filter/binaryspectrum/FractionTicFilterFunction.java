@@ -50,8 +50,7 @@ public class FractionTicFilterFunction implements IBinarySpectrumFunction {
 
         // get the total intensity
         double totalIntensity = 0;
-        for (int i = 0; i < peaklist.length; i++)
-            totalIntensity += peaklist[i].getIntensity();
+        for (BinaryPeak binaryPeak : peaklist) totalIntensity += binaryPeak.getIntensity();
 
         BinaryPeak[] filteredPeaks = new BinaryPeak[peaklist.length];
         int filteredPeaksSize = 0;

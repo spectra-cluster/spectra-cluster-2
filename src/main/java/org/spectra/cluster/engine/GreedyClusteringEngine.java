@@ -78,9 +78,8 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     }
 
     @Override
-    public ICluster[] clusterSpectra(IBinarySpectrum... spectra) {
+    public ICluster[] clusterSpectra(ICluster... clusters) {
         // convert all spectra to clusters
-        GreedySpectralCluster[] clusters = convertSpectraToCluster(spectra);
         float scoreIncrement = (thresholdEnd - thresholdStart) / (float) (clusteringRounds - 1);
         IComparisonPredicate<ICluster> currentComparisonPredicate;
 
@@ -105,6 +104,13 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         return clusters;
     }
 
+    //Todo: Jgriss should review which method can be remove from here.
+    @Override
+    public ICluster createSingleSpectrumCluster(IBinarySpectrum spectrum) {
+        return convertSingleSpectrum(spectrum);
+    }
+
+
     /**
      * Merges similar clusters based on the set clustering threshold.
      * @param clustersToMerge The clusters to merge.
@@ -112,9 +118,9 @@ public class GreedyClusteringEngine implements IClusteringEngine {
      * @param predicate The predicate to use to decide which clusters to compare
      * @return An array of clusters representing the merged result. Warning: The original objects are changed!
      */
-    private GreedySpectralCluster[] mergeSimilarClusters(GreedySpectralCluster[] clustersToMerge, double similarityThreshold, IComparisonPredicate<ICluster> predicate) {
+    private ICluster[] mergeSimilarClusters(ICluster[] clustersToMerge, double similarityThreshold, IComparisonPredicate<ICluster> predicate) {
         // clusters can never be split
-        GreedySpectralCluster[] mergedClusters = new GreedySpectralCluster[clustersToMerge.length];
+        ICluster[] mergedClusters = new GreedySpectralCluster[clustersToMerge.length];
         int mergedClusterSize = 0;
         // the current offset to use based on the set precursor tolerance
         int mergedClusterPrecursorOffset = 0;
@@ -122,7 +128,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         int maxSortTolerance = Math.round((float) precursorTolerance / 5);
 
         // merge similar clusters
-        for (GreedySpectralCluster clusterToMerge : clustersToMerge) {
+        for (ICluster clusterToMerge : clustersToMerge) {
             if (mergedClusterSize < 1) {
                 lastMz = clusterToMerge.getPrecursorMz();
                 mergedClusters[mergedClusterSize++] = clusterToMerge;
@@ -140,7 +146,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
 
             // compare against all existing cluster
             for (int i = mergedClusterPrecursorOffset; i < mergedClusterSize; i++) {
-                GreedySpectralCluster existingCluster = mergedClusters[i];
+                ICluster existingCluster = mergedClusters[i];
 
                 // check about the precursor tolerance
                 if (Math.abs(existingCluster.getPrecursorMz() - clusterToMerge.getPrecursorMz()) > precursorTolerance) {
@@ -196,6 +202,22 @@ public class GreedyClusteringEngine implements IClusteringEngine {
             cluster.addSpectra(s);
             return cluster;
         }).toArray(GreedySpectralCluster[]::new);
+    }
+
+    /**
+     * Converts the spectra objects into an array of cluster objects each only
+     * containing a single spectrum.
+     * @param spectrum The spectrum to be converted
+     * @return An array of ICluster
+     */
+    private GreedySpectralCluster convertSingleSpectrum(IBinarySpectrum spectrum) {
+        GreedySpectralCluster greedyCluster = new GreedySpectralCluster(new GreedyConsensusSpectrum(spectrum.getUUI(),
+                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
+                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
+                consensusSpectrumNoiseFilterIncrement,
+                COMPARISON_FILTER));
+        greedyCluster.addSpectra(spectrum);
+        return greedyCluster;
     }
 
     @Override

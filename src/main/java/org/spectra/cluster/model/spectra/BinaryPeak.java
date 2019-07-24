@@ -36,7 +36,7 @@ public class BinaryPeak implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!BinaryPeak.class.isInstance(o)) return false;
+        if (!(o instanceof BinaryPeak)) return false;
         BinaryPeak that = (BinaryPeak) o;
         return mz == that.mz;
     }

@@ -15,7 +15,7 @@ public interface IClusteringEngine {
      * @param spectra The IBinarySpectra to cluster
      * @return The clustering result as an array of ICluster
      */
-    ICluster[] clusterSpectra(IBinarySpectrum... spectra);
+    ICluster[] clusterSpectra(ICluster... spectra);
 
     /**
      * Clusters the spectrum in an incremental way. Spectra must be sorted according
@@ -26,6 +26,14 @@ public interface IClusteringEngine {
      */
     // @Deprecated // I'm currently a little unsure whether we should still support this use case.
     // ICluster[] clusterSpectrumIncrementally(IBinarySpectrum spectrum);
+
+    /**
+     * This method converts one spectrum into a {@link ICluster} array. This is important because most of the clustering
+     * will start from the single spectrum clusters.
+     * @param spectrum Spectrum to be converted into cluster
+     * @return cluster {@link ICluster}
+     */
+    ICluster createSingleSpectrumCluster(IBinarySpectrum spectrum);
 
     /**
      * Returns the defined precursor tolerance.

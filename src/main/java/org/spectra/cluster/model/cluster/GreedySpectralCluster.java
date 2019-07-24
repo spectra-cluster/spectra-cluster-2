@@ -181,6 +181,7 @@ public class GreedySpectralCluster implements ICluster {
      * @param id Id of the cluster that the comparison was performed with
      * @param similarity The similarity score to store for this comparison
      */
+    @Override
     public void saveComparisonResult(String id, float similarity) {
         if (bestComparisonMatches.size() >= SAVED_COMPARISON_MATCHES && similarity < lowestBestComparisonSimilarity)
             return;
