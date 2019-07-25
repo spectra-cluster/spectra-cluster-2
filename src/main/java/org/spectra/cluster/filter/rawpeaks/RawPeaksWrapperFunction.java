@@ -1,7 +1,8 @@
 package org.spectra.cluster.filter.rawpeaks;
 
 
-import org.bigbio.pgatk.io.common.Spectrum;
+
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 
 import java.util.Map;
 

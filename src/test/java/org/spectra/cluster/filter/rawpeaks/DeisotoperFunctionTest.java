@@ -1,6 +1,6 @@
 package org.spectra.cluster.filter.rawpeaks;
 
-import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,7 +9,6 @@ import org.junit.Test;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 

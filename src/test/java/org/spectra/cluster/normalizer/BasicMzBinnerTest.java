@@ -2,7 +2,7 @@ package org.spectra.cluster.normalizer;
 
 
 import org.bigbio.pgatk.io.common.PgatkIOException;
-import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;

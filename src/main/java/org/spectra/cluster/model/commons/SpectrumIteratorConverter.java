@@ -19,7 +19,8 @@ import java.util.stream.Stream;
  */
 public class SpectrumIteratorConverter<K, T> extends AbstractIteratorConverter {
 
-    public SpectrumIteratorConverter(Stream<Tuple<File, MzIterableReader>> iterator, Converter<? super ITuple, ? extends IBinarySpectrum> converter) {
+    public SpectrumIteratorConverter(Stream<Tuple<File, MzIterableReader>> iterator,
+                                     Converter<? super ITuple, ? extends IBinarySpectrum> converter) {
         this.converter = converter;
         this.iterator = iterator.iterator();
         if (this.iterator.hasNext())

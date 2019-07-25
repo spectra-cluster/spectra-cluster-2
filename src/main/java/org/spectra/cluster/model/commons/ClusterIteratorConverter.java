@@ -1,6 +1,7 @@
 package org.spectra.cluster.model.commons;
 
 import org.bigbio.pgatk.io.common.MzIterableReader;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.spectra.cluster.model.cluster.ICluster;
 
 import java.io.File;
@@ -17,5 +18,10 @@ public class ClusterIteratorConverter<K, T> extends AbstractIteratorConverter {
             this.nextSpectrum = fetchNextValidSpectrum();
         else
             this.nextSpectrum = null;
+    }
+
+    @Override
+    public boolean isSpecValid(Spectrum s) {
+        return s.getPrecursorMZ() != null;
     }
 }

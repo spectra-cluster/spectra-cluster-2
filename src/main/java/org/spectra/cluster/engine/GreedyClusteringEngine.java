@@ -23,6 +23,7 @@ import java.util.Comparator;
  * in the spectra-cluster 1.x API
  *
  * @author jg
+ * @author ypriverol
  */
 @Slf4j
 public class GreedyClusteringEngine implements IClusteringEngine {
@@ -217,6 +218,15 @@ public class GreedyClusteringEngine implements IClusteringEngine {
                 consensusSpectrumNoiseFilterIncrement,
                 COMPARISON_FILTER));
         greedyCluster.addSpectra(spectrum);
+        return greedyCluster;
+    }
+
+    public ICluster newCluster(String uui){
+        GreedySpectralCluster greedyCluster = new GreedySpectralCluster(new GreedyConsensusSpectrum(uui,
+                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
+                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
+                consensusSpectrumNoiseFilterIncrement,
+                COMPARISON_FILTER));
         return greedyCluster;
     }
 

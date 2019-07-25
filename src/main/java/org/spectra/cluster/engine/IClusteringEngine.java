@@ -40,4 +40,11 @@ public interface IClusteringEngine {
      * @return The precursor tolerance in integer space.
      */
     int getPrecursorTolerance();
+
+    /**
+     * Get a new cluster for the specific engine type
+     * @param uui
+     * @return
+     */
+    ICluster newCluster(String uui);
 }

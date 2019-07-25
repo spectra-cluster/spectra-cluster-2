@@ -12,7 +12,6 @@ import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
-import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.normalizer.TideBinner;
@@ -36,7 +35,7 @@ import java.util.*;
 public class BinaryClusterStorageTest {
     IRawSpectrumFunction loadingFilter;
 
-    private List<IBinarySpectrum> spectra = new ArrayList<>(30);
+    private List<ICluster> spectra = new ArrayList<>(30);
      private ICluster[] clusters;
 
 
@@ -46,6 +45,12 @@ public class BinaryClusterStorageTest {
                 .specAndThen(new RemovePrecursorPeaksFunction(0.5))
                 .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(40)));
 
+        IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
+                1, 0.99f, 5, new CombinedFisherIntensityTest(),
+                new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
+                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+
+
         File mgfFile = new File(BinaryClusterStorageTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(mgfFile,
                 new TideBinner(),
@@ -53,24 +58,19 @@ public class BinaryClusterStorageTest {
                 new BasicIntegerNormalizer(),
                 new HighestPeakPerBinFunction(),
                 loadingFilter,
-                GreedyClusteringEngine.COMPARISON_FILTER);
-        Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
+                GreedyClusteringEngine.COMPARISON_FILTER, engine);
+        Iterator<ICluster> iterator = reader.readClusterIterator();
 
         while (iterator.hasNext()) {
-            IBinarySpectrum s = iterator.next();
+            ICluster s = iterator.next();
             spectra.add(s);
         }
 
         // sort the spectra
-        spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
+        spectra.sort(Comparator.comparingInt(ICluster::getPrecursorMz));
 
 
-        IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
-                1, 0.99f, 5, new CombinedFisherIntensityTest(),
-                new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
-
-        clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
+        clusters = engine.clusterSpectra(spectra.toArray(new ICluster[spectra.size()]));
     }
 
     @Ignore

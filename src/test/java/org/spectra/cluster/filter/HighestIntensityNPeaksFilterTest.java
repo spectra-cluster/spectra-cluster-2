@@ -39,7 +39,7 @@ public class HighestIntensityNPeaksFilterTest {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         MzSpectraReader parser = new MzSpectraReader(new File(uri), new TideBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(),
-                new HighestPeakPerBinFunction(), null, GreedyClusteringEngine.COMPARISON_FILTER);
+                new HighestPeakPerBinFunction(), null, GreedyClusteringEngine.COMPARISON_FILTER, null);
         specIt = parser.readBinarySpectraIterator();
 
     }

@@ -1,7 +1,7 @@
 package org.spectra.cluster.model.commons;
 
 import org.bigbio.pgatk.io.common.MzIterableReader;
-import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 
 import java.io.File;
 import java.util.Iterator;
@@ -43,7 +43,7 @@ public class AbstractIteratorConverter <K, T> implements Iterator<T> {
         return null;
     }
 
-    private boolean isSpecValid(Spectrum s) {
+    public boolean isSpecValid(Spectrum s) {
         return s.getPrecursorCharge() != null && s.getPrecursorMZ() != null;
     }
 
