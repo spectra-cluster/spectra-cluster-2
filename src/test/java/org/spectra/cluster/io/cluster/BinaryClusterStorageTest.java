@@ -123,7 +123,9 @@ public class BinaryClusterStorageTest {
         // Retrieve all the spectra
         for(int i = 0; i < 100000; i++){
             int finalI = i;
-            Arrays.stream(clusters).forEach(cluster -> clusterStorage.getCluster(cluster.getId() + String.valueOf(finalI)).get().getId());
+            Arrays.stream(clusters)
+                    .forEach(cluster -> clusterStorage
+                            .getCluster(cluster.getId() + finalI).get().getId());
         }
 
         System.out.println((System.currentTimeMillis() - time)/1000);

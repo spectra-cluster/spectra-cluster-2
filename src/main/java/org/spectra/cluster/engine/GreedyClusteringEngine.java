@@ -1,6 +1,7 @@
 package org.spectra.cluster.engine;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.spectra.cluster.cdf.CumulativeDistributionFunction;
 import org.spectra.cluster.cdf.CumulativeDistributionFunctionFactory;
 import org.spectra.cluster.cdf.INumberOfComparisonAssessor;
@@ -9,6 +10,7 @@ import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.predicates.ClusterIsKnownComparisonPredicate;
 import org.spectra.cluster.predicates.IComparisonPredicate;
@@ -17,6 +19,7 @@ import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the original clustering engine used by default
@@ -221,13 +224,19 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         return greedyCluster;
     }
 
-    public ICluster newCluster(String uui){
-        GreedySpectralCluster greedyCluster = new GreedySpectralCluster(new GreedyConsensusSpectrum(uui,
-                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
-                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
-                consensusSpectrumNoiseFilterIncrement,
-                COMPARISON_FILTER));
+    @Override
+    public ICluster newCluster(org.bigbio.pgatk.io.common.cluster.ICluster cluster){
+        GreedySpectralCluster greedyCluster = new GreedySpectralCluster(cluster.getId(), cluster.getSpectrumReferences().stream().map(Spectrum::getId).collect(Collectors.toSet()), initGreedyConsensusBuilder(cluster),
+                null, (float) 0.1);
+
         return greedyCluster;
+    }
+
+    private IConsensusSpectrumBuilder initGreedyConsensusBuilder(org.bigbio.pgatk.io.common.cluster.ICluster cluster) {
+        IConsensusSpectrumBuilder greedySpectrumBuilder = new GreedyConsensusSpectrum(cluster.getId(), null, null, COMPARISON_FILTER,
+                -1, -1, null, false, cluster.getSpecCount(), 0, 0, 0,
+                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP, GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP, -1);
+        return greedySpectrumBuilder;
     }
 
     @Override

@@ -43,6 +43,24 @@ public class GreedySpectralCluster implements ICluster {
     }
 
     /**
+     * This constructor create the {@link GreedySpectralCluster} from the original properties.
+     * @param id
+     * @param clusteredSpectraIds
+     * @param consensusSpectrumBuilder
+     * @param bestComparisonMatches
+     * @param lowestBestComparisonSimilarity
+     */
+    public GreedySpectralCluster(String id, Set<String> clusteredSpectraIds, IConsensusSpectrumBuilder consensusSpectrumBuilder,
+                                 List<ComparisonMatch> bestComparisonMatches, float lowestBestComparisonSimilarity) {
+        this.id = id;
+        this.clusteredSpectraIds = clusteredSpectraIds;
+        this.consensusSpectrumBuilder = consensusSpectrumBuilder;
+        this.bestComparisonMatches = bestComparisonMatches;
+        this.lowestBestComparisonSimilarity = lowestBestComparisonSimilarity;
+
+    }
+
+    /**
      * return a set of all ids
      *
      * @return A set of strings representing all Ids.

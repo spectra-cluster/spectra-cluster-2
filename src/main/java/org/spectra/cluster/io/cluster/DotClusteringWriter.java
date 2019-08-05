@@ -20,9 +20,14 @@ import java.util.Set;
 
 /**
  * This writer writes clusters to the .clustering format as defined in the original spectra-cluster project.
+ * This class is deprecated for now and we will work on it in the future.
+ *
+ * @author ypriverol
+ * @author jgriss
  */
 
 @Slf4j
+@Deprecated
 public class DotClusteringWriter implements IClusterWriter {
     private final boolean append;
     private final BufferedWriter writer;

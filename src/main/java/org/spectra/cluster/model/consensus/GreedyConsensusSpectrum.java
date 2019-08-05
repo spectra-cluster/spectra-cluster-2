@@ -72,6 +72,27 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     private final int windowSizeBins;
 
 
+    public GreedyConsensusSpectrum(String id, BinaryPeak[] consensusPeaks, Map<BinaryPeak, BinaryPeak> comparisonFilteredPeaks,
+                                   IBinarySpectrumFunction comparisonFilter, int minComparisonMz, int maxComparisonMz, BinaryConsensusPeak[] allPeaksInCluster,
+                                   boolean isDirty, int nSpectra, int averagePrecursorMz, int averageCharge, int sumCharge,
+                                   int minPeaksToKeep, int peaksPerWindowToKeep, int windowSizeBins) {
+        this.id = id;
+        this.consensusPeaks = consensusPeaks;
+        this.comparisonFilteredPeaks = comparisonFilteredPeaks;
+        this.comparisonFilter = comparisonFilter;
+        this.minComparisonMz = minComparisonMz;
+        this.maxComparisonMz = maxComparisonMz;
+        this.allPeaksInCluster = allPeaksInCluster;
+        this.isDirty = isDirty;
+        this.nSpectra = nSpectra;
+        this.averagePrecursorMz = averagePrecursorMz;
+        this.averageCharge = averageCharge;
+        this.sumCharge = sumCharge;
+        this.minPeaksToKeep = minPeaksToKeep;
+        this.peaksPerWindowToKeep = peaksPerWindowToKeep;
+        this.windowSizeBins = windowSizeBins;
+    }
+
     /**
      * Generate a new GreedyConsensusSpectrum
      *

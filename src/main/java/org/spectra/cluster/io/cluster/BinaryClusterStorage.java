@@ -2,6 +2,8 @@ package org.spectra.cluster.io.cluster;
 
 import lombok.extern.slf4j.Slf4j;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
+import org.bigbio.pgatk.io.common.MzIterableReader;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -14,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 
@@ -33,7 +36,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author ypriverol on 17/10/2018.
  */
 @Slf4j
-public class BinaryClusterStorage implements IClusterStorage {
+public class BinaryClusterStorage implements IClusterStorage, MzIterableReader {
 
     public static File dbFile = null;
 
@@ -45,7 +48,6 @@ public class BinaryClusterStorage implements IClusterStorage {
     private int levelDBSize = 0;
 
     public boolean dynamic = false;
-
 
     public BinaryClusterStorage(boolean dynamic, long numberClusters, String fileName) throws IOException {
 
@@ -166,12 +168,37 @@ public class BinaryClusterStorage implements IClusterStorage {
         return clusters.size();
     }
 
+    @Override
+    public void saveToFile(String filePath) {
+
+    }
+
+    @Override
+    public void readFromFile(String filePath) {
+
+    }
+
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
+
+    @Override
+    public Spectrum next() throws NoSuchElementException {
+        return null;
+    }
+
     /**
      * Close the DB on Disk and delete it.
      */
-    public void close() throws IOException {
-        if(dynamic)
-            levelDB.close();
+    public void close() {
+        if(dynamic) {
+            try {
+                levelDB.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         if(dbFile != null && dbFile.exists()){
             dbFile.deleteOnExit();

@@ -43,8 +43,8 @@ public interface IClusteringEngine {
 
     /**
      * Get a new cluster for the specific engine type
-     * @param uui
-     * @return
+     * @param org.bigbio.pgatk.io.common.cluster.ICluster storage
+     * @return ICluster
      */
-    ICluster newCluster(String uui);
+    ICluster newCluster(org.bigbio.pgatk.io.common.cluster.ICluster cluster);
 }

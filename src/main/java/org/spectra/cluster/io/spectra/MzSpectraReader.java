@@ -340,7 +340,7 @@ public class MzSpectraReader {
 
     private ICluster transformIOClusterToCluster(org.bigbio.pgatk.io.common.cluster.ICluster spectrum,
                                                  IClusteringEngine engine) {
-        return engine.newCluster(spectrum.getId());
+        return engine.newCluster(spectrum);
     }
 
     /**
