@@ -289,7 +289,7 @@ public class MzSpectraReader {
                 .collect(Collectors.toList())
                 .stream();
 
-        if(clusteringEngine == null || !clusteringFile)
+        if(clusteringEngine == null)
             throw new SpectraClusterException("The clusterEngine should be init if you want to retrieve Clusters");
 
         return new ClusterIteratorConverter<Stream<ITuple>, ICluster>(iteratorStream, tupleSpectrum -> {
@@ -312,15 +312,15 @@ public class MzSpectraReader {
 //        // save spectrum properties
 //        if (propertyStorage != null) {
 //            for (Param param: spectrum.getAdditional()) {
-//                propertyStorage.storeProperty(s.getUUI(), param.getName(), param.getValue());
+//                propertyStorage.put(s.getUUI(), param.getName(), param.getValue());
 //
 //                // TODO: map the title and retention time from existing cvParams
 //                // current implementation might only work for MGF files.
 //
-//                // TODO: add support for PTMs
+//                // TODO: put support for PTMs
 //            }
 //            // always store the original filename
-//            propertyStorage.storeProperty(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
+//            propertyStorage.put(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
 //
 //            String spectrumId = spectrum.getId();
 //
@@ -329,9 +329,9 @@ public class MzSpectraReader {
 //                spectrumId = "index=" + spectrumId;
 //            }
 //
-//            propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
-//            propertyStorage.storeProperty(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
-//            propertyStorage.storeProperty(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
+//            propertyStorage.put(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
+//            propertyStorage.put(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
+//            propertyStorage.put(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
 //        }
 
         return s;
@@ -389,15 +389,15 @@ public class MzSpectraReader {
         // save spectrum properties
         if (propertyStorage != null) {
             for (Param param: spectrum.getAdditional()) {
-                propertyStorage.storeProperty(s.getUUI(), param.getName(), param.getValue());
+                propertyStorage.put(s.getUUI(), param.getName(), param.getValue());
 
                 // TODO: map the title and retention time from existing cvParams
                 // current implementation might only work for MGF files.
 
-                // TODO: add support for PTMs
+                // TODO: put support for PTMs
             }
             // always store the original filename
-            propertyStorage.storeProperty(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
+            propertyStorage.put(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
 
             String spectrumId = spectrum.getId();
 
@@ -406,9 +406,9 @@ public class MzSpectraReader {
                 spectrumId = "index=" + spectrumId;
             }
 
-            propertyStorage.storeProperty(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
-            propertyStorage.storeProperty(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
-            propertyStorage.storeProperty(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
+            propertyStorage.put(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
+            propertyStorage.put(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
+            propertyStorage.put(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
         }
 
         // call the listeners

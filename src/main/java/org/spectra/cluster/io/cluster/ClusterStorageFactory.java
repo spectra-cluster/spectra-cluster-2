@@ -1,7 +1,12 @@
 package org.spectra.cluster.io.cluster;
 
+import org.bigbio.pgatk.io.mapcache.IMapStorage;
+import org.spectra.cluster.exceptions.SpectraClusterException;
+import org.spectra.cluster.io.cluster.old_writer.BinaryClusterStorage;
+import org.spectra.cluster.model.cluster.ICluster;
+
+import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -25,13 +30,12 @@ public class ClusterStorageFactory {
      *
      * @return BinaryClusterStorage
      */
-    public static Optional<IClusterStorage> buildDynamicStorage(){
+    public static IMapStorage<ICluster> buildStaticStorage(File dbDirectory) throws SpectraClusterException {
         try {
-            return Optional.of(new BinaryClusterStorage(true, -1, null));
+            return new ChronicleMapClusterStorage<ICluster>(dbDirectory);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new SpectraClusterException("Error creating the ChronicleMap Cluster storage -- " + e.getMessage());
         }
-        return Optional.empty();
     }
 
     /**
@@ -39,75 +43,58 @@ public class ClusterStorageFactory {
      * pre-allocation of the number of entries that will be storage.
      * @return BinaryClusterStorage
      */
-    public static Optional<IClusterStorage> buildStaticStorage(){
+    public static IMapStorage<ICluster> buildStaticStorage(File dbDirectory, long numberEntries) throws SpectraClusterException {
         try {
-            return Optional.of(new BinaryClusterStorage(false, -1, null));
+            return new ChronicleMapClusterStorage<ICluster>(dbDirectory, numberEntries);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new SpectraClusterException("Error creating the ChronicleMap Cluster storage -- " + e.getMessage());
         }
-        return Optional.empty();
     }
-
-
-    /**
-     * Return an Static Storage for the number of clusters that will be process.
-     * @param numberClusters Number of Clusters
-     * @return BinaryClusterStorage
-     */
-    public static Optional<IClusterStorage> buildStaticStorage(int numberClusters){
-        try {
-            return Optional.of(new BinaryClusterStorage(false, numberClusters, null));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
-    }
-
 
     /**
      * Create a Dynamic Storage for the clusters. Depending on erros in the
      * file system. This can return a null value.
-     * @param  filePathName file Path for the file
+     * @param  dbDirectory file Path for the file
+     * @param clusterClass The cluster Class Implementation that will be storage (e.g. {@link org.spectra.cluster.model.cluster.GreedySpectralCluster})
      * @return BinaryClusterStorage
      */
-    public static Optional<IClusterStorage> buildDynamicStorage(String filePathName){
+    public static IMapStorage<ICluster> buildDynamicStorage(File dbDirectory, Class clusterClass) throws SpectraClusterException {
         try {
-            return Optional.of(new BinaryClusterStorage(true, -1, filePathName));
+            return new SparkKeyClusterStorage(dbDirectory, clusterClass);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new SpectraClusterException("Error creating the ChronicleMap Cluster storage -- " + e.getMessage());
         }
-        return Optional.empty();
     }
-
-    /**
-     * Create a Static Storage for the clusters. The Static Storage is really fast but it demands
-     * pre-allocation of the number of entries that will be storage.
-     * @return BinaryClusterStorage
-     */
-    public static Optional<IClusterStorage> buildStaticStorage(String filePathName){
-        try {
-            return Optional.of(new BinaryClusterStorage(false, -1, filePathName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
-    }
-
-
-    /**
-     * Return an Static Storage for the number of clusters that will be process.
-     * @param numberClusters Number of Clusters
-     * @param filePathName File Path Name
-     * @return BinaryClusterStorage
-     */
-    public static Optional<IClusterStorage> buildStaticStorage(int numberClusters, String filePathName){
-        try {
-            return Optional.of(new BinaryClusterStorage(false, numberClusters, filePathName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
-    }
+//
+//    /**
+//     * Create a Static Storage for the clusters. The Static Storage is really fast but it demands
+//     * pre-allocation of the number of entries that will be storage.
+//     * @return BinaryClusterStorage
+//     */
+//    public static Optional<IClusterStorage> buildStaticStorage(String filePathName){
+//        try {
+//            return Optional.of(new BinaryClusterStorage(false, -1, filePathName));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return Optional.empty();
+//    }
+//
+//
+//    /**
+//     * Return an Static Storage for the number of clusters that will be process.
+//     * @param numberClusters Number of Clusters
+//     * @param filePathName File Path Name
+//     * @return BinaryClusterStorage
+//     */
+//    public static Optional<IClusterStorage> buildStaticStorage(int numberClusters, String filePathName){
+//        try {
+//            return Optional.of(new BinaryClusterStorage(false, numberClusters, filePathName));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return Optional.empty();
+//    }
 
 
 

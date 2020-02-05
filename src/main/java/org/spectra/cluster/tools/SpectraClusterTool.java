@@ -13,8 +13,8 @@ import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.MissingParameterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
-import org.spectra.cluster.io.cluster.DotClusteringWriter;
-import org.spectra.cluster.io.cluster.IClusterWriter;
+import org.spectra.cluster.io.cluster.old_writer.DotClusteringWriter;
+import org.spectra.cluster.io.cluster.old_writer.IClusterWriter;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.normalizer.*;
@@ -167,7 +167,7 @@ public class SpectraClusterTool implements IProgressListener {
                     .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
                     .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters.getNumberHigherPeaks())));
 
-            IPropertyStorage localStorage = PropertyStorageFactory.buildDynamicPropertyStorage(new File(tempFolder));
+            IPropertyStorage localStorage = PropertyStorageFactory.buildDynamicLevelDBPropertyStorage(new File(tempFolder));
 
             File[] inputFiles = Arrays.stream(peakFiles)
                     .map(File::new)

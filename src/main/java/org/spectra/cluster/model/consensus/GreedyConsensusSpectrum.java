@@ -122,11 +122,11 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     }
 
     /**
-     * This function will add to the allPeaksInCluster, the peaks from the newSpectra.
+     * This function will put to the allPeaksInCluster, the peaks from the newSpectra.
      * <p>
-     * Any clustering process will compute the similarity between spectra and try to add the similar spectra to the {@link GreedyConsensusSpectrum}.
-     * This method only add the peaks of the spetra to allPeaksInCluster and declare the Consensus Spectrum as Dirty. The algorithm loop the list of {@link IBinarySpectrum} and
-     * add the {@link BinaryPeak} o the allPeaksInCluster property.
+     * Any clustering process will compute the similarity between spectra and try to put the similar spectra to the {@link GreedyConsensusSpectrum}.
+     * This method only put the peaks of the spetra to allPeaksInCluster and declare the Consensus Spectrum as Dirty. The algorithm loop the list of {@link IBinarySpectrum} and
+     * put the {@link BinaryPeak} o the allPeaksInCluster property.
      *
      * @param newSpectra List of Spectra to be added to the {@link GreedyConsensusSpectrum}
      */
@@ -158,7 +158,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         if (consensusSpectrumToAdd == null || consensusSpectrumToAdd.getSpectraCount() < 1)
             return;
 
-        // add the peaks like in a "normal" spectrum - the peak count's are preserved
+        // put the peaks like in a "normal" spectrum - the peak count's are preserved
         allPeaksInCluster = addPeaksToConsensus(allPeaksInCluster, consensusSpectrumToAdd.getPeaks());
 
         // update the general properties
@@ -182,7 +182,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
      * Adds the passed peaks to the spectrum.
      *
      * @param existingPeaks The already existing peaks
-     * @param peaksToAdd    New peaks to add. These may be BinaryPeak or BinaryConsensusPeak objects.
+     * @param peaksToAdd    New peaks to put. These may be BinaryPeak or BinaryConsensusPeak objects.
      */
     protected static BinaryConsensusPeak[] addPeaksToConsensus(BinaryConsensusPeak[] existingPeaks, BinaryPeak[] peaksToAdd) {
         if (peaksToAdd.length < 1) {
@@ -331,7 +331,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
             }
         }
 
-        // add the ranks since the sort order was lost anyways
+        // put the ranks since the sort order was lost anyways
         BinaryConsensusPeak[] peakArray = peaksToKeep.toArray(new BinaryConsensusPeak[0]);
         BinarySpectrum.addRanks(peakArray, true);
 

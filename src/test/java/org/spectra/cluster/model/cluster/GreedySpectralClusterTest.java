@@ -49,7 +49,7 @@ public class GreedySpectralClusterTest {
             spectra.add(spectrumIterator.next());
         }
 
-        // add all spectra to one cluster
+        // put all spectra to one cluster
         GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
         cluster.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 

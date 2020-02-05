@@ -1,6 +1,7 @@
 package org.spectra.cluster.model.cluster;
 
 import lombok.extern.slf4j.Slf4j;
+import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
@@ -146,9 +147,9 @@ public class GreedySpectralCluster implements ICluster {
             spectraToAdd = filteredSpectra;
         }
 
-        // only add the spectra to the consensus spectrum
+        // only put the spectra to the consensus spectrum
         consensusSpectrumBuilder.addSpectra(spectraToAdd);
-        // add all spectrum ids
+        // put all spectrum ids
         clusteredSpectraIds.addAll(Arrays.stream(spectraToAdd)
                 .map(IBinarySpectrum::getUUI)
                 .collect(Collectors.toSet()));
@@ -157,7 +158,7 @@ public class GreedySpectralCluster implements ICluster {
     /**
      * This function enables the merging of clusters that do not save peak lists
      *
-     * @param cluster An ICluster to add to the cluster
+     * @param cluster An ICluster to put to the cluster
      */
     @Override
     public void mergeCluster(ICluster cluster) {
@@ -178,13 +179,13 @@ public class GreedySpectralCluster implements ICluster {
             id = cluster.getId();
         }
 
-        // add the clustered spectra
+        // put the clustered spectra
         clusteredSpectraIds.addAll(cluster.getClusteredSpectraIds());
 
-        // add the comparison matches
+        // put the comparison matches
         if (cluster.getComparisonMatches().size() > 0) {
             for (ComparisonMatch match : cluster.getComparisonMatches()) {
-                // make sure not to add any self-references
+                // make sure not to put any self-references
                 if (!match.getSpectrumId().equals(id)) {
                     bestComparisonMatches.add(match);
                 }
@@ -258,17 +259,27 @@ public class GreedySpectralCluster implements ICluster {
     }
 
     @Override
-    public byte[] toBytes() throws IOException {
+    public byte[] toBytes() throws SpectraClusterException {
         ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-        ObjectOutputStream outputStream = new ObjectOutputStream(streamOut);
-        outputStream.writeObject(this);
-        return streamOut.toByteArray();
+        ObjectOutputStream outputStream = null;
+        try {
+            outputStream = new ObjectOutputStream(streamOut);
+            outputStream.writeObject(this);
+            return streamOut.toByteArray();
+        } catch (IOException e) {
+            throw new SpectraClusterException("Error converting in object serialization -- " + e.getMessage());
+        }
+
     }
 
-
-    public static ICluster fromBytes(byte[] clusterBytes) throws IOException, ClassNotFoundException {
+    public static ICluster fromBytes(byte[] clusterBytes) throws SpectraClusterException {
         ByteArrayInputStream in = new ByteArrayInputStream(clusterBytes);
-        ObjectInputStream inputStream = new ObjectInputStream(in);
-        return ((GreedySpectralCluster) inputStream.readObject());
+        ObjectInputStream inputStream = null;
+        try {
+            inputStream = new ObjectInputStream(in);
+            return ((GreedySpectralCluster) inputStream.readObject());
+        } catch (IOException | ClassNotFoundException e) {
+            throw new SpectraClusterException("Error converting in object serialization -- " + e.getMessage());
+        }
     }
 }

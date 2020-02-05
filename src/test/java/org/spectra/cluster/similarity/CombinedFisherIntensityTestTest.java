@@ -158,7 +158,7 @@ public class CombinedFisherIntensityTestTest {
 //            double score = similarity.correlation(firstSpec, impSpectra.get(i));
 //            // only accept very high scores
 //            Assert.assertTrue(String.format("Score for %d is too low (%.2f)", i, score), score > 100);
-//            scores.add(score);
+//            scores.put(score);
 //        }
 //
 //        System.out.printf("Scores between %.2f - %.2f\n",

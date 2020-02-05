@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
-import org.spectra.cluster.io.cluster.DotClusteringWriter;
-import org.spectra.cluster.io.cluster.IClusterWriter;
+import org.spectra.cluster.io.cluster.old_writer.DotClusteringWriter;
+import org.spectra.cluster.io.cluster.old_writer.IClusterWriter;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DotClusteringWriterTest {
+
     private List<ICluster> spectra = new ArrayList<>(30);
     private IPropertyStorage storage = new InMemoryPropertyStorage();
     private GreedyClusteringEngine engine;

@@ -1,4 +1,4 @@
-package org.spectra.cluster.io.cluster;
+package org.spectra.cluster.io.cluster.old_writer;
 
 import org.spectra.cluster.model.cluster.ICluster;
 
@@ -16,6 +16,7 @@ import java.util.Optional;
  *
  * @author ypriverol on 17/10/2018.
  */
+@Deprecated
 public interface IClusterStorage extends Serializable {
 
     /**

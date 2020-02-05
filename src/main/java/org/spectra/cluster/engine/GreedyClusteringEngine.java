@@ -41,7 +41,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     private final INumberOfComparisonAssessor numberOfComparisonAssessor;
     private final IComparisonPredicate<ICluster> firstRoundPredicate;
     private final int consensusSpectrumNoiseFilterIncrement;
-    // TODO: Add a factory for consensus spectrum builder so we can add them as a parameter
+    // TODO: Add a factory for consensus spectrum builder so we can put them as a parameter
     // private final IConsensusSpectrumBuilder consensusSpectrumBuilder;
 
 

@@ -31,7 +31,7 @@ public class DeisotoperFunctionTest {
 
         Spectrum s = allSpectra.get(0);
 
-        // add an arbitrary super high peak
+        // put an arbitrary super high peak
         s.getPeakList().put(new ArrayList<>(s.getPeakList().keySet()).get(1) - 1.003355, 1000.0);
 
         int before = s.getPeakList().size();

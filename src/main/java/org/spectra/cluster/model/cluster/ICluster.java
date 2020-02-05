@@ -1,10 +1,10 @@
 package org.spectra.cluster.model.cluster;
 
 
+import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +56,7 @@ public interface ICluster extends Serializable {
 
     /**
      * Adds spectra to the cluster
-     * @param spectra The IBinarySpectrum objects to add
+     * @param spectra The IBinarySpectrum objects to put
      */
     void addSpectra(IBinarySpectrum... spectra);
 
@@ -84,6 +84,6 @@ public interface ICluster extends Serializable {
      * This method allow to convert an ICluster into a Byte Serializable object
      * @return byte Array
      */
-    byte[] toBytes() throws IOException;
+    byte[] toBytes() throws SpectraClusterException;
 
 }
