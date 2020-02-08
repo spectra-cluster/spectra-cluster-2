@@ -10,6 +10,8 @@ import org.spectra.cluster.util.ClusterUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 
 @Slf4j
 public class ChronicleMapClusterStorage<V> implements IMapStorage {
@@ -105,6 +107,10 @@ public class ChronicleMapClusterStorage<V> implements IMapStorage {
     @Override
     public ICluster get(String key) throws PgatkIOException {
         return this.clusterStorage.get(key);
+    }
+
+    public Iterator<Map.Entry<String, ICluster>> getIterator(){
+        return this.clusterStorage.entrySet().iterator();
     }
 
     @Override

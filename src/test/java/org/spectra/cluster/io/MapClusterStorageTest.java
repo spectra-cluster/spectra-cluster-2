@@ -3,6 +3,8 @@ package org.spectra.cluster.io;
 import lombok.extern.slf4j.Slf4j;
 import org.bigbio.pgatk.io.common.PgatkIOException;
 import org.bigbio.pgatk.io.mapcache.IMapStorage;
+import org.bigbio.pgatk.io.objectdb.LongObject;
+import org.bigbio.pgatk.io.objectdb.ObjectsDB;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +15,7 @@ import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.cluster.ClusterStorageFactory;
+import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
 import org.spectra.cluster.io.cluster.SparkKeyClusterStorage;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
@@ -157,6 +160,28 @@ public class MapClusterStorageTest {
         time = System.currentTimeMillis();
         clusterStorage.close();
         System.out.println("Sparkey: Deleting Temporary Cache -- " + (System.currentTimeMillis() - time) / 1000);
+
+    }
+
+    @Test
+    public void clusteringObjectDBTest() throws IOException {
+
+        long time = System.currentTimeMillis();
+        Random random = new Random();
+
+        ObjectDBGreedyClusterStorage clusterStorage = new ObjectDBGreedyClusterStorage(new ObjectsDB(Files
+                .createTempDirectory("clusters-").toFile()
+                .getAbsolutePath(), "clustering-results.zcl")
+        );
+
+        for(int i = 0; i < NUMBER_CLUSTERS; i++){
+            GreedySpectralCluster cluster = (GreedySpectralCluster) clusters[0];
+            long longKey = LongObject.asLong(cluster.getObjectId() + "-" + String.valueOf(i));
+            clusterStorage.addGreedySpectralCluster(longKey, cluster);
+        }
+
+        Assert.assertEquals(NUMBER_CLUSTERS, clusterStorage.getNumber(GreedySpectralCluster.class));
+        System.out.println("Sparkey: Writing 1M Clusters -- " + (System.currentTimeMillis() - time) / 1000);
 
     }
 

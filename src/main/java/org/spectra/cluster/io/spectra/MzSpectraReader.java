@@ -292,8 +292,8 @@ public class MzSpectraReader {
         if(clusteringEngine == null)
             throw new SpectraClusterException("The clusterEngine should be init if you want to retrieve Clusters");
 
-        return new ClusterIteratorConverter<Stream<ITuple>, ICluster>(iteratorStream, tupleSpectrum -> {
-            if(tupleSpectrum.getValue() instanceof org.bigbio.pgatk.io.common.cluster.ICluster){
+        return new ClusterIteratorConverter<>(iteratorStream, tupleSpectrum -> {
+            if (tupleSpectrum.getValue() instanceof org.bigbio.pgatk.io.common.cluster.ICluster) {
                 return storeCluster(propertyStorage, tupleSpectrum);
             }
             return clusteringEngine.createSingleSpectrumCluster(
@@ -322,7 +322,7 @@ public class MzSpectraReader {
 //            // always store the original filename
 //            propertyStorage.put(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
 //
-//            String spectrumId = spectrum.getId();
+//            String spectrumId = spectrum.getObjectId();
 //
 //            // make spectrum id PSI format compatible
 //            if (spectrum instanceof Ms2Query) {
@@ -360,7 +360,7 @@ public class MzSpectraReader {
         if(clusteringFile)
             throw new SpectraClusterException("The clustering file do not support BinarySpectra Iterator");
 
-        return new SpectrumIteratorConverter<Stream<ITuple>, IBinarySpectrum>(iteratorStream, tupleSpectrum ->
+        return new SpectrumIteratorConverter<>(iteratorStream, tupleSpectrum ->
                 peaksPerMzWindowFilter.apply(storeIBinarySpectrum(propertyStorage, tupleSpectrum)));
     }
 

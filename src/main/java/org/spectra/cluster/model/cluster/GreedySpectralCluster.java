@@ -1,6 +1,7 @@
 package org.spectra.cluster.model.cluster;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bigbio.pgatk.io.objectdb.LongObject;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
  *
  */
 @Slf4j
-public class GreedySpectralCluster implements ICluster {
+public class GreedySpectralCluster extends LongObject implements ICluster {
     /**
      * The N (defined here) highest comparison matches will be
      * saved

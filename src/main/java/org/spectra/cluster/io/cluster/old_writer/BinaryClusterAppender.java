@@ -92,7 +92,7 @@ public class BinaryClusterAppender {
 //
 //        for (ISpectrum cs : clusteredSpectra) {
 //            // default properties
-//            out.writeObject(cs.getId());
+//            out.writeObject(cs.getObjectId());
 //            out.writeInt(cs.getPrecursorCharge());
 //            out.writeFloat(cs.getPrecursorMz());
 //
