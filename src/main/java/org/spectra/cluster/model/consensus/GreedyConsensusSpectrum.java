@@ -41,13 +41,13 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     public static final int MIN_PEAKS_TO_KEEP = 50;
 
     //Id of the GreedyConsensusSpectrum
-    private final String id;
+    private String id;
 
     // The peaks of the GreedyConsensusSpectrum
     private BinaryPeak[] consensusPeaks;
     // The peaks after the comparison filter was applied
     private Map<BinaryPeak, BinaryPeak> comparisonFilteredPeaks;
-    private final IBinarySpectrumFunction comparisonFilter;
+    private IBinarySpectrumFunction comparisonFilter;
     private int minComparisonMz;
     private int maxComparisonMz;
 
@@ -67,10 +67,12 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
 
     private int sumCharge;
 
-    private final int minPeaksToKeep;
-    private final int peaksPerWindowToKeep;
-    private final int windowSizeBins;
+    private int minPeaksToKeep;
+    private int peaksPerWindowToKeep;
+    private int windowSizeBins;
 
+    public GreedyConsensusSpectrum() {
+    }
 
     public GreedyConsensusSpectrum(String id, BinaryPeak[] consensusPeaks, Map<BinaryPeak, BinaryPeak> comparisonFilteredPeaks,
                                    IBinarySpectrumFunction comparisonFilter, int minComparisonMz, int maxComparisonMz, BinaryConsensusPeak[] allPeaksInCluster,

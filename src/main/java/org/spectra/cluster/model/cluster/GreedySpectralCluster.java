@@ -1,6 +1,7 @@
 package org.spectra.cluster.model.cluster;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bigbio.pgatk.io.common.Param;
 import org.bigbio.pgatk.io.objectdb.LongObject;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
@@ -37,12 +38,15 @@ public class GreedySpectralCluster extends LongObject implements ICluster {
      */
     private Set<String> clusteredSpectraIds = new HashSet<>();
 
-    private final IConsensusSpectrumBuilder consensusSpectrumBuilder;
+    private IConsensusSpectrumBuilder consensusSpectrumBuilder;
 
     public GreedySpectralCluster(IConsensusSpectrumBuilder consensusSpectrumBuilder) {
         this.id = consensusSpectrumBuilder.getUUI();
         this.consensusSpectrumBuilder = consensusSpectrumBuilder;
     }
+
+    /** Default constructor */
+    public GreedySpectralCluster() { }
 
     /**
      * This constructor create the {@link GreedySpectralCluster} from the original properties.
@@ -71,6 +75,12 @@ public class GreedySpectralCluster extends LongObject implements ICluster {
     public Set<String> getClusteredSpectraIds() {
         return Collections.unmodifiableSet(clusteredSpectraIds);
     }
+
+    @Override
+    public Long getIndex() {
+        return this.getObjectId();
+    }
+
     /**
      * if possible use the highest
      *
@@ -96,12 +106,37 @@ public class GreedySpectralCluster extends LongObject implements ICluster {
     }
 
     @Override
-    public int getPrecursorCharge() {
+    public Integer getPrecursorCharge() {
         if (clusteredSpectraIds.isEmpty()) {
             return -1;
         }
 
         return consensusSpectrumBuilder.getPrecursorCharge();
+    }
+
+    @Override
+    public Double getPrecursorMZ() {
+        return null;
+    }
+
+    @Override
+    public Double getPrecursorIntensity() {
+        return null;
+    }
+
+    @Override
+    public Map<Double, Double> getPeakList() {
+        return null;
+    }
+
+    @Override
+    public Integer getMsLevel() {
+        return 2;
+    }
+
+    @Override
+    public Collection<? extends Param> getAdditional() {
+        return Collections.EMPTY_LIST;
     }
 
     @Override

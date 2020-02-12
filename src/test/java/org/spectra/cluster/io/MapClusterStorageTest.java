@@ -26,9 +26,11 @@ import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
+import org.spectra.cluster.tools.SpectraClusterToolTest;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -176,12 +178,23 @@ public class MapClusterStorageTest {
 
         for(int i = 0; i < NUMBER_CLUSTERS; i++){
             GreedySpectralCluster cluster = (GreedySpectralCluster) clusters[0];
-            long longKey = LongObject.asLong(cluster.getObjectId() + "-" + String.valueOf(i));
+            long longKey = LongObject.asLongHash(cluster.getObjectId() + "-" + String.valueOf(i));
             clusterStorage.addGreedySpectralCluster(longKey, cluster);
         }
 
         Assert.assertEquals(NUMBER_CLUSTERS, clusterStorage.getNumber(GreedySpectralCluster.class));
         System.out.println("Sparkey: Writing 1M Clusters -- " + (System.currentTimeMillis() - time) / 1000);
+
+    }
+
+    @Test
+    public void readingClusteringObjectFile() throws IOException, URISyntaxException {
+
+        String clusterFile = new File(SpectraClusterToolTest.class
+                .getClassLoader().getResource("previous-clusters.zcl").toURI()).getAbsolutePath();
+        ObjectDBGreedyClusterStorage clusterStorage = new ObjectDBGreedyClusterStorage(new ObjectsDB(clusterFile, false));
+        Assert.assertEquals(7, clusterStorage.getNumber(GreedySpectralCluster.class));
+
 
     }
 

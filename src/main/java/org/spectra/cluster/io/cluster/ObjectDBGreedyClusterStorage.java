@@ -1,12 +1,16 @@
 package org.spectra.cluster.io.cluster;
 
+import org.bigbio.pgatk.io.common.MzIterableReader;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.bigbio.pgatk.io.objectdb.LongObject;
 import org.bigbio.pgatk.io.objectdb.ObjectsDB;
 import org.bigbio.pgatk.io.objectdb.WaitingHandler;
 import org.bigbio.pgatk.io.common.SpectrumProperty;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
+import org.spectra.cluster.model.cluster.ICluster;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class interacts with the back-end database to manage identification
@@ -19,14 +23,14 @@ import java.util.*;
  * @author ypriverol
  * @author Marc Vaudel
  * @author Dominik Kopczynski
+ * @author ypriverol
  */
-public class ObjectDBGreedyClusterStorage extends LongObject {
+public class ObjectDBGreedyClusterStorage extends LongObject implements MzIterableReader {
 
-    //The directory where the database stored.
-    private String dbDirectory;
 
     //The database which will contain the objects.
     private final ObjectsDB objectsDB;
+    private Iterator<?> iterator;
 
     /**
      * Default constructor
@@ -48,7 +52,7 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
      * Returns the number of clusters identifications.
      * @return the number of spectrum identifications
      */
-    public int getClusterIdentificationSize() {
+    public int getNumberOfClusters() {
         return objectsDB.getNumber(GreedySpectralCluster.class);
     }
 
@@ -95,7 +99,8 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
      * @throws InterruptedException exception thrown if a threading error occurs
      * while interacting with the database
      */
-    public void loadObjects(Class className, WaitingHandler waitingHandler, boolean displayProgress) throws InterruptedException {
+    public void loadObjects(Class className, WaitingHandler waitingHandler,
+                            boolean displayProgress) throws InterruptedException {
         objectsDB.loadObjects(className, waitingHandler, displayProgress);
     }
 
@@ -176,10 +181,9 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
      *
      * @return list of objects
      */
-    public ArrayList<Object> retrieveObjects(Class className, WaitingHandler waitingHandler, boolean displayProgress) {
-
+    public ArrayList<Object> retrieveObjects(Class className, WaitingHandler waitingHandler,
+                                             boolean displayProgress) {
         return objectsDB.retrieveObjects(className, waitingHandler, displayProgress);
-
     }
 
     /**
@@ -188,13 +192,8 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
      * @param key the key of the object
      * @param object the object
      */
-    public void addObject(
-            long key,
-            Object object
-    ) {
-
+    public void addObject(long key, Object object) {
         objectsDB.insertObject(key, object);
-
     }
 
     /**
@@ -208,9 +207,7 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
      */
     public void addObjects(HashMap<Long, Object> objects, WaitingHandler waitingHandler,
                            boolean displayProgress) {
-
         objectsDB.insertObjects(objects, waitingHandler);
-
     }
 
     /**
@@ -248,7 +245,7 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
      * @return the database directory
      */
     public String getDatabaseDirectory() {
-        return dbDirectory;
+        return objectsDB.getPath();
     }
 
     /**
@@ -263,17 +260,6 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
     }
 
     /**
-     * Adds a {@link GreedySpectralCluster}. If an exception occurs when saving to the db it is
-     * thrown as runtime exception.
-     *
-     * @param key the peptide match key
-     * @param greedySpectralCluster the peptide match
-     */
-    public void addGreedySpectralCluster(String key, GreedySpectralCluster greedySpectralCluster) {
-        objectsDB.insertObject(asLong(key), greedySpectralCluster);
-    }
-
-    /**
      * Add a set of {@link GreedySpectralCluster}
      * @param greedySpectralClusters the peptide matches in a map
      */
@@ -281,8 +267,20 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
         objectsDB.insertObjects(greedySpectralClusters, null);
     }
 
+    @Override
+    public boolean hasNext() {
+        if(iterator == null)
+            iterator = getIterator(GreedySpectralCluster.class, "firstLevel == true");
+        return iterator.hasNext();
+    }
+
+    @Override
+    public Spectrum next() throws NoSuchElementException {
+        return (Spectrum) iterator.next();
+    }
+
     /**
-     * Closes the database connection.
+     * Closes the database connection. The close method delete the database.
      */
     public void close() { objectsDB.close(); }
 
@@ -294,4 +292,18 @@ public class ObjectDBGreedyClusterStorage extends LongObject {
         return objectsDB.isConnectionActive();
     }
 
+    public void addGreedySpectralClusters(ICluster[] clusters) {
+        objectsDB.insertObjects(Arrays.stream(clusters)
+                .collect(Collectors
+                        .toMap(cluster -> asLongHash(cluster.getId()), cluster -> cluster)),
+                null);
+    }
+
+    /**
+     * Flush the data into the database.
+     */
+    public void flush(){
+        objectsDB.commit();;
+        objectsDB.dumpToDB();
+    }
 }

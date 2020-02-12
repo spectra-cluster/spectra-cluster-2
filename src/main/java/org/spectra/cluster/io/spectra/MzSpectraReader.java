@@ -8,6 +8,7 @@ import org.bigbio.pgatk.io.common.PgatkIOException;
 import org.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.bigbio.pgatk.io.mgf.Ms2Query;
+import org.bigbio.pgatk.io.objectdb.ObjectsDB;
 import org.bigbio.pgatk.io.properties.IPropertyStorage;
 import org.bigbio.pgatk.io.properties.StoredProperties;
 import org.spectra.cluster.engine.IClusteringEngine;
@@ -15,6 +16,7 @@ import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
+import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.commons.ClusterIteratorConverter;
 import org.spectra.cluster.model.commons.ITuple;
@@ -72,7 +74,7 @@ public class MzSpectraReader {
         APL("APL", ".apl"),
         PKL("PKL", ".pkl"),
         DTA("DTA", ".dta"),
-        CLUSTERING("CLUSTERING", ".clustering"),
+        CLUSTERING("CLUSTERING", ".zcl"),
         MZXML("MZXML", "mzXML");
 
         private String name;
@@ -139,7 +141,9 @@ public class MzSpectraReader {
                     } else if(peakListclass == ClusteringFileReader.class){
                         jMzReader = new ClusteringFileReader(file);
                         clusteringFile = true;
-                    }
+                    }else if( peakListclass == ObjectDBGreedyClusterStorage.class)
+                        jMzReader = new ObjectDBGreedyClusterStorage(new ObjectsDB(file
+                                .getAbsolutePath(), false));
 //                    else if (peakListclass == AplFile.class)
 //                        jMzReader = new AplFile(file);
 //                    else if(peakListclass == Ms2File.class)
@@ -282,7 +286,10 @@ public class MzSpectraReader {
      *
      * @return Iterator of {@link BinarySpectrum} spectra
      */
-    public ClusterIteratorConverter<Stream<ITuple>, ICluster> readClusterIterator(IPropertyStorage propertyStorage) throws SpectraClusterException {
+    public ClusterIteratorConverter<Stream<ITuple>, ICluster> readClusterIterator(IPropertyStorage
+                                                                                          propertyStorage)
+            throws SpectraClusterException {
+
         Stream<Tuple<File, MzIterableReader>> iteratorStream = inputFiles
                 .entrySet().stream()
                 .map(x -> new Tuple<>(x.getKey(), x.getValue()))
@@ -290,7 +297,8 @@ public class MzSpectraReader {
                 .stream();
 
         if(clusteringEngine == null)
-            throw new SpectraClusterException("The clusterEngine should be init if you want to retrieve Clusters");
+            throw new SpectraClusterException("The clusterEngine should be init if you want to retrieve " +
+                    "Clusters");
 
         return new ClusterIteratorConverter<>(iteratorStream, tupleSpectrum -> {
             if (tupleSpectrum.getValue() instanceof org.bigbio.pgatk.io.common.cluster.ICluster) {
@@ -431,7 +439,7 @@ public class MzSpectraReader {
         if (filename.endsWith(MzFileType.MGF.getExtension()))
             return MgfIterableReader.class;
         else if(filename.endsWith(MzFileType.CLUSTERING.getExtension()))
-            return ClusteringFileReader.class;
+            return ObjectDBGreedyClusterStorage.class;
 //        else if (filename.endsWith(MzFileType.MS2.getExtension()))
 //            return Ms2File.class;
 //        else if (filename.endsWith(MzFileType.PKL.getExtension()))
