@@ -1,4 +1,4 @@
-package org.spectra.cluster.io.cluster;
+package org.spectra.cluster.io.cluster.old_writer;
 
 import org.spectra.cluster.model.cluster.ICluster;
 

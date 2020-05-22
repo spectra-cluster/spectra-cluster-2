@@ -1,7 +1,7 @@
 package org.spectra.cluster.filter.rawpeaks;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import org.bigbio.pgatk.io.common.Spectrum;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 
 import java.util.ArrayList;
 import java.util.Comparator;

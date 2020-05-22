@@ -21,11 +21,15 @@ import java.util.Objects;
 
 @Data
 public class BinaryPeak implements Serializable {
-    protected final int mz;
-    protected final int intensity;
+
+    protected int mz;
+    protected int intensity;
     /** The peaks' rank in the spectrum where 1 is the highest peak and 0 if the rank isn't set **/
     protected int rank = 0;
-    protected final int mzHash;
+    protected int mzHash;
+
+    public BinaryPeak() {
+    }
 
     public BinaryPeak(int mz, int intensity) {
         this.mz = mz;
@@ -36,7 +40,7 @@ public class BinaryPeak implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!BinaryPeak.class.isInstance(o)) return false;
+        if (!(o instanceof BinaryPeak)) return false;
         BinaryPeak that = (BinaryPeak) o;
         return mz == that.mz;
     }

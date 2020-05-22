@@ -1,6 +1,7 @@
 package org.spectra.cluster.engine;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.spectra.cluster.cdf.CumulativeDistributionFunction;
 import org.spectra.cluster.cdf.CumulativeDistributionFunctionFactory;
 import org.spectra.cluster.cdf.INumberOfComparisonAssessor;
@@ -9,6 +10,7 @@ import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.predicates.ClusterIsKnownComparisonPredicate;
 import org.spectra.cluster.predicates.IComparisonPredicate;
@@ -17,12 +19,14 @@ import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the original clustering engine used by default
  * in the spectra-cluster 1.x API
  *
  * @author jg
+ * @author ypriverol
  */
 @Slf4j
 public class GreedyClusteringEngine implements IClusteringEngine {
@@ -37,7 +41,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     private final INumberOfComparisonAssessor numberOfComparisonAssessor;
     private final IComparisonPredicate<ICluster> firstRoundPredicate;
     private final int consensusSpectrumNoiseFilterIncrement;
-    // TODO: Add a factory for consensus spectrum builder so we can add them as a parameter
+    // TODO: Add a factory for consensus spectrum builder so we can put them as a parameter
     // private final IConsensusSpectrumBuilder consensusSpectrumBuilder;
 
 
@@ -78,9 +82,8 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     }
 
     @Override
-    public ICluster[] clusterSpectra(IBinarySpectrum... spectra) {
+    public ICluster[] clusterSpectra(ICluster... clusters) {
         // convert all spectra to clusters
-        GreedySpectralCluster[] clusters = convertSpectraToCluster(spectra);
         float scoreIncrement = (thresholdEnd - thresholdStart) / (float) (clusteringRounds - 1);
         IComparisonPredicate<ICluster> currentComparisonPredicate;
 
@@ -105,6 +108,13 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         return clusters;
     }
 
+    //Todo: Jgriss should review which method can be remove from here.
+    @Override
+    public ICluster createSingleSpectrumCluster(IBinarySpectrum spectrum) {
+        return convertSingleSpectrum(spectrum);
+    }
+
+
     /**
      * Merges similar clusters based on the set clustering threshold.
      * @param clustersToMerge The clusters to merge.
@@ -112,9 +122,9 @@ public class GreedyClusteringEngine implements IClusteringEngine {
      * @param predicate The predicate to use to decide which clusters to compare
      * @return An array of clusters representing the merged result. Warning: The original objects are changed!
      */
-    private GreedySpectralCluster[] mergeSimilarClusters(GreedySpectralCluster[] clustersToMerge, double similarityThreshold, IComparisonPredicate<ICluster> predicate) {
+    private ICluster[] mergeSimilarClusters(ICluster[] clustersToMerge, double similarityThreshold, IComparisonPredicate<ICluster> predicate) {
         // clusters can never be split
-        GreedySpectralCluster[] mergedClusters = new GreedySpectralCluster[clustersToMerge.length];
+        ICluster[] mergedClusters = new GreedySpectralCluster[clustersToMerge.length];
         int mergedClusterSize = 0;
         // the current offset to use based on the set precursor tolerance
         int mergedClusterPrecursorOffset = 0;
@@ -122,7 +132,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
         int maxSortTolerance = Math.round((float) precursorTolerance / 5);
 
         // merge similar clusters
-        for (GreedySpectralCluster clusterToMerge : clustersToMerge) {
+        for (ICluster clusterToMerge : clustersToMerge) {
             if (mergedClusterSize < 1) {
                 lastMz = clusterToMerge.getPrecursorMz();
                 mergedClusters[mergedClusterSize++] = clusterToMerge;
@@ -140,7 +150,7 @@ public class GreedyClusteringEngine implements IClusteringEngine {
 
             // compare against all existing cluster
             for (int i = mergedClusterPrecursorOffset; i < mergedClusterSize; i++) {
-                GreedySpectralCluster existingCluster = mergedClusters[i];
+                ICluster existingCluster = mergedClusters[i];
 
                 // check about the precursor tolerance
                 if (Math.abs(existingCluster.getPrecursorMz() - clusterToMerge.getPrecursorMz()) > precursorTolerance) {
@@ -196,6 +206,37 @@ public class GreedyClusteringEngine implements IClusteringEngine {
             cluster.addSpectra(s);
             return cluster;
         }).toArray(GreedySpectralCluster[]::new);
+    }
+
+    /**
+     * Converts the spectra objects into an array of cluster objects each only
+     * containing a single spectrum.
+     * @param spectrum The spectrum to be converted
+     * @return An array of ICluster
+     */
+    private GreedySpectralCluster convertSingleSpectrum(IBinarySpectrum spectrum) {
+        GreedySpectralCluster greedyCluster = new GreedySpectralCluster(new GreedyConsensusSpectrum(spectrum.getUUI(),
+                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
+                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP,
+                consensusSpectrumNoiseFilterIncrement,
+                COMPARISON_FILTER));
+        greedyCluster.addSpectra(spectrum);
+        return greedyCluster;
+    }
+
+    @Override
+    public ICluster newCluster(org.bigbio.pgatk.io.common.cluster.ICluster cluster){
+        GreedySpectralCluster greedyCluster = new GreedySpectralCluster(cluster.getId(), cluster.getSpectrumReferences().stream().map(Spectrum::getId).collect(Collectors.toSet()), initGreedyConsensusBuilder(cluster),
+                null, (float) 0.1);
+
+        return greedyCluster;
+    }
+
+    private IConsensusSpectrumBuilder initGreedyConsensusBuilder(org.bigbio.pgatk.io.common.cluster.ICluster cluster) {
+        IConsensusSpectrumBuilder greedySpectrumBuilder = new GreedyConsensusSpectrum(cluster.getId(), null, null, COMPARISON_FILTER,
+                -1, -1, null, false, cluster.getSpecCount(), 0, 0, 0,
+                GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP, GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP, -1);
+        return greedySpectrumBuilder;
     }
 
     @Override

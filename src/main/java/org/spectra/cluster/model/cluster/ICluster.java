@@ -1,10 +1,11 @@
 package org.spectra.cluster.model.cluster;
 
 
+import org.bigbio.pgatk.io.common.spectra.Spectrum;
+import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.Set;
  *
  * @author jg
  */
-public interface ICluster extends Serializable {
+public interface ICluster extends Serializable, Spectrum {
 
     /**
      * Returns the cluster's id. This is identical with the cluster's consensus spectrum's id.
@@ -34,7 +35,7 @@ public interface ICluster extends Serializable {
      *
      * @return The charge
      */
-    int getPrecursorCharge();
+    Integer getPrecursorCharge();
 
     /**
      * Get consensus spectrum
@@ -56,7 +57,7 @@ public interface ICluster extends Serializable {
 
     /**
      * Adds spectra to the cluster
-     * @param spectra The IBinarySpectrum objects to add
+     * @param spectra The IBinarySpectrum objects to put
      */
     void addSpectra(IBinarySpectrum... spectra);
 
@@ -70,6 +71,8 @@ public interface ICluster extends Serializable {
 
     IConsensusSpectrumBuilder getConsensusSpectrumBuilder();
 
+    void saveComparisonResult(String id, float similarity);
+
     /**
      * The results of the last N comparisons.
      * @return A list of ComparisonMatchS
@@ -82,6 +85,6 @@ public interface ICluster extends Serializable {
      * This method allow to convert an ICluster into a Byte Serializable object
      * @return byte Array
      */
-    byte[] toBytes() throws IOException;
+    byte[] toBytes() throws SpectraClusterException;
 
 }

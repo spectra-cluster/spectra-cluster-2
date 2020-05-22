@@ -1,6 +1,9 @@
 package org.spectra.cluster.model.cluster;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bigbio.pgatk.io.common.Param;
+import org.bigbio.pgatk.io.objectdb.LongObject;
+import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
@@ -18,7 +21,7 @@ import java.util.stream.Collectors;
  *
  */
 @Slf4j
-public class GreedySpectralCluster implements ICluster {
+public class GreedySpectralCluster extends LongObject implements ICluster {
     /**
      * The N (defined here) highest comparison matches will be
      * saved
@@ -35,11 +38,32 @@ public class GreedySpectralCluster implements ICluster {
      */
     private Set<String> clusteredSpectraIds = new HashSet<>();
 
-    private final IConsensusSpectrumBuilder consensusSpectrumBuilder;
+    private IConsensusSpectrumBuilder consensusSpectrumBuilder;
 
     public GreedySpectralCluster(IConsensusSpectrumBuilder consensusSpectrumBuilder) {
         this.id = consensusSpectrumBuilder.getUUI();
         this.consensusSpectrumBuilder = consensusSpectrumBuilder;
+    }
+
+    /** Default constructor */
+    public GreedySpectralCluster() { }
+
+    /**
+     * This constructor create the {@link GreedySpectralCluster} from the original properties.
+     * @param id
+     * @param clusteredSpectraIds
+     * @param consensusSpectrumBuilder
+     * @param bestComparisonMatches
+     * @param lowestBestComparisonSimilarity
+     */
+    public GreedySpectralCluster(String id, Set<String> clusteredSpectraIds, IConsensusSpectrumBuilder consensusSpectrumBuilder,
+                                 List<ComparisonMatch> bestComparisonMatches, float lowestBestComparisonSimilarity) {
+        this.id = id;
+        this.clusteredSpectraIds = clusteredSpectraIds;
+        this.consensusSpectrumBuilder = consensusSpectrumBuilder;
+        this.bestComparisonMatches = bestComparisonMatches;
+        this.lowestBestComparisonSimilarity = lowestBestComparisonSimilarity;
+
     }
 
     /**
@@ -51,6 +75,12 @@ public class GreedySpectralCluster implements ICluster {
     public Set<String> getClusteredSpectraIds() {
         return Collections.unmodifiableSet(clusteredSpectraIds);
     }
+
+    @Override
+    public Long getIndex() {
+        return this.getObjectId();
+    }
+
     /**
      * if possible use the highest
      *
@@ -76,12 +106,37 @@ public class GreedySpectralCluster implements ICluster {
     }
 
     @Override
-    public int getPrecursorCharge() {
+    public Integer getPrecursorCharge() {
         if (clusteredSpectraIds.isEmpty()) {
             return -1;
         }
 
         return consensusSpectrumBuilder.getPrecursorCharge();
+    }
+
+    @Override
+    public Double getPrecursorMZ() {
+        return null;
+    }
+
+    @Override
+    public Double getPrecursorIntensity() {
+        return null;
+    }
+
+    @Override
+    public Map<Double, Double> getPeakList() {
+        return null;
+    }
+
+    @Override
+    public Integer getMsLevel() {
+        return 2;
+    }
+
+    @Override
+    public Collection<? extends Param> getAdditional() {
+        return Collections.EMPTY_LIST;
     }
 
     @Override
@@ -128,9 +183,9 @@ public class GreedySpectralCluster implements ICluster {
             spectraToAdd = filteredSpectra;
         }
 
-        // only add the spectra to the consensus spectrum
+        // only put the spectra to the consensus spectrum
         consensusSpectrumBuilder.addSpectra(spectraToAdd);
-        // add all spectrum ids
+        // put all spectrum ids
         clusteredSpectraIds.addAll(Arrays.stream(spectraToAdd)
                 .map(IBinarySpectrum::getUUI)
                 .collect(Collectors.toSet()));
@@ -139,7 +194,7 @@ public class GreedySpectralCluster implements ICluster {
     /**
      * This function enables the merging of clusters that do not save peak lists
      *
-     * @param cluster An ICluster to add to the cluster
+     * @param cluster An ICluster to put to the cluster
      */
     @Override
     public void mergeCluster(ICluster cluster) {
@@ -160,13 +215,13 @@ public class GreedySpectralCluster implements ICluster {
             id = cluster.getId();
         }
 
-        // add the clustered spectra
+        // put the clustered spectra
         clusteredSpectraIds.addAll(cluster.getClusteredSpectraIds());
 
-        // add the comparison matches
+        // put the comparison matches
         if (cluster.getComparisonMatches().size() > 0) {
             for (ComparisonMatch match : cluster.getComparisonMatches()) {
-                // make sure not to add any self-references
+                // make sure not to put any self-references
                 if (!match.getSpectrumId().equals(id)) {
                     bestComparisonMatches.add(match);
                 }
@@ -181,6 +236,7 @@ public class GreedySpectralCluster implements ICluster {
      * @param id Id of the cluster that the comparison was performed with
      * @param similarity The similarity score to store for this comparison
      */
+    @Override
     public void saveComparisonResult(String id, float similarity) {
         if (bestComparisonMatches.size() >= SAVED_COMPARISON_MATCHES && similarity < lowestBestComparisonSimilarity)
             return;
@@ -239,17 +295,27 @@ public class GreedySpectralCluster implements ICluster {
     }
 
     @Override
-    public byte[] toBytes() throws IOException {
+    public byte[] toBytes() throws SpectraClusterException {
         ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-        ObjectOutputStream outputStream = new ObjectOutputStream(streamOut);
-        outputStream.writeObject(this);
-        return streamOut.toByteArray();
+        ObjectOutputStream outputStream = null;
+        try {
+            outputStream = new ObjectOutputStream(streamOut);
+            outputStream.writeObject(this);
+            return streamOut.toByteArray();
+        } catch (IOException e) {
+            throw new SpectraClusterException("Error converting in object serialization -- " + e.getMessage());
+        }
+
     }
 
-
-    public static ICluster fromBytes(byte[] clusterBytes) throws IOException, ClassNotFoundException {
+    public static ICluster fromBytes(byte[] clusterBytes) throws SpectraClusterException {
         ByteArrayInputStream in = new ByteArrayInputStream(clusterBytes);
-        ObjectInputStream inputStream = new ObjectInputStream(in);
-        return ((GreedySpectralCluster) inputStream.readObject());
+        ObjectInputStream inputStream = null;
+        try {
+            inputStream = new ObjectInputStream(in);
+            return ((GreedySpectralCluster) inputStream.readObject());
+        } catch (IOException | ClassNotFoundException e) {
+            throw new SpectraClusterException("Error converting in object serialization -- " + e.getMessage());
+        }
     }
 }

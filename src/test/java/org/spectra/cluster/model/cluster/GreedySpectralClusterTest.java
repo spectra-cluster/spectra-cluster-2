@@ -19,7 +19,7 @@ public class GreedySpectralClusterTest {
     public void testSavingComparisonMatches() {
         GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("Test", GreedyClusteringEngine.COMPARISON_FILTER));
 
-        Assert.assertEquals("Test", cluster.getId());
+        Assert.assertEquals("Test", cluster.getObjectId());
         Assert.assertEquals(0, cluster.getClusteredSpectraCount());
         Assert.assertTrue(cluster.getClusteredSpectraIds().isEmpty());
 
@@ -49,7 +49,7 @@ public class GreedySpectralClusterTest {
             spectra.add(spectrumIterator.next());
         }
 
-        // add all spectra to one cluster
+        // put all spectra to one cluster
         GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
         cluster.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 

@@ -1,17 +1,23 @@
 package org.spectra.cluster.io;
 
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
 import org.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
+import org.spectra.cluster.engine.IClusteringEngine;
+import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
+import org.spectra.cluster.model.cluster.ICluster;
+import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
+import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
+import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
 import java.net.URI;
@@ -34,6 +40,7 @@ import java.util.Objects;
 public class MzSpectraReaderTest {
 
     MzSpectraReader spectraReader;
+    MzSpectraReader clusteringReader;
 
     @Before
     public void setUp() throws Exception {
@@ -41,10 +48,21 @@ public class MzSpectraReaderTest {
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         File mgfFile = new File(uri);
         spectraReader = new MzSpectraReader(mgfFile, GreedyClusteringEngine.COMPARISON_FILTER);
+
+        uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader()
+                .getResource("testfile.clustering")).toURI();
+
+        IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
+                1, 0.99f, 5, new CombinedFisherIntensityTest(),
+                new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
+                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+
+        File clusteringFile = new File(uri);
+        clusteringReader = new MzSpectraReader(clusteringFile, GreedyClusteringEngine.COMPARISON_FILTER, engine);
     }
 
     @Test
-    public void readBinarySpectraIterator() {
+    public void readBinarySpectraIterator() throws SpectraClusterException {
 
         Iterator<IBinarySpectrum> binaryIter = spectraReader.readBinarySpectraIterator();
         int count = 0;
@@ -53,8 +71,19 @@ public class MzSpectraReaderTest {
             count++;
         }
         Assert.assertEquals(2, count);
+    }
 
+    @Test
+    public void readClusteringIterator() throws SpectraClusterException {
 
+        Iterator<ICluster> binaryIter = clusteringReader.readClusterIterator();
+        int count = 0;
+        while(binaryIter.hasNext()){
+            ICluster cluster = binaryIter.next();
+            Assert.assertTrue(cluster.getId() != null);
+            count++;
+        }
+        Assert.assertEquals(107, count);
     }
 
     @Test
@@ -80,7 +109,7 @@ public class MzSpectraReaderTest {
         File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
 
-        IPropertyStorage storage = new InMemoryPropertyStorage();
+        InMemoryPropertyStorage storage = new InMemoryPropertyStorage();
 
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(storage);
         List<String> specIds = new ArrayList<>();
@@ -95,12 +124,12 @@ public class MzSpectraReaderTest {
 
         // test the properties exist
         for (String id : specIds) {
-            if (storage.getProperty(id, "Sequence") != null) {
+            if (storage.get(id, "Sequence") != null) {
                 nIdentified++;
             }
 
-            Assert.assertNotNull("Missing retention time for " + id, storage.getProperty(id, "retention time"));
-            Assert.assertNotNull("Missing title for " + id, storage.getProperty(id, "spectrum title"));
+            Assert.assertNotNull("Missing retention time for " + id, storage.get(id, "retention time"));
+            Assert.assertNotNull("Missing title for " + id, storage.get(id, "spectrum title"));
         }
 
         Assert.assertEquals(136, nIdentified);

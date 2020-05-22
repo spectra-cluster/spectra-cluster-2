@@ -7,3 +7,5 @@ target/
 =======
 *.log
 .spectra-cluster/
+
+tmp/

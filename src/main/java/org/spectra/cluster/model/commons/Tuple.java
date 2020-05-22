@@ -12,6 +12,8 @@ package org.spectra.cluster.model.commons;
  * @author ypriverol on 19/10/2018.
  */
 
+import java.util.Objects;
+
 /**
  * Tuple stores two elements.
  *
@@ -56,7 +58,7 @@ public class Tuple <K, V> implements ITuple<K, V> {
 
         Tuple tuple = (Tuple) o;
 
-        return !(key != null ? !key.equals(tuple.key) : tuple.key != null) && !(value != null ? !value.equals(tuple.value) : tuple.value != null);
+        return !(!Objects.equals(key, tuple.key)) && !(!Objects.equals(value, tuple.value));
 
     }
 

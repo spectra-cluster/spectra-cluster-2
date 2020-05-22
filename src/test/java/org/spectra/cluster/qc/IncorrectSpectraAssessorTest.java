@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class IncorrectSpectraAssessorTest extends AbstractAssessorTest {
+
     @Test
     public void testAssessment() {
         IQcClusteringResultAssessor assessor = new IncorrectSpectraAssessor(1);

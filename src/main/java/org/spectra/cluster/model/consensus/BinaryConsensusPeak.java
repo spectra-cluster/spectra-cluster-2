@@ -6,7 +6,10 @@ import org.spectra.cluster.model.spectra.BinaryPeak;
 public class BinaryConsensusPeak extends BinaryPeak {
 
     @Getter
-    protected final int count;
+    protected int count;
+
+    public BinaryConsensusPeak() {
+    }
 
     /**
      * Create a {@link BinaryConsensusPeak} with mz, intensity and count

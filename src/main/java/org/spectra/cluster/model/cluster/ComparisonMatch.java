@@ -1,8 +1,5 @@
 package org.spectra.cluster.model.cluster;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.io.Serializable;
 
 /**
@@ -12,17 +9,40 @@ import java.io.Serializable;
  *
  * Created by jg on 06.05.15.
  */
-@Builder
-@Data
+
 public class ComparisonMatch implements Comparable<ComparisonMatch>, Serializable {
-    private final String spectrumId;
-    /**
-     * Single precision is sufficient for this
-     */
-    private final float similarity;
+
+    private String spectrumId;
+
+    /** Single precision is sufficient for this*/
+    private float similarity;
+
+    public ComparisonMatch() { }
+
+    public ComparisonMatch(String spectrumId, float similarity) {
+        this.spectrumId = spectrumId;
+        this.similarity = similarity;
+    }
+
+    public String getSpectrumId() {
+        return spectrumId;
+    }
+
+    public void setSpectrumId(String spectrumId) {
+        this.spectrumId = spectrumId;
+    }
+
+    public float getSimilarity() {
+        return similarity;
+    }
+
+    public void setSimilarity(float similarity) {
+        this.similarity = similarity;
+    }
 
     @Override
     public int compareTo(ComparisonMatch o) {
         return Float.compare(this.similarity, o.similarity);
     }
+
 }

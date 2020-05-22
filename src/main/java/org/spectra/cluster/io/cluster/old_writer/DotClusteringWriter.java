@@ -1,6 +1,7 @@
-package org.spectra.cluster.io.cluster;
+package org.spectra.cluster.io.cluster.old_writer;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bigbio.pgatk.io.common.PgatkIOException;
 import org.bigbio.pgatk.io.properties.IPropertyStorage;
 import org.bigbio.pgatk.io.properties.StoredProperties;
 import org.spectra.cluster.model.cluster.ICluster;
@@ -20,9 +21,14 @@ import java.util.Set;
 
 /**
  * This writer writes clusters to the .clustering format as defined in the original spectra-cluster project.
+ * This class is deprecated for now and we will work on it in the future.
+ *
+ * @author ypriverol
+ * @author jgriss
  */
 
 @Slf4j
+@Deprecated
 public class DotClusteringWriter implements IClusterWriter {
     private final boolean append;
     private final BufferedWriter writer;
@@ -66,7 +72,7 @@ public class DotClusteringWriter implements IClusterWriter {
 
             addConsensusPeaks(cluster, stringBuilder);
 
-            // add the spectra
+            // put the spectra
             for (String spectrumId : cluster.getClusteredSpectraIds()) {
                 addSpectrum(spectrumId, stringBuilder);
             }
@@ -78,15 +84,20 @@ public class DotClusteringWriter implements IClusterWriter {
     /**
      * Add the list of identified sequences to the cluster.
      * @param clusteredSpectraIds The ids of the spectra to process.
-     * @param stringBuilder The string builder to add the line to.
+     * @param stringBuilder The string builder to put the line to.
      */
     private void addSequenceList(Set<String> clusteredSpectraIds, StringBuilder stringBuilder) {
         String[] sequences = clusteredSpectraIds.stream().map(id -> {
-            String s = propertyStorage.getProperty(id, StoredProperties.SEQUENCE);
-            if (s == null || s.length() < 1) {
-                s = "UNIDENTIFIED";
+            try{
+                String s = propertyStorage.get(id, StoredProperties.SEQUENCE);
+                if (s == null || s.length() < 1) {
+                    s = "UNIDENTIFIED";
+                }
+                return s;
+            }catch (PgatkIOException ex){
+                // Todo error
             }
-            return s;
+            return null;
         }).toArray(String[]::new);
 
         Map<String, Integer> sequenceCounts = new HashMap<>(sequences.length);
@@ -116,52 +127,58 @@ public class DotClusteringWriter implements IClusterWriter {
      * Adds information about the spectrum to the output file. The actual
      * data will be retrieved from the property storage.
      * @param spectrumId The spectrum's id
-     * @param stringBuilder The StringBuilder to add the information to.
+     * @param stringBuilder The StringBuilder to put the information to.
      */
     private void addSpectrum(String spectrumId, StringBuilder stringBuilder) {
-        String filename = propertyStorage.getProperty(spectrumId, StoredProperties.ORG_FILENAME);
-        String fileId = propertyStorage.getProperty(spectrumId, StoredProperties.FILE_INDEX);
-        String title = propertyStorage.getProperty(spectrumId, StoredProperties.TITLE);
-        String sequence = propertyStorage.getProperty(spectrumId, StoredProperties.SEQUENCE);
-        String precursorMz = propertyStorage.getProperty(spectrumId, StoredProperties.PRECURSOR_MZ);
-        String charge = propertyStorage.getProperty(spectrumId, StoredProperties.CHARGE);
-        String ptms = propertyStorage.getProperty(spectrumId, StoredProperties.PTMS);
-        String retentionTime = propertyStorage.getProperty(spectrumId, StoredProperties.RETENTION_TIME);
+        try{
+            String filename = propertyStorage.get(spectrumId, StoredProperties.ORG_FILENAME);
+            String fileId = propertyStorage.get(spectrumId, StoredProperties.FILE_INDEX);
+            String title = propertyStorage.get(spectrumId, StoredProperties.TITLE);
+            String sequence = propertyStorage.get(spectrumId, StoredProperties.SEQUENCE);
+            String precursorMz = propertyStorage.get(spectrumId, StoredProperties.PRECURSOR_MZ);
+            String charge = propertyStorage.get(spectrumId, StoredProperties.CHARGE);
+            String ptms = propertyStorage.get(spectrumId, StoredProperties.PTMS);
+            String retentionTime = propertyStorage.get(spectrumId, StoredProperties.RETENTION_TIME);
+            stringBuilder
+                    .append("SPEC\t")
+                    .append("#file=").append(filename != null ? filename : "")
+                    .append("#id=").append(fileId != null ? fileId : "")
+                    .append("#title=").append(title != null ? title : "")
+                    .append('\t')
+                    // no longer supported - most common peptide
+                    .append("false").append('\t')
+                    .append(sequence != null ? sequence : "").append('\t')
+                    .append(precursorMz != null ? precursorMz : "").append('\t')
+                    .append(charge != null ? charge : "").append('\t')
+                    // species is not supported
+                    .append('\t')
+                    .append(ptms != null ? ptms : "").append('\t')
+                    // score currently not supported
+                    .append("0\t")
+                    // JSON encoded stuff
+                    .append('{');
 
+            boolean isFirst = true;
+            if (retentionTime != null) {
+                stringBuilder.append("\"RT\": ").append(retentionTime);
+                isFirst = false;
+            }
 
-        stringBuilder
-                .append("SPEC\t")
-                .append("#file=").append(filename != null ? filename : "")
-                .append("#id=").append(fileId != null ? fileId : "")
-                .append("#title=").append(title != null ? title : "")
-                .append('\t')
-                // no longer supported - most common peptide
-                .append("false").append('\t')
-                .append(sequence != null ? sequence : "").append('\t')
-                .append(precursorMz != null ? precursorMz : "").append('\t')
-                .append(charge != null ? charge : "").append('\t')
-                // species is not supported
-                .append('\t')
-                .append(ptms != null ? ptms : "").append('\t')
-                // score currently not supported
-                .append("0\t")
-                // JSON encoded stuff
-                .append('{');
+            // TODO: put other JSON propertes - ie is_decoy etc.
 
-        boolean isFirst = true;
-        if (retentionTime != null) {
-            stringBuilder.append("\"RT\": ").append(retentionTime);
-            isFirst = false;
+            stringBuilder.append("}\n");
+
+        }catch (PgatkIOException ex){
+            //Todo error
         }
 
-        // TODO: add other JSON propertes - ie is_decoy etc.
 
-        stringBuilder.append("}\n");
+
     }
 
     /**
      * Adds the lines representing the consensus spectrum to the passed StringBuilder instance.
-     * @param cluster The cluster who's consensus spectrum to add.
+     * @param cluster The cluster who's consensus spectrum to put.
      * @param stringBuilder The StringBuilder to which the lines are added.
      */
     private void addConsensusPeaks(ICluster cluster, StringBuilder stringBuilder) {
