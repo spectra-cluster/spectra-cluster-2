@@ -180,6 +180,10 @@ public class SpectraClusterTool implements IProgressListener {
             IComparisonPredicate<ICluster> firstRoundPredicate = new ShareNComparisonPeaksPredicate(
                     nInitiallySharedPeaks);
 
+            if (!ignoreCharge) {
+                firstRoundPredicate = new SameChargePredicate().and(firstRoundPredicate);
+            }
+
             IClusteringEngine engine = new GreedyClusteringEngine(
                     binnedPrecursorTolerance,
                     startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
@@ -217,10 +221,6 @@ public class SpectraClusterTool implements IProgressListener {
 
             // sort according to m/z
             spectra.sort(Comparator.comparingInt(ICluster::getPrecursorMz));
-
-            if (!ignoreCharge) {
-                firstRoundPredicate = new SameChargePredicate().and(firstRoundPredicate);
-            }
 
             Path thisResult = Paths.get(finalResultFile.getAbsolutePath());
 

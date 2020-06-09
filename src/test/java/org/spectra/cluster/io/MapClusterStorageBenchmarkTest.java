@@ -47,7 +47,7 @@ import java.util.stream.IntStream;
  * @author ypriverol on 17/10/2018.
  */
 @Slf4j
-public class MapClusterStorageTest {
+public class MapClusterStorageBenchmarkTest {
 
     private static final int MAX_READING_VALUE = 200_000;
     IRawSpectrumFunction loadingFilter;
@@ -59,7 +59,6 @@ public class MapClusterStorageTest {
 
     @Before
     public void setUp() throws Exception {
-
         loadingFilter = new RemoveImpossiblyHighPeaksFunction()
                 .specAndThen(new RemovePrecursorPeaksFunction(0.5))
                 .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(40)));
@@ -70,7 +69,7 @@ public class MapClusterStorageTest {
                 GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
 
-        File mgfFile = new File(MapClusterStorageTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
+        File mgfFile = new File(MapClusterStorageBenchmarkTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(mgfFile,
                 new TideBinner(),
                 new MaxPeakNormalizer(),
@@ -96,8 +95,8 @@ public class MapClusterStorageTest {
         long time = System.currentTimeMillis();
         Random random = new Random();
 
-        ClusterStorageFactory factory = new ClusterStorageFactory();
-        IMapStorage<ICluster> clusterStorage = factory.buildStaticStorage(Files.createTempDirectory("clusters-").toFile(), NUMBER_CLUSTERS);
+        IMapStorage<ICluster> clusterStorage = ClusterStorageFactory.buildTemporaryStaticStorage(
+                Files.createTempDirectory("clusters-").toFile(), NUMBER_CLUSTERS);
 
 
         for(int i = 0; i < NUMBER_CLUSTERS; i++){
@@ -135,7 +134,8 @@ public class MapClusterStorageTest {
         Random random = new Random();
 
         ClusterStorageFactory factory = new ClusterStorageFactory();
-        IMapStorage<ICluster> clusterStorage = factory.buildDynamicStorage(Files.createTempDirectory("clusters-").toFile(), GreedySpectralCluster.class);
+        IMapStorage<ICluster> clusterStorage = factory.buildTemporaryDynamicStorage(
+                Files.createTempDirectory("clusters-").toFile(), GreedySpectralCluster.class);
 
 
         for(int i = 0; i < NUMBER_CLUSTERS; i++){

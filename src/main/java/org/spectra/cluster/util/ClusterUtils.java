@@ -10,6 +10,17 @@ import java.util.Comparator;
 
 public class ClusterUtils {
 
+    /**
+     * Deletes all files within the path including the path.
+     *
+     * If filePath points to a directory, all contents within that directory and the
+     * directory itself is removed.
+     *
+     * Handle with care!!!
+     *
+     * @param filePath Path to the directory or file that should be deleted
+     * @throws PgatkIOException
+     */
     public static void cleanFilePersistence(File filePath) throws PgatkIOException {
         try {
             Files.walk(filePath.toPath())
