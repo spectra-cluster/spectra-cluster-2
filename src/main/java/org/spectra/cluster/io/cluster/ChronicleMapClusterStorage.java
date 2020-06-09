@@ -18,6 +18,7 @@ public class ChronicleMapClusterStorage<V> implements IMapStorage {
 
     private static final double CLUSTER_SIZE = 6000 + (200 * 10);
     private static final double CLUSTER_KEY_SIZE = 36 + (100 * 2);
+    private final boolean deleteOnClose;
     public  File dbFile = null;
 
     // This is the number of features + items
@@ -27,12 +28,17 @@ public class ChronicleMapClusterStorage<V> implements IMapStorage {
     private ChronicleMap<String, ICluster> clusterStorage;
 
     /**
-     * Create a {@link net.openhft.chronicle.map.ChronicleMap} for storing properties
+     * Create a {@link net.openhft.chronicle.map.ChronicleMap} for storing properties.
+     *
+     * This function fails if the directory already contains a storage.
+     *
      * @param dbDirectory Path to the directory that contains the properties
      * @param numberProperties estimated number of properties
+     * @param deleteOnClose If set, the database file is deleted when the storage is closed.
      * @throws IOException
      */
-    public ChronicleMapClusterStorage(File dbDirectory, long numberProperties) throws IOException {
+    public ChronicleMapClusterStorage(File dbDirectory, long numberProperties, boolean deleteOnClose) throws IOException {
+        this.deleteOnClose = deleteOnClose;
 
         if(numberProperties == -1)
             this.numberProperties = MAX_NUMBER_FEATURES;
@@ -41,27 +47,39 @@ public class ChronicleMapClusterStorage<V> implements IMapStorage {
 
         log.info("----- CHRONICLE MAP ------------------------");
         this.dbDirectory = dbDirectory;
-        dbFile = new File(dbDirectory.getAbsolutePath() + File.separator + "properties-" + System.nanoTime() + ".db");
-        dbFile.deleteOnExit();
+        dbFile = new File(dbDirectory.getAbsolutePath() + File.separator + "cluster-cm-storage.db");
+
+        // the storage must not yet exist
+        if (dbFile.exists())
+            throw new IOException("Directory already contains a storage database.");
+
+        if (deleteOnClose)
+            dbFile.deleteOnExit();
+
         this.clusterStorage = ChronicleMapBuilder.of(String.class, ICluster.class)
                 .entries(numberProperties) //the maximum number of entries for the map
                 .averageKeySize(CLUSTER_KEY_SIZE)
                 .averageValueSize(CLUSTER_SIZE)
                 .createPersistedTo(dbFile);
-
     }
 
     /**
      * Create a {@link net.openhft.chronicle.map.ChronicleMap} for storing properties
-     * @param dbFile Path to the directory that contains the properties
+     * @param dbDirectory Path to the directory that contains the properties
      * @throws IOException
      */
-    public ChronicleMapClusterStorage(File dbFile, boolean useFileConfig) throws IOException {
+    public ChronicleMapClusterStorage(File dbDirectory, boolean useFileConfig) throws IOException {
+        this.deleteOnClose = false;
 
         log.info("----- CHRONICLE MAP ------------------------");
-        this.dbFile = dbFile;
+        this.dbDirectory = dbDirectory;
+        this.dbFile = new File(dbDirectory.getAbsolutePath() + File.separator + "cluster-cm-storage.db");
+
+        // make sure the file exists
+        if (!this.dbFile.exists())
+            throw new IOException("Directory does not contain a cluster storage.");
+
         this.clusterStorage = ChronicleMapBuilder.of(String.class, ICluster.class)
-                .entries(numberProperties) //the maximum number of entries for the map
                 .averageKeySize(CLUSTER_KEY_SIZE)
                 .averageValueSize(CLUSTER_SIZE)
                 .recoverPersistedTo(dbFile, useFileConfig);
@@ -73,13 +91,13 @@ public class ChronicleMapClusterStorage<V> implements IMapStorage {
     }
 
     /**
-     * Create a {@link net.openhft.chronicle.map.ChronicleMap} for storing properties using the
+     * Create a temporary {@link net.openhft.chronicle.map.ChronicleMap} for storing properties using the
      * MAX_NUMBER_FEATURES = 100M.
      * @param directoryPath Directory Path
      * @throws IOException
      */
     public ChronicleMapClusterStorage(File directoryPath) throws IOException {
-        this(directoryPath, MAX_NUMBER_FEATURES);
+        this(directoryPath, MAX_NUMBER_FEATURES, false);
     }
 
     @Override
@@ -92,9 +110,8 @@ public class ChronicleMapClusterStorage<V> implements IMapStorage {
      */
     @Override
     public void close() throws PgatkIOException {
-        ClusterUtils.cleanFilePersistence(dbDirectory);
-        if(dbFile != null && dbFile.exists()){
-            dbFile.deleteOnExit();
+        if(deleteOnClose && dbFile != null && dbFile.exists()){
+            dbFile.delete();
         }
     }
 

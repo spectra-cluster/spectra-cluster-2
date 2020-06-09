@@ -17,21 +17,46 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class SparkKeyClusterStorage implements IMapStorage {
 
-    private final File dbDirectory;
-    File dbFile;
+    private final boolean deleteOnClose;
+    private final File dbFile;
     HashSet<SparkeyWriter> writerSet = new HashSet<>();
     HashSet<SparkeyReader> readerSet = new HashSet<>();
-    long entryCounter = 0;
+    AtomicLong entryCounter = new AtomicLong(0);
     Class clusterClass;
 
     private final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-    public SparkKeyClusterStorage(File dbDirectory, Class clusterClass) throws IOException{
-        dbFile = new File(dbDirectory, "properties-" + System.nanoTime() + ".spi");
-        this.dbDirectory = dbDirectory;
+    /**
+     * Creates a new SparkKeyClusterStorage. The storage implementation requires multiple files. Therefore,
+     * they should ideally be stored in a dedicated directory. The directory as a whole can then be regarded
+     * as a permanent record for the clustering run.
+     *
+     * By default, existing storage files will be loaded and not overwritten.
+     *
+     * @param dbDirectory Directory to create the required files in.
+     * @param clusterClass The class of the clusters stored in the storage.
+     * @param openExisting If set, the constructor throws an IOException in case the database file does not exist.
+     * @param deleteOnClose If set, the database files are deleted when the "close" method is called.
+     * @throws IOException
+     */
+    public SparkKeyClusterStorage(File dbDirectory, Class clusterClass, boolean openExisting, boolean deleteOnClose)
+            throws IOException{
+        this.dbFile = new File(dbDirectory, "spectra-cluster_object-storage.spi");
+
+        if (openExisting && !this.dbFile.exists())
+            throw new IOException("No storage found in object storage directory.");
+        if (!openExisting && this.dbFile.exists())
+            throw new IOException("Object storage directory already contains a storage.");
+
+        // indicate that the entry count is wrong if the DB exists
+        if (this.dbFile.exists())
+            entryCounter.set(-1);
+
+        this.deleteOnClose = deleteOnClose;
         this.clusterClass = clusterClass;
     }
 
@@ -52,7 +77,8 @@ public class SparkKeyClusterStorage implements IMapStorage {
         @Override
         protected SparkeyReader initialValue() {
             try {
-                SparkeyReader reader = Sparkey.open(dbFile);
+                // open using a thread-safe reader
+                SparkeyReader reader = Sparkey.openThreadLocalReader(dbFile);
                 readerSet.add(reader);
                 return reader;
             } catch (IOException ex) {
@@ -84,33 +110,50 @@ public class SparkKeyClusterStorage implements IMapStorage {
         }catch (IOException | SpectraClusterException ex){
             throw new PgatkIOException("Error wiring the following property - " + key + " " + cluster.getId() + "error " + ex.getMessage());
         }
-        entryCounter++;
+        entryCounter.incrementAndGet();
     }
 
     @Override
     public ICluster get(String key) throws PgatkIOException {
-        try{
-            return deserialize(readers.get().getAsByteArray(serialize(key)));
-        }catch (IOException ex){
+        try {
+            byte[] byteObject = readers.get().getAsByteArray(serialize(key));
+
+            if (byteObject == null) {
+                return null;
+            }
+
+            return deserialize(byteObject);
+        } catch (IOException ex) {
             throw new PgatkIOException("Error retrieving the value for key -- " + key );
         }
     }
 
     @Override
     public void cleanStorage() throws PgatkIOException {
-       entryCounter = 0;
+        // TODO: This function does not delete any elements.
+        entryCounter.set(0);
     }
 
     @Override
-    public long storageSize() {
-        return entryCounter;
+    public synchronized long storageSize() {
+        // load entry count if DB exists
+        if (entryCounter.get() < 0) {
+            entryCounter.set(readers.get().getIndexHeader().getNumEntries());
+        }
+
+        return entryCounter.get();
     }
 
     @Override
     public void close() throws PgatkIOException{
         for (SparkeyWriter w : writerSet) {
             try {
-                w.writeHash();
+                // only write the files if they are not deleted afterwards
+                if (!deleteOnClose) {
+                    w.flush();
+                    w.writeHash();
+                }
+
                 w.close();
             } catch (IOException ex) {
                 // do nothings.
@@ -120,9 +163,16 @@ public class SparkKeyClusterStorage implements IMapStorage {
             r.close();
         }
 
-        ClusterUtils.cleanFilePersistence(dbDirectory);
-        if(dbFile != null && dbFile.exists()){
-            dbFile.deleteOnExit();
+        // delete the files
+        if (deleteOnClose && dbFile != null) {
+            if (dbFile.exists())
+                dbFile.delete();
+
+            String logFilePath = dbFile.getAbsolutePath().replace(".spi", ".spl");
+
+            File logFile = new File(logFilePath);
+            if (logFile.exists())
+                logFile.delete();
         }
     }
 
@@ -130,7 +180,7 @@ public class SparkKeyClusterStorage implements IMapStorage {
         try {
             writers.get().flush();
             writers.get().writeHash();
-        }catch (IOException ex){
+        } catch (IOException ex) {
             throw new PgatkIOException("Error wiring the SparkKey DB -- " + ex.getMessage());
         }
 
