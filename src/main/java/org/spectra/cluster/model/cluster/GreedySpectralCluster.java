@@ -308,6 +308,11 @@ public class GreedySpectralCluster extends LongObject implements ICluster {
 
     }
 
+    @Override
+    public IClusterProperties getProperties() {
+        return new BasicClusterProperties(getPrecursorMz(), getPrecursorCharge(), id);
+    }
+
     public static ICluster fromBytes(byte[] clusterBytes) throws SpectraClusterException {
         ByteArrayInputStream in = new ByteArrayInputStream(clusterBytes);
         ObjectInputStream inputStream = null;

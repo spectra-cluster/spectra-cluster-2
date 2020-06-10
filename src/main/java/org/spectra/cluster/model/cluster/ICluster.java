@@ -15,7 +15,7 @@ import java.util.Set;
  *
  * @author jg
  */
-public interface ICluster extends Serializable, Spectrum {
+public interface ICluster extends Serializable, Spectrum, IClusterProperties {
 
     /**
      * Returns the cluster's id. This is identical with the cluster's consensus spectrum's id.
@@ -87,4 +87,9 @@ public interface ICluster extends Serializable, Spectrum {
      */
     byte[] toBytes() throws SpectraClusterException;
 
+    /**
+     * Returns the cluster's properties as a light-weight object.
+     * @return IClusterProperties object.
+     */
+    IClusterProperties getProperties();
 }
