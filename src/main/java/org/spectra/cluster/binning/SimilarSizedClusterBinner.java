@@ -36,6 +36,7 @@ public class SimilarSizedClusterBinner implements IClusterBinner {
         // ensure that there are clusters to bin
         if (clusters.length < minimumBinSizeCluster) {
             String[] allIds = Arrays.stream(clusters)
+                    .sorted(Comparator.comparingInt(IClusterProperties::getPrecursorMz))
                     .map(IClusterProperties::getId)
                     .toArray(String[]::new);
 
@@ -50,41 +51,55 @@ public class SimilarSizedClusterBinner implements IClusterBinner {
             precursorOffset = 0;
 
         // get the base binning result
-        Map<Integer, List<String>> bins = doBinning(clusters);
+        Map<Integer, List<IClusterProperties>> bins = doBinning(clusters);
 
-        // merge small bins
-        Integer[] allBins = bins.keySet().stream().sorted().toArray(Integer[]::new);
+        mergeBins(bins);
 
-        for (int binIndex = 0; binIndex < allBins.length - 1; binIndex++) {
-            // merge the bin with the next one if it is too small
-            if (bins.get(allBins[binIndex]).size() < minimumBinSizeCluster) {
-                // add all clusters to the next bin
-                bins.get(allBins[binIndex + 1]).addAll( bins.get(allBins[binIndex]) );
-
-                // put an empty list instead
-                bins.put(allBins[binIndex], new ArrayList<>(0));
-            }
-        }
-
-        // convert to array and remove empty bins
-        String[][] finalBins = bins.values().stream()
-                .filter((List<String> currentBin) -> currentBin.size() > 0)
-                .map((List<String> currentBin) -> currentBin.toArray(new String[0]))
+        // get the sorted bins
+        String[][] sortedIds = bins.values().stream()
+                // remove empty bins
+                .filter(bin -> bin.size() > 0)
+                // sort the clusters based on precursor m/z
+                .peek(bin -> bin.sort(Comparator.comparingInt(IClusterProperties::getPrecursorMz)))
+                // change each bin to an array of ids
+                .map(bin -> bin.stream().map(IClusterProperties::getId).toArray(String[]::new))
+                // return as an array
                 .toArray(String[][]::new);
 
-        return finalBins;
+        return sortedIds;
+    }
+
+    /**
+     * Merge adjacent bins that are smaller than the defined minimum bin size.
+     * @param bins Bins to merge
+     * @return Merged bins.
+     */
+    private void mergeBins(Map<Integer, List<IClusterProperties>> bins) {
+        // get the sorted bin indices
+        Integer[] binIndices = bins.keySet().stream().sorted().toArray(Integer[]::new);
+
+        for (int binIndex = 0; binIndex < binIndices.length - 1; binIndex++) {
+            // merge the bin with the next one if it is too small
+            if (bins.get(binIndices[binIndex]).size() < minimumBinSizeCluster) {
+                // add all clusters to the next bin
+                bins.get(binIndices[binIndex + 1]).addAll( bins.get(binIndices[binIndex]) );
+
+                // put an empty list instead
+                bins.put(binIndices[binIndex], new ArrayList<>(0));
+            }
+        }
     }
 
     /**
      * Performs the initial binning based only on the set bin m/z size and the charge state (if set).
      *
      * @param clusters The clusters to bin.
-     * @return A map with the bin index as key and the respective cluster ids as values.
+     * @return A map with the bin index as key and the respective clusters as values.
      * @throws SpectraClusterException
      */
-    private Map<Integer, List<String>> doBinning(IClusterProperties[] clusters) throws SpectraClusterException {
+    private Map<Integer, List<IClusterProperties>> doBinning(IClusterProperties[] clusters) throws SpectraClusterException {
         // bin the cluster in the smallest possible bins
-        Map<Integer, List<String>> bins = new HashMap<>(1000);
+        Map<Integer, List<IClusterProperties>> bins = new HashMap<>(1000);
 
         for (IClusterProperties cluster : clusters) {
             // get the "raw" bin
@@ -107,7 +122,7 @@ public class SimilarSizedClusterBinner implements IClusterBinner {
             if (!bins.containsKey(bin))
                 bins.put(bin, new ArrayList<>(1));
 
-            bins.get(bin).add(cluster.getId());
+            bins.get(bin).add(cluster);
         }
 
         return bins;
