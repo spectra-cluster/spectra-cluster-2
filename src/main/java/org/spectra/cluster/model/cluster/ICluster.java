@@ -1,7 +1,7 @@
 package org.spectra.cluster.model.cluster;
 
 
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;

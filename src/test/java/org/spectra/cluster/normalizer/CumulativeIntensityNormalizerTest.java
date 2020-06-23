@@ -1,8 +1,8 @@
 package org.spectra.cluster.normalizer;
 
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
-import org.bigbio.pgatk.io.mgf.MgfIterableReader;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,11 +1,11 @@
 package org.spectra.cluster.io.cluster;
 
-import org.bigbio.pgatk.io.common.MzIterableReader;
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
-import org.bigbio.pgatk.io.objectdb.LongObject;
-import org.bigbio.pgatk.io.objectdb.ObjectsDB;
-import org.bigbio.pgatk.io.objectdb.WaitingHandler;
-import org.bigbio.pgatk.io.common.SpectrumProperty;
+import io.github.bigbio.pgatk.io.common.MzIterableReader;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.objectdb.LongObject;
+import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
+import io.github.bigbio.pgatk.io.objectdb.WaitingHandler;
+import io.github.bigbio.pgatk.io.common.SpectrumProperty;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
 

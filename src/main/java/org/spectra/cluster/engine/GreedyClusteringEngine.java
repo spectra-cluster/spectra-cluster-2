@@ -1,7 +1,7 @@
 package org.spectra.cluster.engine;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.spectra.cluster.cdf.CumulativeDistributionFunction;
 import org.spectra.cluster.cdf.CumulativeDistributionFunctionFactory;
 import org.spectra.cluster.cdf.INumberOfComparisonAssessor;
@@ -225,14 +225,14 @@ public class GreedyClusteringEngine implements IClusteringEngine {
     }
 
     @Override
-    public ICluster newCluster(org.bigbio.pgatk.io.common.cluster.ICluster cluster){
+    public ICluster newCluster(io.github.bigbio.pgatk.io.common.cluster.ICluster cluster){
         GreedySpectralCluster greedyCluster = new GreedySpectralCluster(cluster.getId(), cluster.getSpectrumReferences().stream().map(Spectrum::getId).collect(Collectors.toSet()), initGreedyConsensusBuilder(cluster),
                 null, (float) 0.1);
 
         return greedyCluster;
     }
 
-    private IConsensusSpectrumBuilder initGreedyConsensusBuilder(org.bigbio.pgatk.io.common.cluster.ICluster cluster) {
+    private IConsensusSpectrumBuilder initGreedyConsensusBuilder(io.github.bigbio.pgatk.io.common.cluster.ICluster cluster) {
         IConsensusSpectrumBuilder greedySpectrumBuilder = new GreedyConsensusSpectrum(cluster.getId(), null, null, COMPARISON_FILTER,
                 -1, -1, null, false, cluster.getSpecCount(), 0, 0, 0,
                 GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP, GreedyConsensusSpectrum.MIN_PEAKS_TO_KEEP, -1);

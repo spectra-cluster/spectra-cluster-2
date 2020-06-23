@@ -1,6 +1,6 @@
 package org.spectra.cluster.filter.rawpeaks;
 
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 
 import java.io.Serializable;
 import java.util.Objects;
