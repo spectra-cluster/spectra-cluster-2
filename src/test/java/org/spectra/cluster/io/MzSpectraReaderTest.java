@@ -1,6 +1,6 @@
 package org.spectra.cluster.io;
 
-import org.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

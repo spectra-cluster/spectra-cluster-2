@@ -1,6 +1,6 @@
 package org.spectra.cluster.qc;
 
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
 import org.spectra.cluster.model.cluster.ICluster;
 
 /**

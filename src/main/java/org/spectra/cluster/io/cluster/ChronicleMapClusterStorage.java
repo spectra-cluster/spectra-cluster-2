@@ -3,8 +3,8 @@ package org.spectra.cluster.io.cluster;
 import lombok.extern.slf4j.Slf4j;
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
-import org.bigbio.pgatk.io.common.PgatkIOException;
-import org.bigbio.pgatk.io.mapcache.IMapStorage;
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
 import org.spectra.cluster.model.cluster.ICluster;
 
 import java.io.File;

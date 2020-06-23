@@ -1,6 +1,6 @@
 package org.spectra.cluster.io.cluster;
 
-import org.bigbio.pgatk.io.mapcache.IMapStorage;
+import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.io.cluster.old_writer.BinaryClusterStorage;
 import org.spectra.cluster.model.cluster.ICluster;

@@ -1,16 +1,16 @@
 package org.spectra.cluster.io.spectra;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bigbio.pgatk.io.clustering.ClusteringFileReader;
-import org.bigbio.pgatk.io.common.MzIterableReader;
-import org.bigbio.pgatk.io.common.Param;
-import org.bigbio.pgatk.io.common.PgatkIOException;
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
-import org.bigbio.pgatk.io.mgf.MgfIterableReader;
-import org.bigbio.pgatk.io.mgf.Ms2Query;
-import org.bigbio.pgatk.io.objectdb.ObjectsDB;
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
-import org.bigbio.pgatk.io.properties.StoredProperties;
+import io.github.bigbio.pgatk.io.clustering.ClusteringFileReader;
+import io.github.bigbio.pgatk.io.common.MzIterableReader;
+import io.github.bigbio.pgatk.io.common.Param;
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.mgf.MgfIterableReader;
+import io.github.bigbio.pgatk.io.mgf.Ms2Query;
+import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.StoredProperties;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
@@ -301,7 +301,7 @@ public class MzSpectraReader {
                     "Clusters");
 
         return new ClusterIteratorConverter<>(iteratorStream, tupleSpectrum -> {
-            if (tupleSpectrum.getValue() instanceof org.bigbio.pgatk.io.common.cluster.ICluster) {
+            if (tupleSpectrum.getValue() instanceof io.github.bigbio.pgatk.io.common.cluster.ICluster) {
                 return storeCluster(propertyStorage, tupleSpectrum);
             }
             return clusteringEngine.createSingleSpectrumCluster(
@@ -313,8 +313,8 @@ public class MzSpectraReader {
 
     private ICluster storeCluster(IPropertyStorage propertyStorage, ITuple tupleSpectrum) {
         File inputFile = (File) tupleSpectrum.getKey();
-        org.bigbio.pgatk.io.common.cluster.ICluster spectrum =
-                (org.bigbio.pgatk.io.common.cluster.ICluster) tupleSpectrum.getValue();
+        io.github.bigbio.pgatk.io.common.cluster.ICluster spectrum =
+                (io.github.bigbio.pgatk.io.common.cluster.ICluster) tupleSpectrum.getValue();
 
         ICluster s = transformIOClusterToCluster(spectrum, clusteringEngine);
 //        // save spectrum properties
@@ -346,7 +346,7 @@ public class MzSpectraReader {
 
     }
 
-    private ICluster transformIOClusterToCluster(org.bigbio.pgatk.io.common.cluster.ICluster spectrum,
+    private ICluster transformIOClusterToCluster(io.github.bigbio.pgatk.io.common.cluster.ICluster spectrum,
                                                  IClusteringEngine engine) {
         return engine.newCluster(spectrum);
     }

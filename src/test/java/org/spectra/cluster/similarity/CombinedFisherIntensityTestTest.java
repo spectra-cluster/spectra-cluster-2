@@ -2,8 +2,8 @@ package org.spectra.cluster.similarity;
 
 import cern.jet.random.HyperGeometric;
 import cern.jet.random.engine.RandomEngine;
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
-import org.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;

@@ -13,7 +13,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.bigbio.pgatk.io" level="info">
+    <logger name="io.github.bigbio.pgatk.io" level="info">
         <appender-ref ref="SPECTRA_CLUSTER-FILE"/>
         <appender-ref ref="STDOUT"/>
     </logger>

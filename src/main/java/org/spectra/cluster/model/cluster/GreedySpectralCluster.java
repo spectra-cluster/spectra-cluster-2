@@ -1,8 +1,8 @@
 package org.spectra.cluster.model.cluster;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bigbio.pgatk.io.common.Param;
-import org.bigbio.pgatk.io.objectdb.LongObject;
+import io.github.bigbio.pgatk.io.common.Param;
+import io.github.bigbio.pgatk.io.objectdb.LongObject;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;

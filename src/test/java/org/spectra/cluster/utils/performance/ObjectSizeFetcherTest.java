@@ -1,8 +1,8 @@
 package org.spectra.cluster.utils.performance;
 
 
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
-import org.bigbio.pgatk.io.mgf.MgfIterableReader;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.ehcache.sizeof.SizeOf;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * This Test check the size of an {@link IBinarySpectrum} List and compare with a List of {@link org.bigbio.pgatk.io.common.spectra.Spectrum}. The test
+ * This Test check the size of an {@link IBinarySpectrum} List and compare with a List of {@link io.github.bigbio.pgatk.io.common.spectra.Spectrum}. The test
  * expect that the size is half of the original size of an spectrum.
  *
  * @author ypriverol

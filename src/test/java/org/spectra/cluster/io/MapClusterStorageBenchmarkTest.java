@@ -1,10 +1,10 @@
 package org.spectra.cluster.io;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bigbio.pgatk.io.common.PgatkIOException;
-import org.bigbio.pgatk.io.mapcache.IMapStorage;
-import org.bigbio.pgatk.io.objectdb.LongObject;
-import org.bigbio.pgatk.io.objectdb.ObjectsDB;
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
+import io.github.bigbio.pgatk.io.objectdb.LongObject;
+import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

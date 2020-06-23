@@ -1,9 +1,9 @@
 package org.spectra.cluster.tools;
 
-import org.bigbio.pgatk.io.mapcache.IMapStorage;
-import org.bigbio.pgatk.io.objectdb.ObjectsDB;
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
-import org.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
+import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
+import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
