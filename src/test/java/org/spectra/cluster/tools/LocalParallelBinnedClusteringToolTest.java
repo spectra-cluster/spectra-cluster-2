@@ -42,9 +42,7 @@ public class LocalParallelBinnedClusteringToolTest {
     public void setUp() throws Exception {
         mgfFiles = new URI[] {
                 getClass().getClassLoader().getResource("same_sequence_cluster.mgf").toURI(),
-                getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI(),
-                getClass().getClassLoader().getResource("imp_hela_test.mgf").toURI()
-        };
+                getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI()};
 
         testDir = Files.createTempDirectory("clusters-");
     }
@@ -133,7 +131,7 @@ public class LocalParallelBinnedClusteringToolTest {
             totalSpectra += cluster.getClusteredSpectraCount();
         }
 
-        Assert.assertEquals(6958, totalClusters);
+        Assert.assertEquals(192, totalClusters);
         Assert.assertEquals(testClusters.length, totalSpectra);
     }
 }
