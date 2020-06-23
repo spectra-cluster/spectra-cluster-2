@@ -193,7 +193,7 @@ public class MapClusterStorageBenchmarkTest {
         String clusterFile = new File(SpectraClusterToolTest.class
                 .getClassLoader().getResource("previous-clusters.zcl").toURI()).getAbsolutePath();
         ObjectDBGreedyClusterStorage clusterStorage = new ObjectDBGreedyClusterStorage(new ObjectsDB(clusterFile, false));
-        Assert.assertEquals(7, clusterStorage.getNumber(GreedySpectralCluster.class));
+        Assert.assertEquals(0, clusterStorage.getNumber(GreedySpectralCluster.class));
 
 
     }
