@@ -6,7 +6,6 @@ import net.openhft.chronicle.map.ChronicleMapBuilder;
 import org.bigbio.pgatk.io.common.PgatkIOException;
 import org.bigbio.pgatk.io.mapcache.IMapStorage;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.util.ClusterUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 @Slf4j
-public class ChronicleMapClusterStorage<V> implements IMapStorage {
+public class ChronicleMapClusterStorage implements IMapStorage<ICluster> {
 
     private static final double CLUSTER_SIZE = 6000 + (200 * 10);
     private static final double CLUSTER_KEY_SIZE = 36 + (100 * 2);
@@ -116,14 +115,18 @@ public class ChronicleMapClusterStorage<V> implements IMapStorage {
     }
 
     @Override
-    public void put(String key, Object value) {
-        ICluster cluster = (ICluster) value;
+    public void put(String key, ICluster cluster) {
         this.clusterStorage.put(key, cluster);
     }
 
     @Override
     public ICluster get(String key) throws PgatkIOException {
         return this.clusterStorage.get(key);
+    }
+
+    @Override
+    public void flush() throws PgatkIOException {
+        // this function has no effect
     }
 
     public Iterator<Map.Entry<String, ICluster>> getIterator(){

@@ -9,7 +9,6 @@ import org.bigbio.pgatk.io.mapcache.IMapStorage;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.util.ClusterUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +18,7 @@ import java.util.Base64;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SparkKeyClusterStorage implements IMapStorage {
+public class SparkKeyClusterStorage implements IMapStorage<ICluster> {
 
     private final boolean deleteOnClose;
     private final File dbFile;
@@ -44,7 +43,7 @@ public class SparkKeyClusterStorage implements IMapStorage {
      * @throws IOException
      */
     public SparkKeyClusterStorage(File dbDirectory, Class clusterClass, boolean openExisting, boolean deleteOnClose)
-            throws IOException{
+        throws IOException{
         this.dbFile = new File(dbDirectory, "spectra-cluster_object-storage.spi");
 
         if (openExisting && !this.dbFile.exists())
@@ -103,8 +102,7 @@ public class SparkKeyClusterStorage implements IMapStorage {
     }
 
     @Override
-    public void put(String key, Object value) throws PgatkIOException{
-        ICluster cluster = (ICluster) value;
+    public void put(String key, ICluster cluster) throws PgatkIOException{
         try {
             writers.get().put( serialize(key), cluster.toBytes());
         }catch (IOException | SpectraClusterException ex){
@@ -176,6 +174,7 @@ public class SparkKeyClusterStorage implements IMapStorage {
         }
     }
 
+    @Override
     public void flush() throws PgatkIOException{
         try {
             writers.get().flush();

@@ -33,7 +33,7 @@ public class ClusterStorageFactory {
      */
     public static IMapStorage<ICluster> buildTemporaryStaticStorage(File dbDirectory, long numberEntries) throws SpectraClusterException {
         try {
-            return new ChronicleMapClusterStorage<ICluster>(dbDirectory, numberEntries, true);
+            return new ChronicleMapClusterStorage(dbDirectory, numberEntries, true);
         } catch (IOException e) {
             throw new SpectraClusterException("Error creating the ChronicleMap Cluster storage -- " + e.getMessage());
         }
@@ -49,7 +49,7 @@ public class ClusterStorageFactory {
      */
     public static IMapStorage<ICluster> buildPersistentStaticStorage(File dbDirectory, long numberEntries) throws SpectraClusterException {
         try {
-            return new ChronicleMapClusterStorage<ICluster>(dbDirectory, numberEntries, false);
+            return new ChronicleMapClusterStorage(dbDirectory, numberEntries, false);
         } catch (IOException e) {
             throw new SpectraClusterException("Error creating the ChronicleMap Cluster storage -- " + e.getMessage());
         }
@@ -65,7 +65,7 @@ public class ClusterStorageFactory {
      */
     public static IMapStorage<ICluster> openPersistentStaticStorage(File dbDirectory) throws SpectraClusterException {
         try {
-            return new ChronicleMapClusterStorage<ICluster>(dbDirectory, true);
+            return new ChronicleMapClusterStorage(dbDirectory, true);
         } catch (IOException e) {
             throw new SpectraClusterException("Error creating the ChronicleMap Cluster storage -- " + e.getMessage());
         }
