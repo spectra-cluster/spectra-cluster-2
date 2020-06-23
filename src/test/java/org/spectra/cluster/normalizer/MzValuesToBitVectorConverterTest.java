@@ -1,8 +1,8 @@
 package org.spectra.cluster.normalizer;
 
 import cern.colt.bitvector.BitVector;
-import org.bigbio.pgatk.io.common.Spectrum;
-import org.bigbio.pgatk.io.mgf.MgfIterableReader;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

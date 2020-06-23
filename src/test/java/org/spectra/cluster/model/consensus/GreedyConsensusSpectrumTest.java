@@ -141,7 +141,7 @@ public class GreedyConsensusSpectrumTest {
         MzSpectraReader readerCummulative = new MzSpectraReader(testFile,new TideBinner(), new CumulativeIntensityNormalizer(),
                 new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
                 // don't filter the spectrum
-                (IBinarySpectrum s) -> s);
+                (IBinarySpectrum s) -> s, null);
 
         Iterator<IBinarySpectrum> spectrumIterator = readerCummulative.readBinarySpectraIterator();
         List<IBinarySpectrum> spectraCummulative = new ArrayList<>();
@@ -197,7 +197,7 @@ public class GreedyConsensusSpectrumTest {
     public void tesBenchaMarkPeakIntesityNormalizationSytentic() throws Exception {
         File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("synthetic_first_pool_3xHCD_R1.mgf")).toURI());
         MzSpectraReader readerCumulative = new MzSpectraReader(testFile,new TideBinner(), new CumulativeIntensityNormalizer(),
-                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, GreedyClusteringEngine.COMPARISON_FILTER);
+                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter, GreedyClusteringEngine.COMPARISON_FILTER, null);
 
         Iterator<IBinarySpectrum> spectrumIterator = readerCumulative.readBinarySpectraIterator();
         List<IBinarySpectrum> spectraCummulative = new ArrayList<>();
@@ -239,7 +239,7 @@ public class GreedyConsensusSpectrumTest {
 
     @Test
     public void testLargeCluster() {
-        // always add the same spectrum to test for overflows
+        // always put the same spectrum to test for overflows
         BinaryConsensusPeak[] existingPeaks = {
                 new BinaryConsensusPeak(10, 100, 10),
                 new BinaryConsensusPeak(20, 200, 5),

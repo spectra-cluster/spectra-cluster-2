@@ -5,19 +5,18 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.PosixParser;
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
-import org.bigbio.pgatk.io.properties.PropertyStorageFactory;
+import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.PropertyStorageFactory;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.MissingParameterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
-import org.spectra.cluster.io.cluster.DotClusteringWriter;
-import org.spectra.cluster.io.cluster.IClusterWriter;
+import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.*;
 import org.spectra.cluster.predicates.IComparisonPredicate;
 import org.spectra.cluster.predicates.SameChargePredicate;
@@ -81,7 +80,9 @@ public class SpectraClusterTool implements IProgressListener {
 
             // RESULT FILE PATH
             if (!commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_PATH.getValue()))
-                throw new MissingParameterException("Missing required option " + CliOptions.OPTIONS.OUTPUT_PATH.getValue());
+                throw new MissingParameterException("Missing required option " +
+                        CliOptions.OPTIONS.OUTPUT_PATH.getValue());
+
             File finalResultFile = new File(commandLine.getOptionValue(CliOptions.OPTIONS.OUTPUT_PATH.getValue()));
 
             if(commandLine.hasOption(CliOptions.OPTIONS.CONFIG_FILE.getValue()))
@@ -137,9 +138,7 @@ public class SpectraClusterTool implements IProgressListener {
                 tempFolder = createTempFolderPath(finalResultFile, tempFolder);
             }
 
-            /**
-             * Advanced options
-             */
+            /** Advanced options */
             // MIN NUMBER OF COMPARISONS
             int minNumberComparisons = defaultParameters.getMinNumberOfComparisons();
             if (commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue())) {
@@ -162,50 +161,28 @@ public class SpectraClusterTool implements IProgressListener {
             int windowSizeNoiseFilter = (fragmentPrecision.equalsIgnoreCase("high")) ? 3000 : 100;
 
             // set the appropriate m/z binner
-            IMzBinner mzBinner = (fragmentPrecision.equalsIgnoreCase("high")) ? new HighResolutionMzBinner() : new TideBinner();
+            IMzBinner mzBinner = (fragmentPrecision.equalsIgnoreCase("high")) ?
+                    new HighResolutionMzBinner() : new TideBinner();
 
             IRawSpectrumFunction loadingFilter = new RemoveImpossiblyHighPeaksFunction()
                     .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
-                    .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters.getNumberHigherPeaks())));
+                    .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters
+                            .getNumberHigherPeaks())));
 
-            IPropertyStorage localStorage = PropertyStorageFactory.buildDynamicPropertyStorage(new File(tempFolder));
+            IPropertyStorage localStorage = PropertyStorageFactory
+                    .buildDynamicLevelDBPropertyStorage(new File(tempFolder));
+
             File[] inputFiles = Arrays.stream(peakFiles)
                     .map(File::new)
                     .toArray(File[]::new);
 
-            MzSpectraReader reader = new MzSpectraReader( mzBinner, new MaxPeakNormalizer(),
-                    new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
-                    GreedyClusteringEngine.COMPARISON_FILTER, inputFiles);
-
-            // set the comparison assessor as listener to count the spectra per bin
-            reader.addSpectrumListener(numberOfComparisonAssessor);
-
-            Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator(localStorage);
-
-            List<IBinarySpectrum> spectra = new ArrayList<>(1_000);
-
-            log.debug(String.format("Loading spectra from %d file(s)...", inputFiles.length));
-
-            int count = 0;
-            while (iterator.hasNext()) {
-                IBinarySpectrum spectrum = iterator.next();
-                spectra.add(spectrum);
-                count++;
-            }
-
-            LocalDateTime loadingCompleteTime = LocalDateTime.now();
-            log.debug(String.format("Loaded %d spectra in %d seconds", count, Duration.between(startTime, loadingCompleteTime).getSeconds()));
-
-            // sort according to m/z
-            spectra.sort(Comparator.comparingInt(IBinarySpectrum::getPrecursorMz));
-
             // create the comparison predicate for the first round
-            IComparisonPredicate<ICluster> firstRoundPredicate = new ShareNComparisonPeaksPredicate(nInitiallySharedPeaks);
+            IComparisonPredicate<ICluster> firstRoundPredicate = new ShareNComparisonPeaksPredicate(
+                    nInitiallySharedPeaks);
+
             if (!ignoreCharge) {
                 firstRoundPredicate = new SameChargePredicate().and(firstRoundPredicate);
             }
-
-            Path thisResult = Paths.get(finalResultFile.getAbsolutePath());
 
             IClusteringEngine engine = new GreedyClusteringEngine(
                     binnedPrecursorTolerance,
@@ -213,22 +190,60 @@ public class SpectraClusterTool implements IProgressListener {
                     numberOfComparisonAssessor, firstRoundPredicate,
                     windowSizeNoiseFilter);
 
+            MzSpectraReader reader = new MzSpectraReader( mzBinner, new MaxPeakNormalizer(),
+                    new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
+                    GreedyClusteringEngine.COMPARISON_FILTER, engine, inputFiles);
+
+            // set the comparison assessor as listener to count the spectra per bin
+            reader.addSpectrumListener(numberOfComparisonAssessor);
+
+            Iterator<ICluster> iterator = reader.readClusterIterator(localStorage);
+
+            /**
+             * Todo: We need to review the current implementation because it loads in memory
+             *       all the clusters. If we want to the Ehcache we will need to use Maps and
+             *       all the methods
+             **/
+            List<ICluster> spectra = new ArrayList<>(1_000);
+
+            log.debug(String.format("Loading spectra from %d file(s)...", inputFiles.length));
+
+            int count = 0;
+            while (iterator.hasNext()) {
+                ICluster cluster = iterator.next();
+                spectra.add(cluster);
+                count++;
+            }
+
+            LocalDateTime loadingCompleteTime = LocalDateTime.now();
+            log.debug(String.format("Loaded %d spectra in %d seconds", count,
+                    Duration.between(startTime, loadingCompleteTime).getSeconds()));
+
+            // sort according to m/z
+            spectra.sort(Comparator.comparingInt(ICluster::getPrecursorMz));
+
+            Path thisResult = Paths.get(finalResultFile.getAbsolutePath());
+
             log.debug("Clustering files...");
-            ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new IBinarySpectrum[0]));
+            ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new ICluster[spectra.size()]));
 
             LocalDateTime clusteringCompleteTime = LocalDateTime.now();
             log.debug(String.format("Clustering completed in %d seconds", Duration.between(loadingCompleteTime, clusteringCompleteTime).getSeconds()));
 
-            IClusterWriter writer = new DotClusteringWriter(thisResult, false, localStorage);
-            writer.appendClusters(clusters);
-            writer.close();
+            ObjectDBGreedyClusterStorage writer = new ObjectDBGreedyClusterStorage(
+                    new ObjectsDB(finalResultFile.getAbsolutePath(), true));
+            writer.addGreedySpectralClusters(clusters);
+            writer.writeDBMode();
+            writer.flush();
 
-            log.debug(String.format("Results written in %d seconds", Duration.between(clusteringCompleteTime, LocalDateTime.now()).getSeconds()));
+            log.debug(String.format("Results written in %d seconds",
+                    Duration.between(clusteringCompleteTime, LocalDateTime.now()).getSeconds()));
             System.out.println("Results written to " + thisResult.toString());
 
-            log.debug(String.format("Process completed in %d seconds", Duration.between(startTime, LocalDateTime.now()).getSeconds()));
+            log.debug(String.format("Process completed in %d seconds", Duration.between(startTime,
+                    LocalDateTime.now()).getSeconds()));
 
-            // Close the property storage and delete folders and property files
+            // Close the property storage and delete folders and property files.
             localStorage.close();
 
             System.exit(0);
@@ -274,7 +289,7 @@ public class SpectraClusterTool implements IProgressListener {
             }
             System.out.print(addedFilters.get(i));
         }
-        System.out.println("");
+        System.out.println();
 
 //        // only show certain settings if they were changed
 //        if (Defaults.getMinNumberComparisons() != Defaults.DEFAULT_MIN_NUMBER_COMPARISONS)

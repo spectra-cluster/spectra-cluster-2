@@ -53,7 +53,7 @@ public interface IConsensusSpectrumBuilder extends IBinarySpectrum{
 
     /**
      * Add spectra to the consensus spectrum.
-     * @param spectra The spectra to add
+     * @param spectra The spectra to put
      */
     void addSpectra(IBinarySpectrum... spectra);
 

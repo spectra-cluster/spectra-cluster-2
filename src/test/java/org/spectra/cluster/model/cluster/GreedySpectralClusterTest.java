@@ -49,11 +49,37 @@ public class GreedySpectralClusterTest {
             spectra.add(spectrumIterator.next());
         }
 
-        // add all spectra to one cluster
+        // put all spectra to one cluster
         GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
         cluster.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
         Assert.assertEquals(spectra.size(), cluster.getClusteredSpectraCount());
         Assert.assertTrue(cluster.getClusteredSpectraIds().containsAll(spectra.stream().map(IBinarySpectrum::getUUI).collect(Collectors.toList())));
+    }
+
+    @Test
+    public void testGetProperties() throws Exception {
+        File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
+        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
+
+        Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
+        List<IBinarySpectrum> spectra = new ArrayList<>();
+
+        while (spectrumIterator.hasNext()) {
+            spectra.add(spectrumIterator.next());
+        }
+
+        // put all spectra to one cluster
+        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
+        cluster.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
+
+        // get the properties
+        IClusterProperties properties = cluster.getProperties();
+
+        int precursorMz = cluster.getPrecursorMz();
+
+        Assert.assertEquals(cluster.getId(), properties.getId());
+        Assert.assertEquals(precursorMz, properties.getPrecursorMz());
+        Assert.assertEquals(cluster.getPrecursorCharge(), properties.getPrecursorCharge());
     }
 }

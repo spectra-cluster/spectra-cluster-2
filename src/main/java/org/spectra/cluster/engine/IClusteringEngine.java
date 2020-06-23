@@ -15,21 +15,36 @@ public interface IClusteringEngine {
      * @param spectra The IBinarySpectra to cluster
      * @return The clustering result as an array of ICluster
      */
-    ICluster[] clusterSpectra(IBinarySpectrum... spectra);
+    ICluster[] clusterSpectra(ICluster... spectra);
 
     /**
      * Clusters the spectrum in an incremental way. Spectra must be sorted according
      * to precursor m/z. Ie. only spectra with a higher precursor m/z can be incrementally
      * added to be processed.
-     * @param spectrum The spectrum to add (precursor m/z must be higher than the last spectrum).
+     * @param spectrum The spectrum to put (precursor m/z must be higher than the last spectrum).
      * @return The subset of clusters that falls below the set precursor tolerance of the last added spectrum.
      */
     // @Deprecated // I'm currently a little unsure whether we should still support this use case.
     // ICluster[] clusterSpectrumIncrementally(IBinarySpectrum spectrum);
 
     /**
+     * This method converts one spectrum into a {@link ICluster} array. This is important because most of the clustering
+     * will start from the single spectrum clusters.
+     * @param spectrum Spectrum to be converted into cluster
+     * @return cluster {@link ICluster}
+     */
+    ICluster createSingleSpectrumCluster(IBinarySpectrum spectrum);
+
+    /**
      * Returns the defined precursor tolerance.
      * @return The precursor tolerance in integer space.
      */
     int getPrecursorTolerance();
+
+    /**
+     * Get a new cluster for the specific engine type
+     * @param io.github.bigbio.pgatk.io.common.cluster.ICluster storage
+     * @return ICluster
+     */
+    ICluster newCluster(io.github.bigbio.pgatk.io.common.cluster.ICluster cluster);
 }

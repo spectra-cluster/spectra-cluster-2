@@ -1,8 +1,8 @@
 package org.spectra.cluster.normalizer;
 
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
-import org.bigbio.pgatk.io.common.Spectrum;
-import org.bigbio.pgatk.io.mgf.MgfIterableReader;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +11,6 @@ import org.spectra.cluster.model.spectra.BinarySpectrum;
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;

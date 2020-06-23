@@ -14,8 +14,6 @@ import java.util.List;
  *
  * or it can be used to do binning of a set of Doubles into a vector of integers:
  *
- * {@link SequestBinner}
- *
  * @author jg
  */
 public interface IIntegerNormalizer extends Serializable, Cloneable {

@@ -101,7 +101,7 @@ public class CdfResult {
 
     /**
      * Function used to merge two results.
-     * @param other The CdfResult to add to this result
+     * @param other The CdfResult to put to this result
      * @throws Exception Thrown if the same object is merged or if different score increments were used.
      */
     public void addCdfResult(CdfResult other) throws Exception {
@@ -109,7 +109,7 @@ public class CdfResult {
             throw new Exception("Cannot join same object");
 
         if (this.scoreIncrements != other.scoreIncrements)
-            throw new Exception("Cannot add cdf result with different score increment (this = " + this.scoreIncrements + ", other = " + other.scoreIncrements + ')');
+            throw new Exception("Cannot put cdf result with different score increment (this = " + this.scoreIncrements + ", other = " + other.scoreIncrements + ')');
 
         int maxSize = Math.max(other.lowerPeptidesPerScoreIncrement.size(), this.lowerPeptidesPerScoreIncrement.size());
 
