@@ -38,8 +38,7 @@ public class SparkKeyClusterStorageTest {
     public void setUp() throws Exception {
         mgfFiles = new URI[] {
                 getClass().getClassLoader().getResource("same_sequence_cluster.mgf").toURI(),
-                getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI(),
-                getClass().getClassLoader().getResource("imp_hela_test.mgf").toURI()
+                getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI()
         };
 
         testDir = Files.createTempDirectory("clusters-");
