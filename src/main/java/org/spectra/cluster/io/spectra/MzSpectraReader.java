@@ -75,6 +75,7 @@ public class MzSpectraReader {
         PKL("PKL", ".pkl"),
         DTA("DTA", ".dta"),
         CLUSTERING("CLUSTERING", ".zcl"),
+        CLUSTERING_ALL("CLUSTERING_ALL", ".clustering"),
         MZXML("MZXML", "mzXML");
 
         private String name;
@@ -217,7 +218,8 @@ public class MzSpectraReader {
                 this.inputFiles = new ConcurrentHashMap<>();
                 this.inputFiles.put(file, jMzReader);
             }else{
-                throw new SpectraClusterException("The provided file is not supported --" + file.getAbsolutePath());
+                throw new SpectraClusterException("The provided file is not supported --" +
+                        file.getAbsolutePath());
             }
         }catch (PgatkIOException e){
             String message = "The file type provided is not support -- " + Arrays.toString(MzFileType.values());
