@@ -1,9 +1,9 @@
 package org.spectra.cluster.io.cluster.old_writer;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bigbio.pgatk.io.common.PgatkIOException;
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
-import org.bigbio.pgatk.io.properties.StoredProperties;
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.StoredProperties;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.BinaryConsensusPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;

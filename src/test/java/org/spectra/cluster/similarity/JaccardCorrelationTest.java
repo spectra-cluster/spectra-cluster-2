@@ -2,8 +2,8 @@ package org.spectra.cluster.similarity;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
-import org.bigbio.pgatk.io.mgf.MgfIterableReader;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

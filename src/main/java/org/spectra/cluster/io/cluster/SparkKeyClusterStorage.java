@@ -4,12 +4,11 @@ import com.spotify.sparkey.CompressionType;
 import com.spotify.sparkey.Sparkey;
 import com.spotify.sparkey.SparkeyReader;
 import com.spotify.sparkey.SparkeyWriter;
-import org.bigbio.pgatk.io.common.PgatkIOException;
-import org.bigbio.pgatk.io.mapcache.IMapStorage;
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.util.ClusterUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,11 +18,15 @@ import java.util.Base64;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SparkKeyClusterStorage implements IMapStorage {
+public class SparkKeyClusterStorage implements IMapStorage<ICluster> {
 
     private final boolean deleteOnClose;
     private final File dbFile;
-    HashSet<SparkeyWriter> writerSet = new HashSet<>();
+
+    // Sparkey only supports a single writer per database
+    private final SparkeyWriter writer;
+
+    // Multiple simultaneous readers are not a problem
     HashSet<SparkeyReader> readerSet = new HashSet<>();
     AtomicLong entryCounter = new AtomicLong(0);
     Class clusterClass;
@@ -44,7 +47,7 @@ public class SparkKeyClusterStorage implements IMapStorage {
      * @throws IOException
      */
     public SparkKeyClusterStorage(File dbDirectory, Class clusterClass, boolean openExisting, boolean deleteOnClose)
-            throws IOException{
+        throws IOException{
         this.dbFile = new File(dbDirectory, "spectra-cluster_object-storage.spi");
 
         if (openExisting && !this.dbFile.exists())
@@ -58,20 +61,10 @@ public class SparkKeyClusterStorage implements IMapStorage {
 
         this.deleteOnClose = deleteOnClose;
         this.clusterClass = clusterClass;
-    }
 
-    private final ThreadLocal<SparkeyWriter> writers = new ThreadLocal<SparkeyWriter>() {
-        @Override
-        protected SparkeyWriter initialValue() {
-            try {
-                SparkeyWriter writer = Sparkey.appendOrCreate(dbFile, CompressionType.SNAPPY, 512);
-                writerSet.add(writer);
-                return writer;
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    };
+        // create the single writer
+        writer = Sparkey.appendOrCreate(dbFile, CompressionType.SNAPPY, 512);
+    }
 
     private final ThreadLocal<SparkeyReader> readers = new ThreadLocal<SparkeyReader>() {
         @Override
@@ -103,10 +96,9 @@ public class SparkKeyClusterStorage implements IMapStorage {
     }
 
     @Override
-    public void put(String key, Object value) throws PgatkIOException{
-        ICluster cluster = (ICluster) value;
+    public synchronized void put(String key, ICluster cluster) throws PgatkIOException{
         try {
-            writers.get().put( serialize(key), cluster.toBytes());
+            writer.put( serialize(key), cluster.toBytes());
         }catch (IOException | SpectraClusterException ex){
             throw new PgatkIOException("Error wiring the following property - " + key + " " + cluster.getId() + "error " + ex.getMessage());
         }
@@ -145,20 +137,18 @@ public class SparkKeyClusterStorage implements IMapStorage {
     }
 
     @Override
-    public void close() throws PgatkIOException{
-        for (SparkeyWriter w : writerSet) {
-            try {
-                // only write the files if they are not deleted afterwards
-                if (!deleteOnClose) {
-                    w.flush();
-                    w.writeHash();
-                }
-
-                w.close();
-            } catch (IOException ex) {
-                // do nothings.
+    public synchronized void close() throws PgatkIOException{
+        try {
+            if (!deleteOnClose) {
+                flush();
             }
+
+            writer.close();
+        } catch (Exception e) {
+            // ignore
         }
+
+        // close all readers
         for (SparkeyReader r : readerSet) {
             r.close();
         }
@@ -176,10 +166,11 @@ public class SparkKeyClusterStorage implements IMapStorage {
         }
     }
 
-    public void flush() throws PgatkIOException{
+    @Override
+    public synchronized void flush() throws PgatkIOException{
         try {
-            writers.get().flush();
-            writers.get().writeHash();
+            writer.flush();
+            writer.writeHash();
         } catch (IOException ex) {
             throw new PgatkIOException("Error wiring the SparkKey DB -- " + ex.getMessage());
         }

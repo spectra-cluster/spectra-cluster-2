@@ -1,6 +1,6 @@
 package org.spectra.cluster.util;
 
-import org.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
 
 import java.io.File;
 import java.io.IOException;

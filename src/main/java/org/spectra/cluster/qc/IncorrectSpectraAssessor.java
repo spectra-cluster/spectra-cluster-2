@@ -1,9 +1,9 @@
 package org.spectra.cluster.qc;
 
 import lombok.Data;
-import org.bigbio.pgatk.io.common.PgatkIOException;
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
-import org.bigbio.pgatk.io.properties.StoredProperties;
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.StoredProperties;
 import org.spectra.cluster.model.cluster.ICluster;
 
 import java.util.Comparator;

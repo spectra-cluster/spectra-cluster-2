@@ -1,9 +1,9 @@
 package org.spectra.cluster.model.spectra;
 
 
-import org.bigbio.pgatk.io.common.PgatkIOException;
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
-import org.bigbio.pgatk.io.mgf.MgfIterableReader;
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.mgf.MgfIterableReader;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

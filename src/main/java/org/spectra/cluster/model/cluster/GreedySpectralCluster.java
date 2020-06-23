@@ -1,8 +1,8 @@
 package org.spectra.cluster.model.cluster;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bigbio.pgatk.io.common.Param;
-import org.bigbio.pgatk.io.objectdb.LongObject;
+import io.github.bigbio.pgatk.io.common.Param;
+import io.github.bigbio.pgatk.io.objectdb.LongObject;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -306,6 +306,11 @@ public class GreedySpectralCluster extends LongObject implements ICluster {
             throw new SpectraClusterException("Error converting in object serialization -- " + e.getMessage());
         }
 
+    }
+
+    @Override
+    public IClusterProperties getProperties() {
+        return new BasicClusterProperties(getPrecursorMz(), getPrecursorCharge(), id);
     }
 
     public static ICluster fromBytes(byte[] clusterBytes) throws SpectraClusterException {

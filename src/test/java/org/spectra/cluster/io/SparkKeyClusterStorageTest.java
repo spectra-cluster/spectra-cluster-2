@@ -1,8 +1,8 @@
 package org.spectra.cluster.io;
 
-import org.bigbio.pgatk.io.mapcache.IMapStorage;
-import org.bigbio.pgatk.io.properties.IPropertyStorage;
-import org.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
+import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
@@ -38,8 +38,7 @@ public class SparkKeyClusterStorageTest {
     public void setUp() throws Exception {
         mgfFiles = new URI[] {
                 getClass().getClassLoader().getResource("same_sequence_cluster.mgf").toURI(),
-                getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI(),
-                getClass().getClassLoader().getResource("imp_hela_test.mgf").toURI()
+                getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI()
         };
 
         testDir = Files.createTempDirectory("clusters-");

@@ -1,7 +1,7 @@
 package org.spectra.cluster.model.commons;
 
-import org.bigbio.pgatk.io.common.MzIterableReader;
-import org.bigbio.pgatk.io.common.spectra.Spectrum;
+import io.github.bigbio.pgatk.io.common.MzIterableReader;
+import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 
 import java.io.File;
 import java.util.Iterator;
