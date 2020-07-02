@@ -3,7 +3,6 @@ package org.spectra.cluster.io;
 import io.github.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
@@ -11,7 +10,6 @@ import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
-import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
@@ -46,13 +44,9 @@ public class MzSpectraReaderTest {
     @Before
     public void setUp() throws Exception {
 
-        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader()
-                .getResource("single-spectra.mgf")).toURI();
+        URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         File mgfFile = new File(uri);
         spectraReader = new MzSpectraReader(mgfFile, GreedyClusteringEngine.COMPARISON_FILTER);
-
-        uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader()
-                .getResource("testfile.clustering")).toURI();
 
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
@@ -64,7 +58,6 @@ public class MzSpectraReaderTest {
     }
 
     @Test
-    @Ignore
     public void readBinarySpectraIterator() throws SpectraClusterException {
 
         Iterator<IBinarySpectrum> binaryIter = spectraReader.readBinarySpectraIterator();
@@ -77,21 +70,6 @@ public class MzSpectraReaderTest {
     }
 
     @Test
-    @Ignore
-    public void readClusteringIterator() throws SpectraClusterException {
-
-        Iterator<ICluster> binaryIter = clusteringReader.readClusterIterator();
-        int count = 0;
-        while(binaryIter.hasNext()){
-            ICluster cluster = binaryIter.next();
-            Assert.assertTrue(cluster.getId() != null);
-            count++;
-        }
-        Assert.assertEquals(107, count);
-    }
-
-    @Test
-    @Ignore
     public void testNoNullSpectra() throws Exception {
         File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
@@ -110,7 +88,6 @@ public class MzSpectraReaderTest {
     }
 
     @Test
-    @Ignore
     public void testPropertyLoading() throws Exception {
         File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
@@ -144,7 +121,6 @@ public class MzSpectraReaderTest {
     }
 
     @Test
-    @Ignore
     public void testSpectrumListener() throws Exception {
         File testFile = new File(getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI());
         MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
