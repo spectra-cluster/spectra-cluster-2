@@ -20,7 +20,7 @@ public class CliOptions {
         PRECURSOR_TOLERANCE("precursor.tolerance", "p"),
         FRAGMENT_PRECISION("fragment.precision", "f"),
 
-        MAJOR_PEAK_JOBS("major.peak.jobs", "m"),
+        N_THREADS("n.threads", "t"),
 
         START_THRESHOLD("threshold.start", "s"),
         END_THRESHOLD("threshold.end", "e"),
@@ -47,7 +47,8 @@ public class CliOptions {
         ADVANCED_NUMBER_PREFILTERED_PEAKS("xn.prefiltered.peaks", "pp"),
         ADVANCED_LEARN_CDF("x.learn.cdf", "lcdf"),
         ADVANCED_LOAD_CDF_FILE("x.load.cdf", "lcdf"),
-        ADVANCED_DISABLE_MGF_COMMENTS("disable.mgf.comments", "dmc");
+        ADVANCED_DISABLE_MGF_COMMENTS("disable.mgf.comments", "dmc"),
+        ADVANCED_MIN_INITIAL_PEAKS("x.min.initial.shared.peaks", "mip");
 
         private String value;
         private String longValue;
@@ -126,9 +127,9 @@ public class CliOptions {
 
         Option majorPeakJobs = OptionBuilder
                 .hasArg()
-                .withDescription("Number of threads to use for major peak clustering.")
-                .withLongOpt(OPTIONS.MAJOR_PEAK_JOBS.getLongValue())
-                .create(OPTIONS.MAJOR_PEAK_JOBS.getValue());
+                .withDescription("Number of threads to use during the clustering process.")
+                .withLongOpt(OPTIONS.N_THREADS.getLongValue())
+                .create(OPTIONS.N_THREADS.getValue());
         options.addOption(majorPeakJobs);
 
         Option binaryDirectory = OptionBuilder
@@ -224,6 +225,12 @@ public class CliOptions {
                 .withLongOpt(OPTIONS.ADVANCED_DISABLE_MGF_COMMENTS.getLongValue())
                 .create(OPTIONS.ADVANCED_DISABLE_MGF_COMMENTS.getValue());
         options.addOption(xDisableMgfComments);
+
+        Option xMinInitialSharedPeaks = OptionBuilder
+                .withDescription("(Advanced option) The number two spectra must share to be compared using the probabilistic comparison method.")
+                .withLongOpt(OPTIONS.ADVANCED_MIN_INITIAL_PEAKS.getLongValue())
+                .create(OPTIONS.ADVANCED_MIN_INITIAL_PEAKS.getValue());
+        options.addOption(xMinInitialSharedPeaks);
     }
 
     public static Options getOptions() {
