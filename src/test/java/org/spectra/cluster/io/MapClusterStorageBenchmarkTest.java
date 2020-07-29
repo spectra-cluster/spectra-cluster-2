@@ -1,12 +1,13 @@
 package org.spectra.cluster.io;
 
-import lombok.extern.slf4j.Slf4j;
 import io.github.bigbio.pgatk.io.common.PgatkIOException;
 import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
 import io.github.bigbio.pgatk.io.objectdb.LongObject;
 import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
@@ -89,6 +90,7 @@ public class MapClusterStorageBenchmarkTest {
         clusters = engine.clusterSpectra(spectra.toArray(new ICluster[spectra.size()]));
     }
 
+    @Ignore
     @Test
     public void storeBigClusterStatic() throws IOException, SpectraClusterException, PgatkIOException {
 
@@ -126,7 +128,7 @@ public class MapClusterStorageBenchmarkTest {
 
     }
 
-
+    @Ignore
     @Test
     public void storeBigClusterDynamic() throws IOException, SpectraClusterException, PgatkIOException {
 
