@@ -75,7 +75,7 @@ public class ClusteringParameters {
         if(properties.containsKey("fragment.precision"))
             this.fragmentIonPrecision = properties.getProperty("fragment.precision");
         if(properties.containsKey("n.threads"))
-            this.nThreads = Integer.parseInt(properties.getProperty("jobs.precision"));
+            this.nThreads = Integer.parseInt(properties.getProperty("n.threads"));
         if(properties.containsKey("threshold.start"))
             this.thresholdStart =  Float.parseFloat(properties.getProperty("threshold.start"));
         if(properties.containsKey("threshold.end"))

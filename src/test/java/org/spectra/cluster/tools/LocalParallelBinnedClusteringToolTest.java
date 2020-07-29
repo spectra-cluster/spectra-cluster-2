@@ -24,6 +24,7 @@ import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.net.URI;
@@ -108,11 +109,18 @@ public class LocalParallelBinnedClusteringToolTest {
 
         File finalResultFile = new File(testDir.toFile(), "result.bcs");
 
-        clusterer.runClustering(testClusters, clusterStorage, finalResultFile,
-            BasicIntegerNormalizer.MZ_CONSTANT,
-            1, 0.99f, 5, new CombinedFisherIntensityTest(),
-            new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-            GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+        ClusteringParameters clusteringParameters = new ClusteringParameters();
+        clusteringParameters.setThresholdStart(1f);
+        clusteringParameters.setThresholdEnd(0.99f);
+        clusteringParameters.setClusterRounds(5);
+        clusteringParameters.setFragmentIonPrecision("high");
+        clusteringParameters.setPrecursorIonTolerance((double) 1);
+        clusteringParameters.setIgnoreCharge(false);
+        clusteringParameters.setNInitiallySharedPeaks(5);
+        clusteringParameters.setNThreads(1);
+        clusteringParameters.setOutputFile(finalResultFile);
+
+        clusterer.runClustering(testClusters, clusterStorage, clusteringParameters);
 
         // make sure the final result file exists
         Assert.assertTrue(finalResultFile.exists());
@@ -131,7 +139,7 @@ public class LocalParallelBinnedClusteringToolTest {
             totalSpectra += cluster.getClusteredSpectraCount();
         }
 
-        Assert.assertEquals(192, totalClusters);
+        Assert.assertEquals(95, totalClusters);
         Assert.assertEquals(testClusters.length, totalSpectra);
     }
 }

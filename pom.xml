@@ -220,6 +220,10 @@
             <id>sonatype-snapshopt</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
+        <repository>
+            <id>nuiton</id>
+            <url>http://maven.nuiton.org/release/</url>
+        </repository>
     </repositories>
 
 </project>
