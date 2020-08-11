@@ -15,7 +15,7 @@
         <common-collections.version>3.2.2</common-collections.version>
         <commons-math3.version>3.5</commons-math3.version>
         <commons-cli.version>1.2</commons-cli.version>
-        <pgatk-io.version>1.0.0-SNAPSHOT</pgatk-io.version>
+        <pgatk-io.version>1.0.1-SNAPSHOT</pgatk-io.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
         <guava.version>29.0-jre</guava.version>
