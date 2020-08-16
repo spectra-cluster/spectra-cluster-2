@@ -30,7 +30,10 @@ public abstract class AbstractConsensusSpectrumBuilder implements IConsensusSpec
      * Merge consensus peaks that are within the specified m/z tolerance.
      *
      * Similar peaks are merged using the ConsensusPeak::mergePeak function where
-     * the weighted average m/z and weighted average intensity is used.
+     * the weighted average m/z and weighted average intensity is used. No incremental
+     * threshold is applied.
+     *
+     * Warning: This function alters the originally passed objects.
      *
      * @param peaks The peaks to process.
      * @param mzTolerance The tolerance within which to merge peaks.

@@ -17,14 +17,11 @@ import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TestAbstractConsensusBuilder {
-    @Test
-    public void testLoadOriginalPeaks() throws Exception {
+    private List<ICluster> loadClusters(IPropertyStorage propertyStorage) throws Exception {
         // open the file
         URI uri = Objects.requireNonNull(getClass().getClassLoader().getResource("single-spectra.mgf")).toURI();
         File mgfFile = new File(uri);
@@ -36,7 +33,6 @@ public class TestAbstractConsensusBuilder {
 
         MzSpectraReader spectraReader = new MzSpectraReader(mgfFile, GreedyClusteringEngine.COMPARISON_FILTER, engine);
 
-        IPropertyStorage propertyStorage = new InMemoryPropertyStorage();
 
         // read the spectra
         Iterator<ICluster> clusterIterator = spectraReader.readClusterIterator(propertyStorage);
@@ -47,6 +43,14 @@ public class TestAbstractConsensusBuilder {
         }
 
         Assert.assertEquals(2, clusters.size());
+
+        return clusters;
+    }
+
+    @Test
+    public void testLoadOriginalPeaks() throws Exception {
+        IPropertyStorage propertyStorage = new InMemoryPropertyStorage();
+        List<ICluster> clusters = loadClusters(propertyStorage);
 
         // get the original peaks
         for (ICluster cluster : clusters) {
@@ -59,5 +63,22 @@ public class TestAbstractConsensusBuilder {
 
             Assert.assertEquals(MaxPeakNormalizer.MAX_INTENSITY, maxValue, 0);
         }
+    }
+
+    @Test
+    public void testMergePeaks() throws Exception {
+        ConsensusPeak p1 = new ConsensusPeak(10.0, 1.0);
+        ConsensusPeak p2 = new ConsensusPeak(10.1, 2.0);
+        ConsensusPeak p3 = new ConsensusPeak(11.0, 1.0);
+
+        List<ConsensusPeak> peaks = Arrays.stream(new ConsensusPeak[]{p1, p2, p3}).collect(Collectors.toList());
+
+        List<ConsensusPeak> mergedPeaks = AbstractConsensusSpectrumBuilder.mergeConsensusPeaks(peaks, 0.5);
+
+        Assert.assertEquals(2, mergedPeaks.size());
+        Assert.assertEquals(10.05, mergedPeaks.get(0).getMz(), 0);
+        Assert.assertEquals(2, mergedPeaks.get(0).getCount());
+        Assert.assertEquals(1.5, mergedPeaks.get(0).getIntensity(), 0);
+        Assert.assertEquals(1, mergedPeaks.get(1).getCount());
     }
 }
