@@ -112,12 +112,8 @@ public class MapClusterStorageBenchmarkTest {
 
         time = System.currentTimeMillis();
         IntStream.range(0, MAX_READING_VALUE).forEach(x -> {
-            try {
-                int key = random.nextInt(clusters.length);
-                ICluster value = clusterStorage.get(clusters[key].getId() + String.valueOf(x));
-            }catch (PgatkIOException ex){
-                log.error("Error reading entry -- " + x);
-            }
+            int key = random.nextInt(clusters.length);
+            ICluster value = clusterStorage.get(clusters[key].getId() + String.valueOf(x));
         });
 
         System.out.println("ChronicleMap: Reading 200'000 Clusters -- " + (System.currentTimeMillis() - time) / 1000);
@@ -152,11 +148,7 @@ public class MapClusterStorageBenchmarkTest {
 
         time = System.currentTimeMillis();
         IntStream.range(0, MAX_READING_VALUE).forEach(x -> {
-            try {
-                ICluster value = clusterStorage.get(clusters[0].getId() +  "-" + String.valueOf(x));
-            }catch (PgatkIOException ex){
-                log.error("Error reading entry -- " + x);
-            }
+            ICluster value = clusterStorage.get(clusters[0].getId() +  "-" + String.valueOf(x));
         });
 
         System.out.println("Sparkey: Reading 200'000 Clusters -- " + (System.currentTimeMillis() - time) / 1000);
