@@ -6,6 +6,7 @@ import com.spotify.sparkey.SparkeyReader;
 import com.spotify.sparkey.SparkeyWriter;
 import io.github.bigbio.pgatk.io.common.PgatkIOException;
 import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
+import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
@@ -18,6 +19,7 @@ import java.util.Base64;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Slf4j
 public class SparkKeyClusterStorage implements IMapStorage<ICluster> {
 
     private final boolean deleteOnClose;
@@ -96,17 +98,17 @@ public class SparkKeyClusterStorage implements IMapStorage<ICluster> {
     }
 
     @Override
-    public synchronized void put(String key, ICluster cluster) throws PgatkIOException{
+    public synchronized void put(String key, ICluster cluster) {
         try {
             writer.put( serialize(key), cluster.toBytes());
         }catch (IOException | SpectraClusterException ex){
-            throw new PgatkIOException("Error wiring the following property - " + key + " " + cluster.getId() + "error " + ex.getMessage());
+            throw new IllegalStateException("Error wiring the following property - " + key + " " + cluster.getId() + "error " + ex.getMessage());
         }
         entryCounter.incrementAndGet();
     }
 
     @Override
-    public ICluster get(String key) throws PgatkIOException {
+    public ICluster get(String key) {
         try {
             byte[] byteObject = readers.get().getAsByteArray(serialize(key));
 
@@ -115,8 +117,9 @@ public class SparkKeyClusterStorage implements IMapStorage<ICluster> {
             }
 
             return deserialize(byteObject);
-        } catch (IOException ex) {
-            throw new PgatkIOException("Error retrieving the value for key -- " + key );
+        } catch (PgatkIOException | IOException ex) {
+            log.error("Error retrieving the value for key -- " + key );
+            return null;
         }
     }
 
