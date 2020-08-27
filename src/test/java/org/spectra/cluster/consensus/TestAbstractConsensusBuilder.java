@@ -66,6 +66,19 @@ public class TestAbstractConsensusBuilder {
     }
 
     @Test
+    public void testAveragePrecursorMz () throws Exception {
+        IPropertyStorage propertyStorage = new InMemoryPropertyStorage();
+        List<ICluster> clusters = loadClusters(propertyStorage);
+
+        // get the average precuror m/z for every cluster
+        for (ICluster cluster : clusters) {
+            Double averageMz = AbstractConsensusSpectrumBuilder.getAveragePrecursorMz(cluster, propertyStorage);
+
+            Assert.assertEquals(400.29, averageMz, 0.01);
+        }
+    }
+
+    @Test
     public void testMergePeaks() throws Exception {
         ConsensusPeak p1 = new ConsensusPeak(10.0, 1.0);
         ConsensusPeak p2 = new ConsensusPeak(10.1, 2.0);

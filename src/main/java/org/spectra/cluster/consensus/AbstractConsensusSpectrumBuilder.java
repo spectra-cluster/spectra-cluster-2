@@ -118,4 +118,26 @@ public abstract class AbstractConsensusSpectrumBuilder implements IConsensusSpec
                 .mapToDouble(Double::valueOf)
                 .toArray();
     }
+
+    /**
+     * Get the average precursor m/z of all contained spectra
+     * within the cluster based on the original spectra's precursor m/z.
+     *
+     * @param cluster The cluster
+     * @param propertyStorage Property storage of the spectra's properties
+     * @return The precursor m/z as double
+     * @throws IllegalStateException In case the property storage is not accessible.
+     */
+    static protected Double getAveragePrecursorMz(ICluster cluster, IPropertyStorage propertyStorage) {
+        return cluster.getClusteredSpectraIds().stream()
+            .mapToDouble(id -> {
+                try {
+                    return Double.parseDouble(propertyStorage.get(id, StoredProperties.PRECURSOR_MZ));
+                }
+                catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            })
+            .average().getAsDouble();
+    }
 }
