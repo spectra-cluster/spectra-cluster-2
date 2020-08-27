@@ -21,6 +21,15 @@ public class ConsensusPeak {
         this.count = 1;
     }
 
+    /**
+     * Initializes a new ConsensusPeak setting the count
+     */
+    public ConsensusPeak(Double mz, Double intensity, int count) {
+        this.mz = mz;
+        this.intensity = intensity;
+        this.count = count;
+    }
+
     public Double getMz() {
         return mz;
     }
