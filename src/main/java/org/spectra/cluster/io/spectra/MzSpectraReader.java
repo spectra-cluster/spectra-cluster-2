@@ -416,7 +416,17 @@ public class MzSpectraReader {
             StringBuilder mzValues = new StringBuilder(50);
             StringBuilder intensValues = new StringBuilder(50);
 
+            boolean isFirst = true;
+
             for (Double mz : top50Peaks.keySet()) {
+                // add the delimiter
+                if (!isFirst) {
+                    mzValues.append(",");
+                    intensValues.append(",");
+                } else {
+                    isFirst = false;
+                }
+
                 mzValues.append(String.format("%.4f", mz));
                 intensValues.append(String.format("%.4f", top50Peaks.get(mz)));
             }
