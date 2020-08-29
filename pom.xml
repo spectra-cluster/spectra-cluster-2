@@ -19,6 +19,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
         <guava.version>29.0-jre</guava.version>
+        <pride-mod.version>2.1.12</pride-mod.version>
     </properties>
 
     <dependencies>
@@ -97,6 +98,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>${commons-math3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.ebi.pride.utilities</groupId>
+            <artifactId>pride-mod</artifactId>
+            <version>${pride-mod.version}</version>
         </dependency>
 
         <!-- Performance libraries -->
