@@ -1,6 +1,7 @@
 package org.spectra.cluster.tools;
 
 import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
+import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
 import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
 import io.github.bigbio.pgatk.io.properties.PropertyStorageFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -10,10 +11,14 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.PosixParser;
 import org.spectra.cluster.binning.IClusterBinner;
 import org.spectra.cluster.binning.SimilarSizedClusterBinner;
+import org.spectra.cluster.consensus.AverageConsensusSpectrumBuilder;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.exceptions.MissingParameterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.io.cluster.ClusterStorageFactory;
+import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
+import org.spectra.cluster.io.result.IClusteringResultWriter;
+import org.spectra.cluster.io.result.MspWriter;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
@@ -26,6 +31,8 @@ import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -150,6 +157,19 @@ public class SpectraClusterTool implements IProgressListener {
                 Duration.between(startTime, clusteringCompleteTime).getSeconds()));
 
         log.info("Result file written to " + clusteringParameters.getOutputFile());
+
+        // create the MSP file
+        if (clusteringParameters.isOutputMsp()) {
+            Path mspFile = Paths.get(clusteringParameters.getOutputFile().toString() + ".msp");
+            IClusteringResultWriter writer = new MspWriter(new AverageConsensusSpectrumBuilder(clusteringParameters));
+
+            // open the result file again
+            ObjectDBGreedyClusterStorage resultReader = new ObjectDBGreedyClusterStorage(
+                    new ObjectsDB(clusteringParameters.getOutputFile().getAbsolutePath(), false));
+
+            log.info("Saving clustering results as MSP file at " + mspFile.toString());
+            writer.writeResult(mspFile, resultReader, propertyStorage);
+        }
 
         // TODO: Create .clustering output file
 

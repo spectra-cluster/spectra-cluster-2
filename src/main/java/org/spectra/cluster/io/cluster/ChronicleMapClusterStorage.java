@@ -1,10 +1,10 @@
 package org.spectra.cluster.io.cluster;
 
+import io.github.bigbio.pgatk.io.common.PgatkIOException;
+import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
 import lombok.extern.slf4j.Slf4j;
 import net.openhft.chronicle.map.ChronicleMap;
 import net.openhft.chronicle.map.ChronicleMapBuilder;
-import io.github.bigbio.pgatk.io.common.PgatkIOException;
-import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
 import org.spectra.cluster.model.cluster.ICluster;
 
 import java.io.File;
@@ -120,7 +120,7 @@ public class ChronicleMapClusterStorage implements IMapStorage<ICluster> {
     }
 
     @Override
-    public ICluster get(String key) throws PgatkIOException {
+    public ICluster get(String key) {
         return this.clusterStorage.get(key);
     }
 

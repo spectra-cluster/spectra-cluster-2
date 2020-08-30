@@ -53,6 +53,7 @@ public class ClusteringParameters {
     private int minNumberOfComparisons;
 
     private File outputFile;
+    private boolean outputMsp;
 
     private int nThreads;
 
@@ -98,6 +99,8 @@ public class ClusteringParameters {
             this.nInitiallySharedPeaks = Integer.parseInt(properties.getProperty("initially.shared.peaks"));
         if(properties.containsKey("x.min.comparisons"))
             this.minNumberOfComparisons = Integer.parseInt(properties.getProperty("x.min.comparisons"));
+        if(properties.contains("output.msp"))
+            this.outputMsp = Boolean.parseBoolean(properties.getProperty("output.msp"));
     }
 
     public Properties readProperties() throws URISyntaxException {
@@ -151,6 +154,8 @@ public class ClusteringParameters {
 
         if (commandLine.hasOption(CliOptions.OPTIONS.N_THREADS.getValue()))
             nThreads = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.N_THREADS.getValue()));
+
+        outputMsp = commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_MSP.getValue());
     }
 
     public void mergeParameters(String configFile) throws IOException {

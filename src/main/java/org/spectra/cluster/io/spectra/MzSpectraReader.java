@@ -1,6 +1,5 @@
 package org.spectra.cluster.io.spectra;
 
-import lombok.extern.slf4j.Slf4j;
 import io.github.bigbio.pgatk.io.clustering.ClusteringFileReader;
 import io.github.bigbio.pgatk.io.common.MzIterableReader;
 import io.github.bigbio.pgatk.io.common.Param;
@@ -11,6 +10,7 @@ import io.github.bigbio.pgatk.io.mgf.Ms2Query;
 import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
 import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
 import io.github.bigbio.pgatk.io.properties.StoredProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
@@ -52,6 +52,7 @@ import java.util.stream.Stream;
  */
 @Slf4j
 public class MzSpectraReader {
+    private final static IRawPeakFunction top50PeaksFilter = new KeepNHighestRawPeaks(50);
 
     /** Pattern for validating mzML format */
     private static final Pattern mzMLHeaderPattern = Pattern.compile("^[^<]*(<\\?xml [^>]*>\\s*(<!--[^>]*-->\\s*)*)?<(mzML)|(indexedmzML) xmlns=.*", Pattern.MULTILINE);
@@ -303,9 +304,11 @@ public class MzSpectraReader {
                     "Clusters");
 
         return new ClusterIteratorConverter<>(iteratorStream, tupleSpectrum -> {
+            // ignore clusters
             if (tupleSpectrum.getValue() instanceof io.github.bigbio.pgatk.io.common.cluster.ICluster) {
                 return storeCluster(propertyStorage, tupleSpectrum);
             }
+            // create the single spectrum cluster
             return clusteringEngine.createSingleSpectrumCluster(
                     peaksPerMzWindowFilter.apply(storeIBinarySpectrum(propertyStorage, tupleSpectrum)));
         });
@@ -319,30 +322,11 @@ public class MzSpectraReader {
                 (io.github.bigbio.pgatk.io.common.cluster.ICluster) tupleSpectrum.getValue();
 
         ICluster s = transformIOClusterToCluster(spectrum, clusteringEngine);
-//        // save spectrum properties
-//        if (propertyStorage != null) {
-//            for (Param param: spectrum.getAdditional()) {
-//                propertyStorage.put(s.getUUI(), param.getName(), param.getValue());
-//
-//                // TODO: map the title and retention time from existing cvParams
-//                // current implementation might only work for MGF files.
-//
-//                // TODO: put support for PTMs
-//            }
-//            // always store the original filename
-//            propertyStorage.put(s.getUUI(), StoredProperties.ORG_FILENAME, inputFile.getName());
-//
-//            String spectrumId = spectrum.getObjectId();
-//
-//            // make spectrum id PSI format compatible
-//            if (spectrum instanceof Ms2Query) {
-//                spectrumId = "index=" + spectrumId;
-//            }
-//
-//            propertyStorage.put(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
-//            propertyStorage.put(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
-//            propertyStorage.put(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
-//        }
+//        // save additional properties
+        if (propertyStorage != null) {
+            // TODO: store additional cluster properties
+            log.warn("Loaded cluster properties are currently not stored.");
+        }
 
         return s;
 
@@ -375,6 +359,11 @@ public class MzSpectraReader {
     }
 
     /**
+     * Stores the spectrum's properties in the property storage and returns
+     * the binary spectrum with defined filters already applied.
+     *
+     * Currently, the precursor m/z is stored in integer space, the peaks are
+     * normalized and the comparison filter is being applied.
      *
      * @param propertyStorage Property Storage
      * @param tupleSpectrum Spectrum Tuple
@@ -384,6 +373,9 @@ public class MzSpectraReader {
 
         File inputFile = (File) tupleSpectrum.getKey();
         Spectrum spectrum = (Spectrum) tupleSpectrum.getValue();
+
+        // retain the top 50 peaks for later
+        Map<Double, Double> top50Peaks = top50PeaksFilter.apply(spectrum.getPeakList());
 
         // apply the initial loading filter
         if (loadingFilter != null) {
@@ -419,6 +411,28 @@ public class MzSpectraReader {
             propertyStorage.put(s.getUUI(), StoredProperties.FILE_INDEX, spectrumId);
             propertyStorage.put(s.getUUI(), StoredProperties.PRECURSOR_MZ, String.valueOf(spectrum.getPrecursorMZ()));
             propertyStorage.put(s.getUUI(), StoredProperties.CHARGE, String.valueOf(spectrum.getPrecursorCharge()));
+
+            // save the original peaklist
+            StringBuilder mzValues = new StringBuilder(50);
+            StringBuilder intensValues = new StringBuilder(50);
+
+            boolean isFirst = true;
+
+            for (Double mz : top50Peaks.keySet()) {
+                // add the delimiter
+                if (!isFirst) {
+                    mzValues.append(",");
+                    intensValues.append(",");
+                } else {
+                    isFirst = false;
+                }
+
+                mzValues.append(String.format("%.4f", mz));
+                intensValues.append(String.format("%.4f", top50Peaks.get(mz)));
+            }
+
+            propertyStorage.put(s.getUUI(), StoredProperties.ORIGINAL_PEAKS_MZ, mzValues.toString());
+            propertyStorage.put(s.getUUI(), StoredProperties.ORIGINAL_PEAKS_INTENS, intensValues.toString());
         }
 
         // call the listeners
