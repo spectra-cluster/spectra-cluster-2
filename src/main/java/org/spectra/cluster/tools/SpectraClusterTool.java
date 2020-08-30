@@ -1,37 +1,44 @@
 package org.spectra.cluster.tools;
 
+import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
+import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
+import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
+import io.github.bigbio.pgatk.io.properties.PropertyStorageFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.PosixParser;
-import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
-import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
-import io.github.bigbio.pgatk.io.properties.PropertyStorageFactory;
-import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
+import org.spectra.cluster.binning.IClusterBinner;
+import org.spectra.cluster.binning.SimilarSizedClusterBinner;
+import org.spectra.cluster.consensus.AverageConsensusSpectrumBuilder;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
-import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.MissingParameterException;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
-import org.spectra.cluster.filter.rawpeaks.*;
+import org.spectra.cluster.io.cluster.ClusterStorageFactory;
 import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
+import org.spectra.cluster.io.result.IClusteringResultWriter;
+import org.spectra.cluster.io.result.MspWriter;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
+import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.normalizer.*;
-import org.spectra.cluster.predicates.IComparisonPredicate;
-import org.spectra.cluster.predicates.SameChargePredicate;
-import org.spectra.cluster.predicates.ShareNComparisonPeaksPredicate;
-import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
+import org.spectra.cluster.model.cluster.IClusterProperties;
+import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
+import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.tools.utils.IProgressListener;
 import org.spectra.cluster.tools.utils.ProgressUpdate;
-import org.spectra.cluster.util.DefaultParameters;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This code is licensed under the Apache License, Version 2.0 (the
@@ -47,12 +54,6 @@ import java.util.*;
 @Slf4j
 public class SpectraClusterTool implements IProgressListener {
 
-    public static final boolean DELETE_TEMPORARY_CLUSTERING_RESULTS = true;
-
-    public DefaultParameters defaultParameters = new DefaultParameters();
-
-    private boolean verbose;
-
     public static void main(String[] args) {
         SpectraClusterTool instance = new SpectraClusterTool();
         instance.run(args);
@@ -62,6 +63,7 @@ public class SpectraClusterTool implements IProgressListener {
         CommandLineParser parser = new PosixParser();
 
         try {
+            // parse the command line
             CommandLine commandLine = parser.parse(CliOptions.getOptions(), args);
 
             // HELP
@@ -70,7 +72,24 @@ public class SpectraClusterTool implements IProgressListener {
                 return;
             }
 
-            // File input
+            // create the object to hold the parameters
+            ClusteringParameters clusteringParameters = new ClusteringParameters();
+
+            // if a config file is set, merge the config file parameters first
+            if (commandLine.hasOption(CliOptions.OPTIONS.CONFIG_FILE.getValue())) {
+                String configFilePath = commandLine.getOptionValue(CliOptions.OPTIONS.CONFIG_FILE.getValue());
+
+                clusteringParameters.mergeParameters(configFilePath);
+                log.info("Configuration loaded from " + configFilePath);
+            }
+
+            // merge all other command line parameters overwriting the config file values
+            clusteringParameters.mergeCommandLineArgs(commandLine);
+
+            // make sure that the set parameters are valid
+            checkParameterValidity(clusteringParameters);
+
+            // all remaining parameters are treated as input files
             String[] peakFiles = commandLine.getArgs();
 
             if (peakFiles.length < 1) {
@@ -78,174 +97,14 @@ public class SpectraClusterTool implements IProgressListener {
                 throw new MissingParameterException("Missing input files");
             }
 
-            // RESULT FILE PATH
-            if (!commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_PATH.getValue()))
-                throw new MissingParameterException("Missing required option " +
-                        CliOptions.OPTIONS.OUTPUT_PATH.getValue());
+            // create the temporary directory in case it wasn't set
+            if (clusteringParameters.getBinaryDirectory() == null)
+                clusteringParameters.setBinaryDirectory(createTempFolderPath(clusteringParameters.getOutputFile(), "binary-clustering-files"));
 
-            File finalResultFile = new File(commandLine.getOptionValue(CliOptions.OPTIONS.OUTPUT_PATH.getValue()));
+            // start the clustering
+            runClustering(peakFiles, clusteringParameters);
 
-            if(commandLine.hasOption(CliOptions.OPTIONS.CONFIG_FILE.getValue()))
-                defaultParameters.mergeParameters(commandLine.getOptionValue(CliOptions.OPTIONS.CONFIG_FILE.getValue()));
-
-            if (finalResultFile.exists())
-                throw new Exception("Result file " + finalResultFile + " already exists");
-
-            // NUMBER OF ROUNDS
-            int rounds = defaultParameters.getClusterRounds();
-            if (commandLine.hasOption(CliOptions.OPTIONS.ROUNDS.getValue()))
-                rounds = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.ROUNDS.getValue()));
-
-            // START THRESHOLD
-            float startThreshold = defaultParameters.getThresholdStart();
-            if (commandLine.hasOption(CliOptions.OPTIONS.START_THRESHOLD.getValue()))
-                startThreshold = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.START_THRESHOLD.getValue()));
-
-            // END THRESHOLD
-            float endThreshold = defaultParameters.getThresholdEnd();
-            if (commandLine.hasOption(CliOptions.OPTIONS.END_THRESHOLD.getValue()))
-                endThreshold = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.END_THRESHOLD.getValue()));
-
-            // PRECURSOR TOLERANCE
-            // TODO: Add support for precursor tolerance
-            double precursorTolerance = defaultParameters.getPrecursorIonTolerance();
-            if (commandLine.hasOption(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue())) {
-                precursorTolerance = Float.parseFloat(commandLine.getOptionValue(CliOptions.OPTIONS.PRECURSOR_TOLERANCE.getValue()));
-            }
-            // convert the precursor tolerance to int space
-            int binnedPrecursorTolerance = (int) Math.round(precursorTolerance * (double) BasicIntegerNormalizer.MZ_CONSTANT);
-
-            // FRAGMENT TOLERANCE
-            // TODO: Add support for fragment tolerance
-            String fragmentPrecision = defaultParameters.getFragmentIonPrecision();
-            if (commandLine.hasOption(CliOptions.OPTIONS.FRAGMENT_PRECISION.getValue())) {
-                fragmentPrecision = commandLine.getOptionValue(CliOptions.OPTIONS.FRAGMENT_PRECISION.getValue());
-            }
-            if (!"high".equalsIgnoreCase(fragmentPrecision) && !"low".equalsIgnoreCase(fragmentPrecision)) {
-                throw new Exception("Invalid fragment precision set. Allowed values are 'low' and 'high'");
-            }
-
-            // IGNORE CHARGE STATE
-            boolean ignoreCharge = defaultParameters.isIgnoreCharge();
-            if (commandLine.hasOption(CliOptions.OPTIONS.IGNORE_CHARGE.getValue())) {
-                ignoreCharge = true;
-            }
-
-            String tempFolder = defaultParameters.getBinaryDirectory();
-            if(commandLine.hasOption(CliOptions.OPTIONS.TEMP_DIRECTORY.getValue())){
-                tempFolder = commandLine.getOptionValue(CliOptions.OPTIONS.TEMP_DIRECTORY.getValue());
-            }else{
-                tempFolder = createTempFolderPath(finalResultFile, tempFolder);
-            }
-
-            /** Advanced options */
-            // MIN NUMBER OF COMPARISONS
-            int minNumberComparisons = defaultParameters.getMinNumberOfComparisons();
-            if (commandLine.hasOption(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue())) {
-                minNumberComparisons = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.ADVANCED_MIN_NUMBER_COMPARISONS.getValue()));
-            }
-
-            SpectraPerBinNumberComparisonAssessor numberOfComparisonAssessor = new SpectraPerBinNumberComparisonAssessor(
-                    binnedPrecursorTolerance * 2, minNumberComparisons, BasicIntegerNormalizer.MZ_CONSTANT * 2500
-            );
-
-            int nInitiallySharedPeaks = defaultParameters.getNInitiallySharedPeaks();
-
-            /** Perform clustering **/
-            LocalDateTime startTime = LocalDateTime.now();
-
-            // set an approximate fragment tolerance for the filters
-            double fragmentTolerance = (fragmentPrecision.equalsIgnoreCase("high")) ? 0.01 : 0.5;
-
-            // set the window size for the noise filter
-            int windowSizeNoiseFilter = (fragmentPrecision.equalsIgnoreCase("high")) ? 3000 : 100;
-
-            // set the appropriate m/z binner
-            IMzBinner mzBinner = (fragmentPrecision.equalsIgnoreCase("high")) ?
-                    new HighResolutionMzBinner() : new TideBinner();
-
-            IRawSpectrumFunction loadingFilter = new RemoveImpossiblyHighPeaksFunction()
-                    .specAndThen(new RemovePrecursorPeaksFunction(fragmentTolerance))
-                    .specAndThen(new RawPeaksWrapperFunction(new KeepNHighestRawPeaks(defaultParameters
-                            .getNumberHigherPeaks())));
-
-            IPropertyStorage localStorage = PropertyStorageFactory
-                    .buildDynamicLevelDBPropertyStorage(new File(tempFolder));
-
-            File[] inputFiles = Arrays.stream(peakFiles)
-                    .map(File::new)
-                    .toArray(File[]::new);
-
-            // create the comparison predicate for the first round
-            IComparisonPredicate<ICluster> firstRoundPredicate = new ShareNComparisonPeaksPredicate(
-                    nInitiallySharedPeaks);
-
-            if (!ignoreCharge) {
-                firstRoundPredicate = new SameChargePredicate().and(firstRoundPredicate);
-            }
-
-            IClusteringEngine engine = new GreedyClusteringEngine(
-                    binnedPrecursorTolerance,
-                    startThreshold, endThreshold, rounds, new CombinedFisherIntensityTest(),
-                    numberOfComparisonAssessor, firstRoundPredicate,
-                    windowSizeNoiseFilter);
-
-            MzSpectraReader reader = new MzSpectraReader( mzBinner, new MaxPeakNormalizer(),
-                    new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
-                    GreedyClusteringEngine.COMPARISON_FILTER, engine, inputFiles);
-
-            // set the comparison assessor as listener to count the spectra per bin
-            reader.addSpectrumListener(numberOfComparisonAssessor);
-
-            Iterator<ICluster> iterator = reader.readClusterIterator(localStorage);
-
-            /**
-             * Todo: We need to review the current implementation because it loads in memory
-             *       all the clusters. If we want to the Ehcache we will need to use Maps and
-             *       all the methods
-             **/
-            List<ICluster> spectra = new ArrayList<>(1_000);
-
-            log.debug(String.format("Loading spectra from %d file(s)...", inputFiles.length));
-
-            int count = 0;
-            while (iterator.hasNext()) {
-                ICluster cluster = iterator.next();
-                spectra.add(cluster);
-                count++;
-            }
-
-            LocalDateTime loadingCompleteTime = LocalDateTime.now();
-            log.debug(String.format("Loaded %d spectra in %d seconds", count,
-                    Duration.between(startTime, loadingCompleteTime).getSeconds()));
-
-            // sort according to m/z
-            spectra.sort(Comparator.comparingInt(ICluster::getPrecursorMz));
-
-            Path thisResult = Paths.get(finalResultFile.getAbsolutePath());
-
-            log.debug("Clustering files...");
-            ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new ICluster[spectra.size()]));
-
-            LocalDateTime clusteringCompleteTime = LocalDateTime.now();
-            log.debug(String.format("Clustering completed in %d seconds", Duration.between(loadingCompleteTime, clusteringCompleteTime).getSeconds()));
-
-            ObjectDBGreedyClusterStorage writer = new ObjectDBGreedyClusterStorage(
-                    new ObjectsDB(finalResultFile.getAbsolutePath(), true));
-            writer.addGreedySpectralClusters(clusters);
-            writer.writeDBMode();
-            writer.flush();
-
-            log.debug(String.format("Results written in %d seconds",
-                    Duration.between(clusteringCompleteTime, LocalDateTime.now()).getSeconds()));
-            System.out.println("Results written to " + thisResult.toString());
-
-            log.debug(String.format("Process completed in %d seconds", Duration.between(startTime,
-                    LocalDateTime.now()).getSeconds()));
-
-            // Close the property storage and delete folders and property files.
-            localStorage.close();
-
+            // exit nicely
             System.exit(0);
         } catch (MissingParameterException e) {
             System.out.println("Error: " + e.getMessage() + "\n\n");
@@ -260,6 +119,166 @@ public class SpectraClusterTool implements IProgressListener {
         }
     }
 
+    /**
+     * Run the clustering process using the defined parameters.
+     *
+     * @param clusteringParameters
+     * @throws Exception
+     */
+    private void runClustering(String[] peakFiles, ClusteringParameters clusteringParameters) throws Exception {
+        // create the storage to load the spectra
+        IPropertyStorage propertyStorage = PropertyStorageFactory
+                .buildDynamicLevelDBPropertyStorage(new File(clusteringParameters.getBinaryDirectory()));
+
+        File clusterStorageDir = createUniqueDirectory(new File(clusteringParameters.getBinaryDirectory(), "loaded-clusters"));
+        IMapStorage<ICluster> clusterStorage = ClusterStorageFactory.buildTemporaryDynamicStorage(clusterStorageDir, GreedySpectralCluster.class);
+
+        // load the spectra
+        IClusterProperties[] loadedClusters = loadInputFiles(peakFiles, clusteringParameters, propertyStorage, clusterStorage);
+
+        // run the clustering in parallel
+        File clusteringTmpDir = createUniqueDirectory(new File(clusteringParameters.getBinaryDirectory(), "clustering-files"));
+
+        IClusterBinner clusterBinner = new SimilarSizedClusterBinner(
+                2 * clusteringParameters.getIntPrecursorTolerance(),
+                1_000, !clusteringParameters.isIgnoreCharge());
+
+        LocalParallelBinnedClusteringTool clusteringTool = new LocalParallelBinnedClusteringTool(
+                clusteringParameters.getNThreads(), clusteringTmpDir, clusterBinner, GreedySpectralCluster.class);
+
+        LocalDateTime startTime = LocalDateTime.now();
+        log.debug("Starting clustering...");
+
+        clusteringTool.runClustering(loadedClusters, clusterStorage, clusteringParameters);
+
+        // some nice output
+        LocalDateTime clusteringCompleteTime = LocalDateTime.now();
+        log.debug(String.format("Clustering completed in in %d seconds",
+                Duration.between(startTime, clusteringCompleteTime).getSeconds()));
+
+        log.info("Result file written to " + clusteringParameters.getOutputFile());
+
+        // create the MSP file
+        if (clusteringParameters.isOutputMsp()) {
+            Path mspFile = Paths.get(clusteringParameters.getOutputFile().toString() + ".msp");
+            IClusteringResultWriter writer = new MspWriter(new AverageConsensusSpectrumBuilder(clusteringParameters));
+
+            // open the result file again
+            ObjectDBGreedyClusterStorage resultReader = new ObjectDBGreedyClusterStorage(
+                    new ObjectsDB(clusteringParameters.getOutputFile().getAbsolutePath(), false));
+
+            log.info("Saving clustering results as MSP file at " + mspFile.toString());
+            writer.writeResult(mspFile, resultReader, propertyStorage);
+        }
+
+        // TODO: Create .clustering output file
+
+        // close the storage
+        clusterStorage.close();
+        propertyStorage.close();
+    }
+
+    /**
+     * Loads all spectra from the defined peak list files as IClusters. The clusters are stored in the defined clusterStorage.
+     * The cluster's properties are stored in the propertyStorage. The cluster's basic properties are returned as an array.
+     *
+     * @param peakFiles Files to load.
+     * @param clusteringParameters Clustering parameters to use.
+     * @param propertyStorage The property storage.
+     * @param clusterStorage Storage to store the clusters in.
+     * @return The IClusterProperties of the loaded clusters.
+     */
+    private IClusterProperties[] loadInputFiles(String[] peakFiles, ClusteringParameters clusteringParameters,
+                                                IPropertyStorage propertyStorage, IMapStorage<ICluster> clusterStorage)
+                                                throws Exception {
+        log.debug(String.format("Loading spectra from %d input files", peakFiles.length));
+        LocalDateTime startTime = LocalDateTime.now();
+
+        // convert the input files to file objects
+        File[] inputFiles = Arrays.stream(peakFiles)
+                .map(File::new)
+                .toArray(File[]::new);
+
+        // load the spectra using an MzSpectraReader
+        MzSpectraReader reader = new MzSpectraReader( clusteringParameters.createMzBinner(), new MaxPeakNormalizer(),
+                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), clusteringParameters.createLoadingFilter(),
+                GreedyClusteringEngine.COMPARISON_FILTER, clusteringParameters.createGreedyClusteringEngine(), inputFiles);
+
+        // create the iterator to load the clusters
+        Iterator<ICluster> iterator = reader.readClusterIterator(propertyStorage);
+
+        List<IClusterProperties> loadedClusters = new ArrayList<>(1000);
+
+        while (iterator.hasNext()) {
+            ICluster cluster = iterator.next();
+
+            // all clusters are primarily stored in the cluster storage
+            clusterStorage.put(cluster.getId(), cluster);
+
+            // only retain the basic properties
+            loadedClusters.add(cluster.getProperties());
+        }
+
+        // some nice output
+        LocalDateTime loadingCompleteTime = LocalDateTime.now();
+        log.debug(String.format("Loaded %d spectra in %d seconds", loadedClusters.size(),
+                Duration.between(startTime, loadingCompleteTime).getSeconds()));
+
+        return loadedClusters.toArray(new IClusterProperties[0]);
+    }
+
+    /**
+     * Create a new unique directory name. In case the target name already exists, a new directory with the name
+     * {target name}-{N} is created.
+     *
+     * @param targetDirectoryName The target directory name / path.
+     * @return The File object representing the finally created unique directory.
+     * @throws IOException Thrown if creating the directory failed.
+     */
+    private File createUniqueDirectory(File targetDirectoryName) throws IOException {
+        int iteration = 1;
+        String orgPath = targetDirectoryName.getAbsolutePath();
+
+        while (targetDirectoryName.exists()) {
+            targetDirectoryName = new File(orgPath + "-" + String.valueOf(iteration));
+            iteration++;
+        }
+
+        // now that the directory does not yet exist, create it
+        if (!targetDirectoryName.mkdir()) {
+            throw new IOException("Failed to create directory " + targetDirectoryName.getAbsolutePath());
+        }
+
+        return targetDirectoryName;
+    }
+
+    /**
+     * Ensures that the set user parameters are valid. In case they are not, an Exception is thrown.
+     *
+     * @param clusteringParameters The set parameters
+     * @throws Exception In case something is invalid.
+     * @throws MissingParameterException
+     */
+    private void checkParameterValidity(ClusteringParameters clusteringParameters) throws Exception, MissingParameterException {
+        // RESULT FILE PATH
+        if (clusteringParameters.getOutputFile() == null)
+            throw new MissingParameterException("Missing required option " +
+                    CliOptions.OPTIONS.OUTPUT_PATH.getValue());
+
+        // ensure that the output file does not exist
+        if (clusteringParameters.getOutputFile().exists())
+            throw new Exception("Result file " + clusteringParameters.getOutputFile().getAbsolutePath() + " already exists");
+
+        // check whether the fragment tolerance is valid
+        if (!"high".equalsIgnoreCase(clusteringParameters.getFragmentIonPrecision()) &&
+            !"low".equalsIgnoreCase(clusteringParameters.getFragmentIonPrecision())) {
+            throw new Exception("Invalid fragment precision set. Allowed values are 'low' and 'high'");
+        }
+    }
+
+    /**
+
+     TODO: update print function
     private void printSettings(File finalResultFile, int nMajorPeakJobs, float startThreshold,
                                float endThreshold, int rounds, boolean keepBinaryFiles, File binaryTmpDirectory,
                                String[] peaklistFilenames, boolean reUseBinaryFiles, boolean fastMode,
@@ -278,7 +297,7 @@ public class SpectraClusterTool implements IProgressListener {
         System.out.println("Using fast mode: " + (fastMode ? "yes" : "no"));
 
         System.out.println("\nOther settings:");
-        System.out.println("Precursor tolerance: " + defaultParameters.getPrecursorIonTolerance());
+        System.out.println("Precursor tolerance: " + clusteringParameters.getPrecursorIonTolerance());
         System.out.println("Fragment ion precision: " + fragmentPrecision);
 
         // used filters
@@ -296,7 +315,7 @@ public class SpectraClusterTool implements IProgressListener {
 //            System.out.println("Minimum number of comparisons: " + Defaults.getMinNumberComparisons());
 
         System.out.println();
-    }
+    }*/
 
     private void printUsage() {
         HelpFormatter formatter = new HelpFormatter();

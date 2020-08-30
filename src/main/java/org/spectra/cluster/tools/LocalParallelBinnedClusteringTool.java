@@ -1,14 +1,12 @@
 package org.spectra.cluster.tools;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import io.github.bigbio.pgatk.io.common.PgatkIOException;
 import io.github.bigbio.pgatk.io.mapcache.IMapStorage;
 import io.github.bigbio.pgatk.io.objectdb.LongObject;
 import io.github.bigbio.pgatk.io.objectdb.ObjectsDB;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.binning.IClusterBinner;
-import org.spectra.cluster.cdf.INumberOfComparisonAssessor;
-import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.io.cluster.ClusterStorageFactory;
@@ -16,8 +14,7 @@ import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.cluster.IClusterProperties;
-import org.spectra.cluster.predicates.IComparisonPredicate;
-import org.spectra.cluster.similarity.IBinarySpectrumSimilarity;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.util.Arrays;
@@ -37,12 +34,8 @@ public class LocalParallelBinnedClusteringTool {
     private final IClusterBinner binner;
     private final Class clusterClass;
 
-    public void runClustering(IClusterProperties[] clusters, IMapStorage<ICluster> clusterStorage, File resultFile,
-                              int precursorTolerance, float thresholdStart, float thresholdEnd,
-                              int clusteringRounds, IBinarySpectrumSimilarity similarityMeasure,
-                              INumberOfComparisonAssessor numberOfComparisonAssessor,
-                              IComparisonPredicate<ICluster> firstRoundPredicate,
-                              int consensusSpectrumNoiseFilterIncrement) throws SpectraClusterException {
+    public void runClustering(IClusterProperties[] clusters, IMapStorage<ICluster> clusterStorage,
+                              ClusteringParameters clusteringParameters) throws SpectraClusterException {
         log.debug("------ Local parallel binned clustering -----");
 
         try {
@@ -64,8 +57,7 @@ public class LocalParallelBinnedClusteringTool {
 
             // cluster the initially binned clusters
             IClusterProperties[][] firstRoundResult = clusterMapped(binnedClusterIds, clusterStorage, firstRoundStorage,
-                    precursorTolerance, thresholdStart, thresholdEnd, clusteringRounds, similarityMeasure,
-                    numberOfComparisonAssessor, firstRoundPredicate, consensusSpectrumNoiseFilterIncrement);
+                    clusteringParameters);
 
             // close the initial storage
             clusterStorage.close();
@@ -87,15 +79,14 @@ public class LocalParallelBinnedClusteringTool {
 
             // run the clustering again on the re-binned ids
             IClusterProperties[][] secondRoundResult = clusterMapped(rebinnedClusterIds, firstRoundStorage, secondRoundStorage,
-                    precursorTolerance, thresholdStart, thresholdEnd, clusteringRounds, similarityMeasure,
-                    numberOfComparisonAssessor, firstRoundPredicate, consensusSpectrumNoiseFilterIncrement);
+                    clusteringParameters);
 
             // close the first round storage - thereby deleting the temporary data
             firstRoundStorage.close();
 
             // write the final clusters to file
             ObjectDBGreedyClusterStorage writer = new ObjectDBGreedyClusterStorage(
-                    new ObjectsDB(resultFile.getAbsolutePath(), true));
+                    new ObjectsDB(clusteringParameters.getOutputFile().getAbsolutePath(), true));
 
             // write all clusters to storage
             Arrays.stream(secondRoundResult).flatMap(Arrays::stream)
@@ -149,20 +140,12 @@ public class LocalParallelBinnedClusteringTool {
     }
 
     private IClusterProperties[][] clusterMapped(String[][] binnedClusterIds, IMapStorage<ICluster> clusterStorage,
-                                                 IMapStorage<ICluster> resultStorage, int precursorTolerance,
-                                                 float thresholdStart, float thresholdEnd,
-                                                 int clusteringRounds, IBinarySpectrumSimilarity similarityMeasure,
-                                                 INumberOfComparisonAssessor numberOfComparisonAssessor,
-                                                 IComparisonPredicate<ICluster> firstRoundPredicate,
-                                                 int consensusSpectrumNoiseFilterIncrement) throws Exception {
+                                                 IMapStorage<ICluster> resultStorage, ClusteringParameters clusteringParameters) throws Exception {
         // start the clustering
         ForkJoinPool clusteringPool = new ForkJoinPool(parallelJobs, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, true);
         return clusteringPool.submit(() -> Arrays.stream(binnedClusterIds).parallel().map((String[] clusterIds) -> {
             try {
-                // TODO: replace with factory for clustering engine
-                IClusteringEngine engine = new GreedyClusteringEngine(precursorTolerance, thresholdStart, thresholdEnd,
-                        clusteringRounds, similarityMeasure, numberOfComparisonAssessor, firstRoundPredicate,
-                        consensusSpectrumNoiseFilterIncrement);
+                IClusteringEngine engine = clusteringParameters.createGreedyClusteringEngine();
 
                 // load the clusters - parallel reads are not a problem
                 ICluster[] loadedClusters = new ICluster[clusterIds.length];
