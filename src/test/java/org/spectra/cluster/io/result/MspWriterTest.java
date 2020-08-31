@@ -16,7 +16,6 @@ import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.cluster.IClusterProperties;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
@@ -30,7 +29,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -71,9 +69,6 @@ public class MspWriterTest {
         // create the iterator
         Iterator<ICluster> iterator = reader.readClusterIterator(propertyStorage);
 
-        // keep track of the cluster ids
-        List<IClusterProperties> clusterProperties = new ArrayList<>(10_000);
-
         // create the output file
         Path clusteringResult = Paths.get(testDir.toString(), "clustering_result.cls");
         ObjectDBGreedyClusterStorage clusterStorage = new ObjectDBGreedyClusterStorage(new ObjectsDB(clusteringResult.toString(), true));
@@ -96,9 +91,21 @@ public class MspWriterTest {
         Assert.assertTrue(Files.exists(mspFile));
 
         List<String> lines = Files.readAllLines(mspFile);
-        Assert.assertEquals("Name: +42.011EVQLVETGGGLIQPGGSLR/2", lines.get(0));
-        Assert.assertEquals("Comment: Spec=Consensus Parent=977.0230 Mods=1(0,[,Acetyl) Nreps=1 Naa=26 MaxRatio=1.000", lines.get(1));
-        Assert.assertEquals("Num peaks: 50", lines.get(2));
+        Assert.assertEquals(47101, lines.size());
+
+        boolean found = false;
+        int index = 0;
+
+        for (;index < lines.size(); index++) {
+            if (lines.get(index).equals("Name: +42.011EVQLVETGGGLIQPGGSLR/2")) {
+                found = true;
+                break;
+            }
+        }
+
+        Assert.assertTrue(found);
+        Assert.assertEquals("Comment: Spec=Consensus Parent=977.0230 Mods=1(0,[,Acetyl) Nreps=1 Naa=26 MaxRatio=1.000", lines.get(index + 1));
+        Assert.assertEquals("Num peaks: 50", lines.get(index + 2));
     }
 
     @Test
