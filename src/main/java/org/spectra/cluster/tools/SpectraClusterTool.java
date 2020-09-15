@@ -72,6 +72,10 @@ public class SpectraClusterTool implements IProgressListener {
                 return;
             }
 
+            log.info("---------------------------");
+            log.info("spectra-cluster version 2.0");
+            log.info("---------------------------");
+
             // create the object to hold the parameters
             ClusteringParameters clusteringParameters = new ClusteringParameters();
 
@@ -101,22 +105,47 @@ public class SpectraClusterTool implements IProgressListener {
             if (clusteringParameters.getBinaryDirectory() == null)
                 clusteringParameters.setBinaryDirectory(createTempFolderPath(clusteringParameters.getOutputFile(), "binary-clustering-files"));
 
+            logParameters(clusteringParameters);
+
+            log.info("Starting clustering process...");
+
             // start the clustering
             runClustering(peakFiles, clusteringParameters);
 
             // exit nicely
             System.exit(0);
         } catch (MissingParameterException e) {
-            System.out.println("Error: " + e.getMessage() + "\n\n");
+            log.error(e.getMessage());
             printUsage();
 
             System.exit(1);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error: " + e.getMessage());
+            log.error(e.getMessage(), e);
 
             System.exit(1);
         }
+    }
+
+    /**
+     * Print the chosen parametes to the log
+     * @param clusteringParameters
+     */
+    private void logParameters(ClusteringParameters clusteringParameters) {
+        log.info("--- Clustering Parameters ----");
+        log.info("Precursor tolerance: {}", clusteringParameters.getPrecursorIonTolerance().toString());
+        log.info("Fragment precision: {}", clusteringParameters.getFragmentIonPrecision());
+        log.info("Clustering thresholds: from {} to {} in {} rounds",
+                clusteringParameters.getThresholdStart().toString(),
+                clusteringParameters.getThresholdEnd().toString(),
+                clusteringParameters.getClusterRounds().toString());
+        log.info("Temporary directory: {}", clusteringParameters.getBinaryDirectory());
+        log.info("Ignore charge: {}", clusteringParameters.isIgnoreCharge());
+        log.info("Number of comparison peaks: {}", clusteringParameters.getNumberHigherPeaks().toString());
+        log.info("Minimum number of shared peaks: {}", clusteringParameters.getNInitiallySharedPeaks());
+        log.info("Remove reporter peaks: {}", clusteringParameters.isFilterReportPeaks());
+        log.info("Minimum number of comparisons: {}", clusteringParameters.getMinNumberOfComparisons());
+        log.info("Number of threads: {}", clusteringParameters.getNThreads());
+        log.info("-----------------------------------------------");
     }
 
     /**
@@ -131,10 +160,14 @@ public class SpectraClusterTool implements IProgressListener {
                 .buildDynamicLevelDBPropertyStorage(new File(clusteringParameters.getBinaryDirectory()));
 
         File clusterStorageDir = createUniqueDirectory(new File(clusteringParameters.getBinaryDirectory(), "loaded-clusters"));
+        log.debug("Storing loaded clusters in {}", clusterStorageDir.getAbsolutePath());
         IMapStorage<ICluster> clusterStorage = ClusterStorageFactory.buildTemporaryDynamicStorage(clusterStorageDir, GreedySpectralCluster.class);
 
         // load the spectra
+        log.info("Loading spectra from {} input files...", peakFiles.length);
         IClusterProperties[] loadedClusters = loadInputFiles(peakFiles, clusteringParameters, propertyStorage, clusterStorage);
+
+        log.info("Loaded {} spectra", loadedClusters.length);
 
         // run the clustering in parallel
         File clusteringTmpDir = createUniqueDirectory(new File(clusteringParameters.getBinaryDirectory(), "clustering-files"));
@@ -147,16 +180,16 @@ public class SpectraClusterTool implements IProgressListener {
                 clusteringParameters.getNThreads(), clusteringTmpDir, clusterBinner, GreedySpectralCluster.class);
 
         LocalDateTime startTime = LocalDateTime.now();
-        log.debug("Starting clustering...");
+        log.info("Clustering input data using {} threads...", clusteringParameters.getNThreads());
 
         clusteringTool.runClustering(loadedClusters, clusterStorage, clusteringParameters);
 
         // some nice output
         LocalDateTime clusteringCompleteTime = LocalDateTime.now();
-        log.debug(String.format("Clustering completed in in %d seconds",
-                Duration.between(startTime, clusteringCompleteTime).getSeconds()));
+        log.info("Clustering completed in {} seconds",
+                Duration.between(startTime, clusteringCompleteTime).getSeconds());
 
-        log.info("Result file written to " + clusteringParameters.getOutputFile());
+        log.info("Result file written to {}", clusteringParameters.getOutputFile());
 
         // create the MSP file
         if (clusteringParameters.isOutputMsp()) {
@@ -275,47 +308,6 @@ public class SpectraClusterTool implements IProgressListener {
             throw new Exception("Invalid fragment precision set. Allowed values are 'low' and 'high'");
         }
     }
-
-    /**
-
-     TODO: update print function
-    private void printSettings(File finalResultFile, int nMajorPeakJobs, float startThreshold,
-                               float endThreshold, int rounds, boolean keepBinaryFiles, File binaryTmpDirectory,
-                               String[] peaklistFilenames, boolean reUseBinaryFiles, boolean fastMode,
-                               List<String> addedFilters, String fragmentPrecision) {
-        System.out.println("Spectra Cluster API Version 2.0");
-        System.out.println("Created by Yasset Perez-Riverol & Johannes Griss\n");
-
-        System.out.println("-- Settings --");
-        System.out.println("Number of threads: " + String.valueOf(nMajorPeakJobs));
-        System.out.println("Thresholds: " + String.valueOf(startThreshold) + " - " + String.valueOf(endThreshold) + " in " + rounds + " rounds");
-        System.out.println("Keeping binary files: " + (keepBinaryFiles ? "true" : "false"));
-        System.out.println("Binary file directory: " + binaryTmpDirectory);
-        System.out.println("Result file: " + finalResultFile);
-        System.out.println("Reuse binary files: " + (reUseBinaryFiles ? "true" : "false"));
-        System.out.println("Input files: " + peaklistFilenames.length);
-        System.out.println("Using fast mode: " + (fastMode ? "yes" : "no"));
-
-        System.out.println("\nOther settings:");
-        System.out.println("Precursor tolerance: " + clusteringParameters.getPrecursorIonTolerance());
-        System.out.println("Fragment ion precision: " + fragmentPrecision);
-
-        // used filters
-        System.out.print("Added filters: ");
-        for (int i = 0; i < addedFilters.size(); i++) {
-            if (i > 0) {
-                System.out.print(", ");
-            }
-            System.out.print(addedFilters.get(i));
-        }
-        System.out.println();
-
-//        // only show certain settings if they were changed
-//        if (Defaults.getMinNumberComparisons() != Defaults.DEFAULT_MIN_NUMBER_COMPARISONS)
-//            System.out.println("Minimum number of comparisons: " + Defaults.getMinNumberComparisons());
-
-        System.out.println();
-    }*/
 
     private void printUsage() {
         HelpFormatter formatter = new HelpFormatter();
