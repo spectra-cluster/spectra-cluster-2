@@ -1,0 +1,33 @@
+<configuration>
+
+    <appender name="SPECTRA_CLUSTER-FILE" class="ch.qos.logback.core.FileAppender">
+        <file>log/spectra-cluster.log</file>
+        <encoder>
+            <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- Must be at least INFO to appear on the console -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level: %msg%n%nopex</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.spectra.cluster" level="debug" />
+
+    <logger name="ch.qos.logback" level="error" />
+
+    <logger name="org.zoodb" level="warn" />
+
+    <logger name="io.github.bigbio.pgatk.io" level="warn" />
+
+    <root level="info">
+        <appender-ref ref="SPECTRA_CLUSTER-FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
