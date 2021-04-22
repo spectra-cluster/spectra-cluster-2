@@ -4,12 +4,10 @@ import lombok.Data;
 import org.apache.commons.cli.CommandLine;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.HighResolutionMzBinner;
-import org.spectra.cluster.normalizer.IMzBinner;
-import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.normalizer.*;
 import org.spectra.cluster.predicates.IComparisonPredicate;
 import org.spectra.cluster.predicates.SameChargePredicate;
 import org.spectra.cluster.predicates.ShareNComparisonPeaksPredicate;
@@ -180,6 +178,16 @@ public class ClusteringParameters {
     }
 
     /**
+     * Creates a new instance of the IIntegerNormalizer to
+     * normalize precursor ion intensities.
+     *
+     * @return A new IIntegerNormlalizer
+     */
+    public IIntegerNormalizer createPrecursorNormaliser() {
+        return new BasicIntegerNormalizer(BasicIntegerNormalizer.MZ_CONSTANT);
+    }
+
+    /**
      * Creates a new GreedyClusteringEngine based on the currently set parameters.
      *
      * Note: The validity of these parameters is not checked in this function but
@@ -232,6 +240,15 @@ public class ClusteringParameters {
     }
 
     /**
+     * Return the comparison filter to use.
+     *
+     * @return
+     */
+    public IBinarySpectrumFunction getComparisonFilter() {
+        return GreedyClusteringEngine.COMPARISON_FILTER;
+    }
+
+    /**
      * Creates a new instance of the matching m/z binner.
      *
      * Note: The validity of these parameters is not checked in this function but
@@ -242,5 +259,15 @@ public class ClusteringParameters {
     public IMzBinner createMzBinner() {
         return (fragmentIonPrecision.equalsIgnoreCase("high")) ?
                 new HighResolutionMzBinner() : new TideBinner();
+    }
+
+    /**
+     * Creates a new instance of the IIntensityNormaliser to use
+     * to normalise peak intensities.
+     *
+     * @return A new IIntensityNormalizer object.
+     */
+    public IIntensityNormalizer createIntensityNormalizer() {
+        return new MaxPeakNormalizer();
     }
 }

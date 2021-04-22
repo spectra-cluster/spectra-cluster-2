@@ -6,6 +6,7 @@ import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class GreedySpectralClusterTest {
     @Test
     public void testAddingSpectra() throws Exception {
         File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), testFile);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> spectra = new ArrayList<>();
@@ -60,7 +61,7 @@ public class GreedySpectralClusterTest {
     @Test
     public void testGetProperties() throws Exception {
         File testFile = new File(Objects.requireNonNull(GreedySpectralClusterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), testFile);
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> spectra = new ArrayList<>();

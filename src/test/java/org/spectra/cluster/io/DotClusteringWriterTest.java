@@ -14,6 +14,7 @@ import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -36,7 +37,7 @@ public class DotClusteringWriterTest {
                 5, new CombinedFisherIntensityTest(), new MinNumberComparisonsAssessor(10000),
                 new ShareHighestPeaksClusterPredicate(5), GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
-        MzSpectraReader reader = new MzSpectraReader(mgfFile, GreedyClusteringEngine.COMPARISON_FILTER, engine);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), mgfFile);
         Iterator<ICluster> iterator = reader.readClusterIterator(storage);
 
         while (iterator.hasNext()) {

@@ -12,9 +12,7 @@ import org.apache.commons.cli.PosixParser;
 import org.spectra.cluster.binning.IClusterBinner;
 import org.spectra.cluster.binning.SimilarSizedClusterBinner;
 import org.spectra.cluster.consensus.AverageConsensusSpectrumBuilder;
-import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.exceptions.MissingParameterException;
-import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.io.cluster.ClusterStorageFactory;
 import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
 import org.spectra.cluster.io.result.IClusteringResultWriter;
@@ -23,8 +21,6 @@ import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.cluster.IClusterProperties;
-import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.tools.utils.IProgressListener;
 import org.spectra.cluster.tools.utils.ProgressUpdate;
 import org.spectra.cluster.util.ClusteringParameters;
@@ -233,9 +229,7 @@ public class SpectraClusterTool implements IProgressListener {
                 .toArray(File[]::new);
 
         // load the spectra using an MzSpectraReader
-        MzSpectraReader reader = new MzSpectraReader( clusteringParameters.createMzBinner(), new MaxPeakNormalizer(),
-                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), clusteringParameters.createLoadingFilter(),
-                GreedyClusteringEngine.COMPARISON_FILTER, clusteringParameters.createGreedyClusteringEngine(), inputFiles);
+        MzSpectraReader reader = new MzSpectraReader(clusteringParameters, inputFiles);
 
         // create the iterator to load the clusters
         Iterator<ICluster> iterator = reader.readClusterIterator(propertyStorage);

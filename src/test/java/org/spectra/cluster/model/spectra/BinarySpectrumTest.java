@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.net.URI;
@@ -72,7 +73,7 @@ public class BinarySpectrumTest {
     @Test
     public void testPeakSortOrder() throws Exception{
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MzSpectraReader reader = new MzSpectraReader(new File(uri), GreedyClusteringEngine.COMPARISON_FILTER);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), new File(uri));
 
         Iterator<IBinarySpectrum> spectrumIterator = reader.readBinarySpectraIterator();
         IBinarySpectrum spectrum = spectrumIterator.next();

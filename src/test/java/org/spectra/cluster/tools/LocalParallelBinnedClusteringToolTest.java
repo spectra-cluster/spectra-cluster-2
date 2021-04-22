@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.spectra.cluster.binning.SimilarSizedClusterBinner;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
-import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.cluster.ClusterStorageFactory;
 import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
@@ -20,8 +19,6 @@ import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.cluster.IClusterProperties;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
-import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.util.ClusteringParameters;
@@ -65,9 +62,7 @@ public class LocalParallelBinnedClusteringToolTest {
         File[] inFiles = Arrays.stream(mgfFiles).map(File::new).toArray(File[]::new);
 
         // read all files at once
-        MzSpectraReader reader = new MzSpectraReader(new TideBinner(), new MaxPeakNormalizer(),
-                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
-                GreedyClusteringEngine.COMPARISON_FILTER, engine, inFiles);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), inFiles);
 
         // create the iterator
         Iterator<ICluster> iterator = reader.readClusterIterator(propertyStorage);

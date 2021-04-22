@@ -14,6 +14,7 @@ import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.net.URI;
@@ -31,7 +32,7 @@ public class TestAbstractConsensusBuilder {
                 new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
                 GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
-        MzSpectraReader spectraReader = new MzSpectraReader(mgfFile, GreedyClusteringEngine.COMPARISON_FILTER, engine);
+        MzSpectraReader spectraReader = new MzSpectraReader(new ClusteringParameters(), mgfFile);
 
 
         // read the spectra

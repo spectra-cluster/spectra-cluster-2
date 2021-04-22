@@ -3,15 +3,11 @@ package org.spectra.cluster.filter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
-import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
-import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
-import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.net.URI;
@@ -38,8 +34,7 @@ public class HighestIntensityNPeaksFilterTest {
     public void setUp() throws Exception {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
-        MzSpectraReader parser = new MzSpectraReader(new File(uri), new TideBinner(), new MaxPeakNormalizer(), new BasicIntegerNormalizer(),
-                new HighestPeakPerBinFunction(), null, GreedyClusteringEngine.COMPARISON_FILTER, null);
+        MzSpectraReader parser = new MzSpectraReader(new ClusteringParameters(), new File(uri));
         specIt = parser.readBinarySpectraIterator();
 
     }
@@ -52,7 +47,7 @@ public class HighestIntensityNPeaksFilterTest {
             IBinarySpectrum spec = specIt.next();
             spec = highestIntensityNPeaksFilter.apply(spec);
             Assert.assertEquals(40, spec.getPeaks().length);
-            Assert.assertTrue(spec.getPeaks()[0].getIntensity() > spec.getPeaks()[39].getIntensity());
+            Assert.assertTrue(spec.getPeaks()[0].getMz() < spec.getPeaks()[39].getMz());
         }
 
     }

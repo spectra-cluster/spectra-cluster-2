@@ -8,13 +8,10 @@ import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
-import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
-import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.util.ClusteringParameters;
@@ -34,9 +31,7 @@ public class AverageConsensusSpectrumBuilderTest {
         // load the spectra
         File mgfFile = new File(getClass().getClassLoader().getResource("imp_single_cluster.mgf").toURI());
         IPropertyStorage localStorage = new InMemoryPropertyStorage();
-        MzSpectraReader reader = new MzSpectraReader(mgfFile, new TideBinner(), new MaxPeakNormalizer(),
-                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), params.createLoadingFilter(),
-                GreedyClusteringEngine.COMPARISON_FILTER, params.createGreedyClusteringEngine());
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), mgfFile);
 
         Iterator<ICluster> iterator = reader.readClusterIterator(localStorage);
         List<ICluster> spectra = new ArrayList<>(1_000);
