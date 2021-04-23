@@ -86,7 +86,7 @@ public class MspWriterTest {
         Assert.assertTrue(Files.exists(mspFile));
 
         List<String> lines = Files.readAllLines(mspFile);
-        Assert.assertEquals(47101, lines.size());
+        Assert.assertEquals(48053, lines.size());
 
         boolean found = false;
         int index = 0;
