@@ -1,10 +1,11 @@
 package org.spectra.cluster.model.cluster;
 
-import lombok.extern.slf4j.Slf4j;
 import io.github.bigbio.pgatk.io.common.Param;
 import io.github.bigbio.pgatk.io.objectdb.LongObject;
+import lombok.extern.slf4j.Slf4j;
 import org.spectra.cluster.exceptions.SpectraClusterException;
-import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
+import org.spectra.cluster.model.consensus.IClusteringConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
 import java.io.*;
@@ -13,8 +14,8 @@ import java.util.stream.Collectors;
 
 
 /**
- * The {@link GreedySpectralCluster} implements the clustering process and creates a {@link org.spectra.cluster.model.consensus.GreedyConsensusSpectrum}. This implementation if ICluster only supports the addition of
- * spectra. It does not keep the actual spectra after they were added to the {@link org.spectra.cluster.model.consensus.GreedyConsensusSpectrum} but only their ids.
+ * The {@link GreedySpectralCluster} implements the clustering process and creates a {@link GreedyClusteringConsensusSpectrum}. This implementation if ICluster only supports the addition of
+ * spectra. It does not keep the actual spectra after they were added to the {@link GreedyClusteringConsensusSpectrum} but only their ids.
  *
  * @author Johannes Griss
  * @author ypriverol
@@ -38,9 +39,9 @@ public class GreedySpectralCluster extends LongObject implements ICluster {
      */
     private Set<String> clusteredSpectraIds = new HashSet<>();
 
-    private IConsensusSpectrumBuilder consensusSpectrumBuilder;
+    private IClusteringConsensusSpectrumBuilder consensusSpectrumBuilder;
 
-    public GreedySpectralCluster(IConsensusSpectrumBuilder consensusSpectrumBuilder) {
+    public GreedySpectralCluster(IClusteringConsensusSpectrumBuilder consensusSpectrumBuilder) {
         this.id = consensusSpectrumBuilder.getUUI();
         this.consensusSpectrumBuilder = consensusSpectrumBuilder;
     }
@@ -56,7 +57,7 @@ public class GreedySpectralCluster extends LongObject implements ICluster {
      * @param bestComparisonMatches
      * @param lowestBestComparisonSimilarity
      */
-    public GreedySpectralCluster(String id, Set<String> clusteredSpectraIds, IConsensusSpectrumBuilder consensusSpectrumBuilder,
+    public GreedySpectralCluster(String id, Set<String> clusteredSpectraIds, IClusteringConsensusSpectrumBuilder consensusSpectrumBuilder,
                                  List<ComparisonMatch> bestComparisonMatches, float lowestBestComparisonSimilarity) {
         this.id = id;
         this.clusteredSpectraIds = clusteredSpectraIds;
@@ -92,7 +93,7 @@ public class GreedySpectralCluster extends LongObject implements ICluster {
     }
 
     @Override
-    public IConsensusSpectrumBuilder getConsensusSpectrumBuilder() {
+    public IClusteringConsensusSpectrumBuilder getConsensusSpectrumBuilder() {
         return consensusSpectrumBuilder;
     }
 

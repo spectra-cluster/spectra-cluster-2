@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.util.ClusteringParameters;
 
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class GreedySpectralClusterTest {
     @Test
     public void testSavingComparisonMatches() {
-        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("Test", GreedyClusteringEngine.COMPARISON_FILTER));
+        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyClusteringConsensusSpectrum("Test", GreedyClusteringEngine.COMPARISON_FILTER));
 
         Assert.assertEquals("Test", cluster.getId());
         Assert.assertEquals(0, cluster.getClusteredSpectraCount());
@@ -51,7 +51,7 @@ public class GreedySpectralClusterTest {
         }
 
         // put all spectra to one cluster
-        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
+        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyClusteringConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
         cluster.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
         Assert.assertEquals(spectra.size(), cluster.getClusteredSpectraCount());
@@ -71,7 +71,7 @@ public class GreedySpectralClusterTest {
         }
 
         // put all spectra to one cluster
-        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
+        GreedySpectralCluster cluster = new GreedySpectralCluster(new GreedyClusteringConsensusSpectrum("test", GreedyClusteringEngine.COMPARISON_FILTER));
         cluster.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
         // get the properties

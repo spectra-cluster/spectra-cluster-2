@@ -48,7 +48,7 @@ public class GreedyConsensusSpectrumTest {
                 new BinaryPeak(110, 20)
         };
 
-        BinaryConsensusPeak[] mergedPeaks = GreedyConsensusSpectrum.addPeaksToConsensus(existingPeaks, peaksToAdd);
+        BinaryConsensusPeak[] mergedPeaks = GreedyClusteringConsensusSpectrum.addPeaksToConsensus(existingPeaks, peaksToAdd);
 
         Assert.assertEquals(5, mergedPeaks.length);
         Assert.assertEquals(5, mergedPeaks[0].getMz());
@@ -74,7 +74,7 @@ public class GreedyConsensusSpectrumTest {
                 new BinaryConsensusPeak(110, 20, 10)
         };
 
-        BinaryConsensusPeak[] mergedPeaks = GreedyConsensusSpectrum.addPeaksToConsensus(existingPeaks, peaksToAdd);
+        BinaryConsensusPeak[] mergedPeaks = GreedyClusteringConsensusSpectrum.addPeaksToConsensus(existingPeaks, peaksToAdd);
 
         Assert.assertEquals(5, mergedPeaks.length);
         Assert.assertEquals(5, mergedPeaks[0].getMz());
@@ -113,7 +113,7 @@ public class GreedyConsensusSpectrumTest {
 
         long currentTime = System.currentTimeMillis();
 
-        GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("Test", (IBinarySpectrum s) -> s);
+        GreedyClusteringConsensusSpectrum consensusSpectrum = new GreedyClusteringConsensusSpectrum("Test", (IBinarySpectrum s) -> s);
         consensusSpectrum.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
 
         currentTime = System.currentTimeMillis();
@@ -153,7 +153,7 @@ public class GreedyConsensusSpectrumTest {
             spectraCummulative.add(spectrumIterator.next());
         }
 
-        GreedyConsensusSpectrum consesusCumulative = new GreedyConsensusSpectrum("Test", (IBinarySpectrum s) -> s);
+        GreedyClusteringConsensusSpectrum consesusCumulative = new GreedyClusteringConsensusSpectrum("Test", (IBinarySpectrum s) -> s);
         consesusCumulative.addSpectra(spectraCummulative.toArray(new IBinarySpectrum[0]));
         IBinarySpectrum consensusCumulative = consesusCumulative.getConsensusSpectrum();
 
@@ -168,7 +168,7 @@ public class GreedyConsensusSpectrumTest {
             spectra.add(spectrumIterator.next());
         }
 
-        GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("Test", (IBinarySpectrum s) -> s);
+        GreedyClusteringConsensusSpectrum consensusSpectrum = new GreedyClusteringConsensusSpectrum("Test", (IBinarySpectrum s) -> s);
         consensusSpectrum.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
         IBinarySpectrum consensus = consensusSpectrum.getConsensusSpectrum();
 
@@ -208,7 +208,7 @@ public class GreedyConsensusSpectrumTest {
             spectraCummulative.add(spectrumIterator.next());
         }
 
-        GreedyConsensusSpectrum consesusCumulative = new GreedyConsensusSpectrum("Test", GreedyClusteringEngine.COMPARISON_FILTER);
+        GreedyClusteringConsensusSpectrum consesusCumulative = new GreedyClusteringConsensusSpectrum("Test", GreedyClusteringEngine.COMPARISON_FILTER);
         consesusCumulative.addSpectra(spectraCummulative.toArray(new IBinarySpectrum[0]));
         IBinarySpectrum consensusCumulative = consesusCumulative.getConsensusSpectrum();
 
@@ -223,7 +223,7 @@ public class GreedyConsensusSpectrumTest {
             spectra.add(spectrumIterator.next());
         }
 
-        GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("Test", GreedyClusteringEngine.COMPARISON_FILTER);
+        GreedyClusteringConsensusSpectrum consensusSpectrum = new GreedyClusteringConsensusSpectrum("Test", GreedyClusteringEngine.COMPARISON_FILTER);
         consensusSpectrum.addSpectra(spectra.toArray(new IBinarySpectrum[0]));
         IBinarySpectrum consensus = consensusSpectrum.getConsensusSpectrum();
 
@@ -255,7 +255,7 @@ public class GreedyConsensusSpectrumTest {
                 new BinaryConsensusPeak(1000, 200, 30)
         };
 
-        GreedyConsensusSpectrum consensusSpectrum = new GreedyConsensusSpectrum("0", 50, 5, 100, GreedyClusteringEngine.COMPARISON_FILTER);
+        GreedyClusteringConsensusSpectrum consensusSpectrum = new GreedyClusteringConsensusSpectrum("0", 50, 5, 100, GreedyClusteringEngine.COMPARISON_FILTER);
         int precursorMz = new BasicIntegerNormalizer().binValue(1024.1993);
 
         for (int i = 0; i < 100_000; i++) {
@@ -270,7 +270,7 @@ public class GreedyConsensusSpectrumTest {
             Assert.assertEquals(i + 1, consensusSpectrum.getSpectraCount());
         }
 
-        GreedyConsensusSpectrum consensusSpectrum2 = new GreedyConsensusSpectrum("c1", 50, 5, 100, GreedyClusteringEngine.COMPARISON_FILTER);
+        GreedyClusteringConsensusSpectrum consensusSpectrum2 = new GreedyClusteringConsensusSpectrum("c1", 50, 5, 100, GreedyClusteringEngine.COMPARISON_FILTER);
 
         for (int i = 0; i < 15; i++) {
             IBinarySpectrum binarySpectrum = new BinarySpectrum(String.valueOf(i + 100_010),

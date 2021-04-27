@@ -12,7 +12,7 @@ import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
@@ -54,7 +54,7 @@ public class MzSpectraReaderTest {
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         File clusteringFile = new File(uri);
         clusteringReader = new MzSpectraReader(new ClusteringParameters(), clusteringFile);

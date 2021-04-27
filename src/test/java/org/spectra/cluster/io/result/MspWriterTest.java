@@ -15,7 +15,7 @@ import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
@@ -51,7 +51,7 @@ public class MspWriterTest {
         GreedyClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         URI[] mgfFiles = new URI[] {
                 getClass().getClassLoader().getResource("same_sequence_cluster.mgf").toURI(),

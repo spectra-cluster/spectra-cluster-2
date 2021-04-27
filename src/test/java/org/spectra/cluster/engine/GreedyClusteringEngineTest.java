@@ -12,7 +12,7 @@ import org.spectra.cluster.io.cluster.old_writer.IClusterWriter;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
@@ -47,7 +47,7 @@ public class GreedyClusteringEngineTest {
         engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         File mgfFile = new File(GreedyClusteringEngineTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
 
@@ -110,7 +110,7 @@ public class GreedyClusteringEngineTest {
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         // sort according to m/z
         ICluster[] clusters = singleClusters.toArray(new GreedySpectralCluster[singleClusters.size()]);
@@ -242,7 +242,7 @@ public class GreedyClusteringEngineTest {
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new ICluster[spectra.size()]));
 
@@ -279,7 +279,7 @@ public class GreedyClusteringEngineTest {
             IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                     1, t, 5, new CombinedFisherIntensityTest(),
                     new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5),
-                    GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                    GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
             ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new ICluster[spectra.size()]));
 

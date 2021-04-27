@@ -9,7 +9,7 @@ import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
@@ -30,7 +30,7 @@ public class TestAbstractConsensusBuilder {
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         MzSpectraReader spectraReader = new MzSpectraReader(new ClusteringParameters(), mgfFile);
 

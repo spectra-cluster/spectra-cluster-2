@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 
 /**
  * This is a greedy version of the FrankEtAlConsensusSpectrumBuilder. It only supports the addition of spectra but not their removal.
- * Thereby, the original peaks do not have to be kept. This implementation of {@link IConsensusSpectrumBuilder} contains in the
+ * Thereby, the original peaks do not have to be kept. This implementation of {@link IClusteringConsensusSpectrumBuilder} contains in the
  * allPeaksInCluster property all the peaks of the spectra that belongs to the cluster.
  * <p>
  * allPeaksInCluster: Contains all the peaks of the {@link IBinarySpectrum} that belong to the Cluster. All peaks of the spectra that belongs to
  * the Cluster needs to be keep to accurately compute the ConsensusPeaks each time is needed.
  * <p>
- * consensusPeaks: This is the Array of @{@link BinaryPeak} of a clean @{@link GreedyConsensusSpectrum}.
+ * consensusPeaks: This is the Array of @{@link BinaryPeak} of a clean @{@link GreedyClusteringConsensusSpectrum}.
  * <p>
  * isDirty: This variable is used to notice the algorithm each time the consensusPeaks are generated from the allPeaksInCluster. This variable is important because
  * the class only will update the consensusPeaks when is needed.
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @author ypriverol
  */
 @Slf4j
-public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
+public class GreedyClusteringConsensusSpectrum implements IClusteringConsensusSpectrumBuilder {
     /**
      * Peaks to keep per 100 m/z during noise filtering
      */
@@ -71,13 +71,13 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     private int peaksPerWindowToKeep;
     private int windowSizeBins;
 
-    public GreedyConsensusSpectrum() {
+    public GreedyClusteringConsensusSpectrum() {
     }
 
-    public GreedyConsensusSpectrum(String id, BinaryPeak[] consensusPeaks, Map<BinaryPeak, BinaryPeak> comparisonFilteredPeaks,
-                                   IBinarySpectrumFunction comparisonFilter, int minComparisonMz, int maxComparisonMz, BinaryConsensusPeak[] allPeaksInCluster,
-                                   boolean isDirty, int nSpectra, int averagePrecursorMz, int averageCharge, int sumCharge,
-                                   int minPeaksToKeep, int peaksPerWindowToKeep, int windowSizeBins) {
+    public GreedyClusteringConsensusSpectrum(String id, BinaryPeak[] consensusPeaks, Map<BinaryPeak, BinaryPeak> comparisonFilteredPeaks,
+                                             IBinarySpectrumFunction comparisonFilter, int minComparisonMz, int maxComparisonMz, BinaryConsensusPeak[] allPeaksInCluster,
+                                             boolean isDirty, int nSpectra, int averagePrecursorMz, int averageCharge, int sumCharge,
+                                             int minPeaksToKeep, int peaksPerWindowToKeep, int windowSizeBins) {
         this.id = id;
         this.consensusPeaks = consensusPeaks;
         this.comparisonFilteredPeaks = comparisonFilteredPeaks;
@@ -104,7 +104,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
      * @param windowSizeBins           The window size to use for the noise filter. The unit is in number of m/z bins.
      * @param comparisonFilter     The filter function to use for the comparisons.
      */
-    public GreedyConsensusSpectrum(String id, int minPeaksToKeep, int peaksPerWindowToKeep, int windowSizeBins, IBinarySpectrumFunction comparisonFilter) {
+    public GreedyClusteringConsensusSpectrum(String id, int minPeaksToKeep, int peaksPerWindowToKeep, int windowSizeBins, IBinarySpectrumFunction comparisonFilter) {
         this.id = id;
         this.minPeaksToKeep = minPeaksToKeep;
         this.peaksPerWindowToKeep = peaksPerWindowToKeep;
@@ -112,25 +112,25 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
         this.comparisonFilter = comparisonFilter;
     }
 
-    public GreedyConsensusSpectrum(String id, IBinarySpectrumFunction comparisonFilter) {
+    public GreedyClusteringConsensusSpectrum(String id, IBinarySpectrumFunction comparisonFilter) {
         this(id, MIN_PEAKS_TO_KEEP, DEFAULT_PEAKS_TO_KEEP, NOISE_FILTER_INCREMENT, comparisonFilter);
     }
 
     /**
      * Create a new consensus spectrum builder with a random id and the default values.
      */
-    public GreedyConsensusSpectrum(IBinarySpectrumFunction comparisonFilter) {
+    public GreedyClusteringConsensusSpectrum(IBinarySpectrumFunction comparisonFilter) {
         this(UUID.randomUUID().toString(), comparisonFilter);
     }
 
     /**
      * This function will put to the allPeaksInCluster, the peaks from the newSpectra.
      * <p>
-     * Any clustering process will compute the similarity between spectra and try to put the similar spectra to the {@link GreedyConsensusSpectrum}.
+     * Any clustering process will compute the similarity between spectra and try to put the similar spectra to the {@link GreedyClusteringConsensusSpectrum}.
      * This method only put the peaks of the spetra to allPeaksInCluster and declare the Consensus Spectrum as Dirty. The algorithm loop the list of {@link IBinarySpectrum} and
      * put the {@link BinaryPeak} o the allPeaksInCluster property.
      *
-     * @param newSpectra List of Spectra to be added to the {@link GreedyConsensusSpectrum}
+     * @param newSpectra List of Spectra to be added to the {@link GreedyClusteringConsensusSpectrum}
      */
     @Override
     public void addSpectra(IBinarySpectrum... newSpectra) {
@@ -156,7 +156,7 @@ public class GreedyConsensusSpectrum implements IConsensusSpectrumBuilder {
     }
 
     @Override
-    public void addConsensusSpectrum(IConsensusSpectrumBuilder consensusSpectrumToAdd) {
+    public void addConsensusSpectrum(IClusteringConsensusSpectrumBuilder consensusSpectrumToAdd) {
         if (consensusSpectrumToAdd == null || consensusSpectrumToAdd.getSpectraCount() < 1)
             return;
 
