@@ -1,5 +1,6 @@
 package org.spectra.cluster.consensus;
 
+import io.github.bigbio.pgatk.io.common.CvParam;
 import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
 import io.github.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
@@ -61,5 +62,8 @@ public class AverageConsensusSpectrumBuilderTest {
         Assert.assertEquals(2, (int) consensusSpectrum.getMsLevel());
         Assert.assertEquals(69, consensusSpectrum.getPeakList().size());
         Assert.assertEquals(402.717, consensusSpectrum.getPrecursorMZ(), 0.001);
+
+        Assert.assertEquals(1, consensusSpectrum.getAdditional().size());
+        Assert.assertEquals("5,5,5", ((List<CvParam>) consensusSpectrum.getAdditional()).get(0).getValue().substring(0, 5));
     }
 }
