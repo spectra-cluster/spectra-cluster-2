@@ -37,7 +37,6 @@ public class ClusteringParameters {
 
     private String binaryDirectory;
     private boolean reuseBinary;
-    private boolean fastMode;
     private Integer clusterRounds;
     private boolean filterReportPeaks;
     private Integer numberHigherPeaks;
@@ -90,17 +89,15 @@ public class ClusteringParameters {
             this.reuseBinary = Boolean.parseBoolean(properties.getProperty("reuse.binary.files"));
         if(properties.containsKey("ignore.charge"))
             this.ignoreCharge = Boolean.parseBoolean(properties.getProperty("ignore.charge"));
-        if(properties.containsKey("cluster.fast.mode"))
-            this.fastMode = Boolean.parseBoolean(properties.getProperty("cluster.fast.mode"));
         if(properties.containsKey("filters.remove.reporter.peaks"))
             this.filterReportPeaks = Boolean.parseBoolean(properties.getProperty("filters.remove.reporter.peaks"));
         if(properties.containsKey("initially.shared.peaks"))
             this.nInitiallySharedPeaks = Integer.parseInt(properties.getProperty("initially.shared.peaks"));
         if(properties.containsKey("x.min.comparisons"))
             this.minNumberOfComparisons = Integer.parseInt(properties.getProperty("x.min.comparisons"));
-        if(properties.contains("output.msp"))
+        if(properties.containsKey("output.msp"))
             this.outputMsp = Boolean.parseBoolean(properties.getProperty("output.msp"));
-        if(properties.contains("output.dot_clustering"))
+        if(properties.containsKey("output.dot_clustering"))
             this.outputDotClustering = Boolean.parseBoolean(properties.getProperty("output.dot_clustering"));
     }
 

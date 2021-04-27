@@ -37,7 +37,6 @@ public class CliOptions {
 
         IGNORE_CHARGE("ignore.charge", "ic"),
 
-        FAST_MODE("fast_mode", "fm"),
         FILTER("filter", "ft"),
         HELP("help", "h"),
         VERBOSE("verbose", "v"),
@@ -170,12 +169,6 @@ public class CliOptions {
                 .withLongOpt(OPTIONS.IGNORE_CHARGE.getLongValue())
                 .create(OPTIONS.IGNORE_CHARGE.getValue());
         options.addOption(ignoreCharge);
-
-        Option fastMode = OptionBuilder
-                .withDescription("If this option is set the 'fast mode' is enabled. In this mode, the radical peak filtering used for the comparison function is already applied during spectrum conversion. Thereby, the clustering and consensus spectrum quality is slightly decreased but speed increases 2-3 fold.")
-                .withLongOpt(OPTIONS.FAST_MODE.getLongValue())
-                .create(OPTIONS.FAST_MODE.getValue());
-        options.addOption(fastMode);
 
         Option filter = OptionBuilder
                 .hasArg()
