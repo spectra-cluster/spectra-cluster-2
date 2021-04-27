@@ -23,7 +23,7 @@ jobs:
       uses: actions/setup-java@v2
       with:
         distribution: 'zulu'
-        java-package: 'jre'
+        java-package: 'jdk'
         java-version: ${{ matrix.java }}
     - name: Build with Maven
       run: mvn -B package --file pom.xml
