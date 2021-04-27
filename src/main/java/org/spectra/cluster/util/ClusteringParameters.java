@@ -52,6 +52,7 @@ public class ClusteringParameters {
 
     private File outputFile;
     private boolean outputMsp;
+    private boolean outputDotClustering;
 
     private int nThreads;
 
@@ -99,6 +100,8 @@ public class ClusteringParameters {
             this.minNumberOfComparisons = Integer.parseInt(properties.getProperty("x.min.comparisons"));
         if(properties.contains("output.msp"))
             this.outputMsp = Boolean.parseBoolean(properties.getProperty("output.msp"));
+        if(properties.contains("output.dot_clustering"))
+            this.outputDotClustering = Boolean.parseBoolean(properties.getProperty("output.dot_clustering"));
     }
 
     public Properties readProperties() throws URISyntaxException {
@@ -154,6 +157,7 @@ public class ClusteringParameters {
             nThreads = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.N_THREADS.getValue()));
 
         outputMsp = commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_MSP.getValue());
+        outputDotClustering = commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_CLUSTERING.getValue());
     }
 
     public void mergeParameters(String configFile) throws IOException {

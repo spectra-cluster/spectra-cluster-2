@@ -17,6 +17,7 @@ public class CliOptions {
         CONFIG_FILE("config", "c"),
         OUTPUT_PATH("output.path", "o"),
         OUTPUT_MSP("output.msp", "om"),
+        OUTPUT_CLUSTERING("output.dot_clustering", "oc"),
 
         PRECURSOR_TOLERANCE("precursor.tolerance", "p"),
         FRAGMENT_PRECISION("fragment.precision", "f"),
@@ -106,10 +107,16 @@ public class CliOptions {
         options.addOption(outputPath);
 
         Option outputMsp = OptionBuilder
-                .withDescription("If set, an MSP file containing the consensus spectra is written to the same location as the outputfile.")
+                .withDescription("If set, an MSP file containing the consensus spectra is written to the same location as the output file.")
                 .withLongOpt(OPTIONS.OUTPUT_MSP.getLongValue())
                 .create(OPTIONS.OUTPUT_MSP.getValue());
         options.addOption(outputMsp);
+
+        Option outputClustering = OptionBuilder
+                .withDescription("If set, a .clustering file containing the clustering results is written to the same location as the output file.")
+                .withLongOpt(OPTIONS.OUTPUT_CLUSTERING.getLongValue())
+                .create(OPTIONS.OUTPUT_CLUSTERING.getValue());
+        options.addOption(outputClustering);
 
         Option startThreshold = OptionBuilder
                 .hasArg()

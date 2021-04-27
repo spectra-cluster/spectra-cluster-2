@@ -15,6 +15,7 @@ import org.spectra.cluster.consensus.AverageConsensusSpectrumBuilder;
 import org.spectra.cluster.exceptions.MissingParameterException;
 import org.spectra.cluster.io.cluster.ClusterStorageFactory;
 import org.spectra.cluster.io.cluster.ObjectDBGreedyClusterStorage;
+import org.spectra.cluster.io.result.DotClusteringWriter;
 import org.spectra.cluster.io.result.IClusteringResultWriter;
 import org.spectra.cluster.io.result.MspWriter;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
@@ -200,7 +201,18 @@ public class SpectraClusterTool implements IProgressListener {
             writer.writeResult(mspFile, resultReader, propertyStorage);
         }
 
-        // TODO: Create .clustering output file
+        // create the .clustering file
+        if (clusteringParameters.isOutputDotClustering()) {
+            Path clusteringFile = Paths.get(clusteringParameters.getOutputFile().toString() + ".clustering");
+            IClusteringResultWriter writer = new DotClusteringWriter(new AverageConsensusSpectrumBuilder(clusteringParameters));
+
+            // open the result file again
+            ObjectDBGreedyClusterStorage resultReader = new ObjectDBGreedyClusterStorage(
+                    new ObjectsDB(clusteringParameters.getOutputFile().getAbsolutePath(), false));
+
+            log.info("Saving clustering results as .clustering file at " + clusteringFile.toString());
+            writer.writeResult(clusteringFile, resultReader, propertyStorage);
+        }
 
         // close the storage
         clusterStorage.close();
