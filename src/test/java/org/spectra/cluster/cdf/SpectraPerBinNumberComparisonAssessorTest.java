@@ -4,17 +4,15 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
-import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.MzSpectraReaderTest;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
-import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.util.Iterator;
@@ -53,11 +51,9 @@ public class SpectraPerBinNumberComparisonAssessorTest {
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
-        MzSpectraReader reader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),
-                normalizer, new HighestPeakPerBinFunction(), loadingFilter, GreedyClusteringEngine.COMPARISON_FILTER, engine,
-                testFile);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), testFile);
 
         SpectraPerBinNumberComparisonAssessor assessor = new SpectraPerBinNumberComparisonAssessor(
                 (int) Math.round(BasicIntegerNormalizer.MZ_CONSTANT * 0.5), 0, 2500 * BasicIntegerNormalizer.MZ_CONSTANT);

@@ -3,7 +3,7 @@ package org.spectra.cluster.model.cluster;
 
 import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 import org.spectra.cluster.exceptions.SpectraClusterException;
-import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
+import org.spectra.cluster.model.consensus.IClusteringConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
 import java.io.Serializable;
@@ -69,7 +69,7 @@ public interface ICluster extends Serializable, Spectrum, IClusterProperties {
      */
     void mergeCluster(ICluster clusterToMerge);
 
-    IConsensusSpectrumBuilder getConsensusSpectrumBuilder();
+    IClusteringConsensusSpectrumBuilder getConsensusSpectrumBuilder();
 
     void saveComparisonResult(String id, float similarity);
 

@@ -8,6 +8,7 @@ import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class ShareHighestPeaksPredicateTest {
     @Before
     public void setUp() throws Exception {
         testFile = new File(Objects.requireNonNull(ShareHighestPeaksPredicate.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI()));
-        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), testFile);
         spectra = new ArrayList<>(50);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
 

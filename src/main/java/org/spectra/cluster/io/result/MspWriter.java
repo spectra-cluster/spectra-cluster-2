@@ -113,6 +113,9 @@ public class MspWriter implements IClusteringResultWriter {
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(peak -> clusterString.append(String.format("%f %f\n", peak.getKey(), peak.getValue())));
 
+        // empty line after each cluster
+        clusterString.append("\n");
+
         return clusterString.toString();
     }
 

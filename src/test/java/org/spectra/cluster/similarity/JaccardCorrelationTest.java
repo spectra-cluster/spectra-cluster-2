@@ -1,9 +1,9 @@
 package org.spectra.cluster.similarity;
 
 
-import lombok.extern.slf4j.Slf4j;
 import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 import io.github.bigbio.pgatk.io.mgf.MgfIterableReader;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +16,7 @@ import org.spectra.cluster.normalizer.FactoryNormalizer;
 import org.spectra.cluster.normalizer.LSHBinner;
 import org.spectra.cluster.normalizer.MaxPeakNormalizer;
 import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.net.URI;
@@ -87,7 +88,7 @@ public class JaccardCorrelationTest {
     @Test
     public void testJaccardInSyntheticPeptides() throws Exception {
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("synthetic_first_pool_3xHCD_R1.mgf")).toURI();
-        MzSpectraReader reader = new MzSpectraReader(new File(uri), GreedyClusteringEngine.COMPARISON_FILTER);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), new File(uri));
 
         Iterator<IBinarySpectrum> specIt = reader.readBinarySpectraIterator();
         List<IBinarySpectrum> spectra = new ArrayList<>();

@@ -4,7 +4,7 @@ package org.spectra.cluster.io.cluster.old_writer;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.model.cluster.ComparisonMatch;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.consensus.IConsensusSpectrumBuilder;
+import org.spectra.cluster.model.consensus.IClusteringConsensusSpectrumBuilder;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 
@@ -48,7 +48,7 @@ public class BinaryClusterAppender {
         }
     }
 
-    private void appendConsensusSpectrumBuilder(ObjectOutputStream out, IConsensusSpectrumBuilder consensusSpectrumBuilder) throws IOException {
+    private void appendConsensusSpectrumBuilder(ObjectOutputStream out, IClusteringConsensusSpectrumBuilder consensusSpectrumBuilder) throws IOException {
         // always save the class first
         out.writeObject(consensusSpectrumBuilder.getClass().getCanonicalName());
 

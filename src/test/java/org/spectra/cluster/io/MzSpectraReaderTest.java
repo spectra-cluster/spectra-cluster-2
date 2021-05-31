@@ -1,5 +1,7 @@
 package org.spectra.cluster.io;
 
+import io.github.bigbio.pgatk.io.pride.ArchiveSpectrum;
+import io.github.bigbio.pgatk.io.pride.PrideJsonIterableReader;
 import io.github.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,13 +12,14 @@ import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
 import org.spectra.cluster.exceptions.SpectraClusterException;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.net.URI;
@@ -46,15 +49,15 @@ public class MzSpectraReaderTest {
 
         URI uri = Objects.requireNonNull(BinarySpectrum.class.getClassLoader().getResource("single-spectra.mgf")).toURI();
         File mgfFile = new File(uri);
-        spectraReader = new MzSpectraReader(mgfFile, GreedyClusteringEngine.COMPARISON_FILTER);
+        spectraReader = new MzSpectraReader(new ClusteringParameters(), mgfFile);
 
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         File clusteringFile = new File(uri);
-        clusteringReader = new MzSpectraReader(clusteringFile, GreedyClusteringEngine.COMPARISON_FILTER, engine);
+        clusteringReader = new MzSpectraReader(new ClusteringParameters(), clusteringFile);
     }
 
     @Test
@@ -72,7 +75,7 @@ public class MzSpectraReaderTest {
     @Test
     public void testNoNullSpectra() throws Exception {
         File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), testFile);
         Iterator<IBinarySpectrum> iterator = reader.readBinarySpectraIterator();
 
         while (iterator.hasNext()) {
@@ -90,7 +93,7 @@ public class MzSpectraReaderTest {
     @Test
     public void testPropertyLoading() throws Exception {
         File testFile = new File(MzSpectraReaderTest.class.getClassLoader().getResource("same_sequence_cluster.mgf").toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), testFile);
 
         InMemoryPropertyStorage storage = new InMemoryPropertyStorage();
 
@@ -123,7 +126,8 @@ public class MzSpectraReaderTest {
     @Test
     public void testSpectrumListener() throws Exception {
         File testFile = new File(getClass().getClassLoader().getResource("synthetic_mixed_runs.mgf").toURI());
-        MzSpectraReader reader = new MzSpectraReader(testFile, GreedyClusteringEngine.COMPARISON_FILTER);
+        File[] inputFiles = { testFile };
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), inputFiles);
         SpectraPerBinNumberComparisonAssessor assessor = new SpectraPerBinNumberComparisonAssessor(
                 BasicIntegerNormalizer.MZ_CONSTANT, 1, BasicIntegerNormalizer.MZ_CONSTANT * 5000);
 
@@ -143,5 +147,18 @@ public class MzSpectraReaderTest {
         Assert.assertEquals(109, assessor.getNumberOfComparisons(BasicIntegerNormalizer.MZ_CONSTANT * 957, 1));
 
         Assert.assertEquals(1, assessor.getNumberOfComparisons(BasicIntegerNormalizer.MZ_CONSTANT * 300, 1));
+    }
+
+    @Test
+    public void testPrideJson() throws Exception {
+        File testFile = new File(getClass().getClassLoader().getResource("pride_spectra.json").toURI());
+
+        PrideJsonIterableReader reader = new PrideJsonIterableReader(testFile);
+
+        while (reader.hasNext()) {
+            ArchiveSpectrum s = (ArchiveSpectrum) reader.next();
+
+            Assert.assertNotNull(s);
+        }
     }
 }

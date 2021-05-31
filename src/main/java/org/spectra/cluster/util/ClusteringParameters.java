@@ -4,12 +4,10 @@ import lombok.Data;
 import org.apache.commons.cli.CommandLine;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
+import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.HighResolutionMzBinner;
-import org.spectra.cluster.normalizer.IMzBinner;
-import org.spectra.cluster.normalizer.TideBinner;
+import org.spectra.cluster.normalizer.*;
 import org.spectra.cluster.predicates.IComparisonPredicate;
 import org.spectra.cluster.predicates.SameChargePredicate;
 import org.spectra.cluster.predicates.ShareNComparisonPeaksPredicate;
@@ -39,7 +37,6 @@ public class ClusteringParameters {
 
     private String binaryDirectory;
     private boolean reuseBinary;
-    private boolean fastMode;
     private Integer clusterRounds;
     private boolean filterReportPeaks;
     private Integer numberHigherPeaks;
@@ -54,6 +51,7 @@ public class ClusteringParameters {
 
     private File outputFile;
     private boolean outputMsp;
+    private boolean outputDotClustering;
 
     private int nThreads;
 
@@ -91,16 +89,16 @@ public class ClusteringParameters {
             this.reuseBinary = Boolean.parseBoolean(properties.getProperty("reuse.binary.files"));
         if(properties.containsKey("ignore.charge"))
             this.ignoreCharge = Boolean.parseBoolean(properties.getProperty("ignore.charge"));
-        if(properties.containsKey("cluster.fast.mode"))
-            this.fastMode = Boolean.parseBoolean(properties.getProperty("cluster.fast.mode"));
         if(properties.containsKey("filters.remove.reporter.peaks"))
             this.filterReportPeaks = Boolean.parseBoolean(properties.getProperty("filters.remove.reporter.peaks"));
         if(properties.containsKey("initially.shared.peaks"))
             this.nInitiallySharedPeaks = Integer.parseInt(properties.getProperty("initially.shared.peaks"));
         if(properties.containsKey("x.min.comparisons"))
             this.minNumberOfComparisons = Integer.parseInt(properties.getProperty("x.min.comparisons"));
-        if(properties.contains("output.msp"))
+        if(properties.containsKey("output.msp"))
             this.outputMsp = Boolean.parseBoolean(properties.getProperty("output.msp"));
+        if(properties.containsKey("output.dot_clustering"))
+            this.outputDotClustering = Boolean.parseBoolean(properties.getProperty("output.dot_clustering"));
     }
 
     public Properties readProperties() throws URISyntaxException {
@@ -156,6 +154,7 @@ public class ClusteringParameters {
             nThreads = Integer.parseInt(commandLine.getOptionValue(CliOptions.OPTIONS.N_THREADS.getValue()));
 
         outputMsp = commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_MSP.getValue());
+        outputDotClustering = commandLine.hasOption(CliOptions.OPTIONS.OUTPUT_CLUSTERING.getValue());
     }
 
     public void mergeParameters(String configFile) throws IOException {
@@ -177,6 +176,16 @@ public class ClusteringParameters {
      */
     public int getIntPrecursorTolerance() {
         return (int) Math.round(precursorIonTolerance * (double) BasicIntegerNormalizer.MZ_CONSTANT);
+    }
+
+    /**
+     * Creates a new instance of the IIntegerNormalizer to
+     * normalize precursor ion intensities.
+     *
+     * @return A new IIntegerNormlalizer
+     */
+    public IIntegerNormalizer createPrecursorNormaliser() {
+        return new BasicIntegerNormalizer(BasicIntegerNormalizer.MZ_CONSTANT);
     }
 
     /**
@@ -232,6 +241,15 @@ public class ClusteringParameters {
     }
 
     /**
+     * Return the comparison filter to use.
+     *
+     * @return
+     */
+    public IBinarySpectrumFunction getComparisonFilter() {
+        return GreedyClusteringEngine.COMPARISON_FILTER;
+    }
+
+    /**
      * Creates a new instance of the matching m/z binner.
      *
      * Note: The validity of these parameters is not checked in this function but
@@ -242,5 +260,15 @@ public class ClusteringParameters {
     public IMzBinner createMzBinner() {
         return (fragmentIonPrecision.equalsIgnoreCase("high")) ?
                 new HighResolutionMzBinner() : new TideBinner();
+    }
+
+    /**
+     * Creates a new instance of the IIntensityNormaliser to use
+     * to normalise peak intensities.
+     *
+     * @return A new IIntensityNormalizer object.
+     */
+    public IIntensityNormalizer createIntensityNormalizer() {
+        return new MaxPeakNormalizer();
     }
 }

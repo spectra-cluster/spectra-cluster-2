@@ -1,5 +1,6 @@
 package org.spectra.cluster.consensus;
 
+import io.github.bigbio.pgatk.io.common.CvParam;
 import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
 import io.github.bigbio.pgatk.io.properties.InMemoryPropertyStorage;
@@ -8,13 +9,10 @@ import org.junit.Test;
 import org.spectra.cluster.cdf.MinNumberComparisonsAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
-import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
-import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.predicates.ShareHighestPeaksClusterPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
 import org.spectra.cluster.util.ClusteringParameters;
@@ -34,9 +32,7 @@ public class AverageConsensusSpectrumBuilderTest {
         // load the spectra
         File mgfFile = new File(getClass().getClassLoader().getResource("imp_single_cluster.mgf").toURI());
         IPropertyStorage localStorage = new InMemoryPropertyStorage();
-        MzSpectraReader reader = new MzSpectraReader(mgfFile, new TideBinner(), new MaxPeakNormalizer(),
-                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), params.createLoadingFilter(),
-                GreedyClusteringEngine.COMPARISON_FILTER, params.createGreedyClusteringEngine());
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), mgfFile);
 
         Iterator<ICluster> iterator = reader.readClusterIterator(localStorage);
         List<ICluster> spectra = new ArrayList<>(1_000);
@@ -52,7 +48,7 @@ public class AverageConsensusSpectrumBuilderTest {
         IClusteringEngine engine = new GreedyClusteringEngine(BasicIntegerNormalizer.MZ_CONSTANT,
                 1, 0.99f, 5, new CombinedFisherIntensityTest(),
                 new MinNumberComparisonsAssessor(10_000), new ShareHighestPeaksClusterPredicate(5),
-                GreedyConsensusSpectrum.NOISE_FILTER_INCREMENT);
+                GreedyClusteringConsensusSpectrum.NOISE_FILTER_INCREMENT);
 
         ICluster[] clusters = engine.clusterSpectra(spectra.toArray(new ICluster[spectra.size()]));
 
@@ -66,5 +62,8 @@ public class AverageConsensusSpectrumBuilderTest {
         Assert.assertEquals(2, (int) consensusSpectrum.getMsLevel());
         Assert.assertEquals(69, consensusSpectrum.getPeakList().size());
         Assert.assertEquals(402.717, consensusSpectrum.getPrecursorMZ(), 0.001);
+
+        Assert.assertEquals(1, consensusSpectrum.getAdditional().size());
+        Assert.assertEquals("5,5,5", ((List<CvParam>) consensusSpectrum.getAdditional()).get(0).getValue().substring(0, 5));
     }
 }

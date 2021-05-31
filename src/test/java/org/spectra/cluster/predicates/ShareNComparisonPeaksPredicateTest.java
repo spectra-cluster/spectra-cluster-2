@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.model.cluster.GreedySpectralCluster;
 import org.spectra.cluster.model.cluster.ICluster;
-import org.spectra.cluster.model.consensus.GreedyConsensusSpectrum;
+import org.spectra.cluster.model.consensus.GreedyClusteringConsensusSpectrum;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 
@@ -45,7 +45,7 @@ public class ShareNComparisonPeaksPredicateTest {
 
     private ICluster clusterForPeaklist(BinaryPeak[] peaklist) {
         BinarySpectrum s1 = new BinarySpectrum("test1", 100, 1, peaklist, GreedyClusteringEngine.COMPARISON_FILTER);
-        ICluster c = new GreedySpectralCluster(new GreedyConsensusSpectrum(GreedyClusteringEngine.COMPARISON_FILTER));
+        ICluster c = new GreedySpectralCluster(new GreedyClusteringConsensusSpectrum(GreedyClusteringEngine.COMPARISON_FILTER));
         c.addSpectra(s1);
 
         return c;

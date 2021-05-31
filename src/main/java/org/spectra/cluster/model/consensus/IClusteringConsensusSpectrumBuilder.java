@@ -25,7 +25,7 @@ import org.spectra.cluster.model.spectra.IBinarySpectrum;
  *
  * @author jg
  */
-public interface IConsensusSpectrumBuilder extends IBinarySpectrum{
+public interface IClusteringConsensusSpectrumBuilder extends IBinarySpectrum{
 
     /**
      * return the current spectrum represented as the data in the stored spectra
@@ -49,7 +49,7 @@ public interface IConsensusSpectrumBuilder extends IBinarySpectrum{
      * Used to merge two consensus spectra
      * @param consensusSpectrumToAdd Add a ConsensusSpectrum
      */
-    void addConsensusSpectrum(IConsensusSpectrumBuilder consensusSpectrumToAdd);
+    void addConsensusSpectrum(IClusteringConsensusSpectrumBuilder consensusSpectrumToAdd);
 
     /**
      * Add spectra to the consensus spectrum.

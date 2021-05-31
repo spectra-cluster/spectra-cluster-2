@@ -6,17 +6,15 @@ import org.junit.Before;
 import org.spectra.cluster.cdf.SpectraPerBinNumberComparisonAssessor;
 import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.engine.IClusteringEngine;
-import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.rawpeaks.*;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.cluster.ICluster;
 import org.spectra.cluster.model.spectra.BinarySpectrum;
 import org.spectra.cluster.normalizer.BasicIntegerNormalizer;
-import org.spectra.cluster.normalizer.MaxPeakNormalizer;
-import org.spectra.cluster.normalizer.TideBinner;
 import org.spectra.cluster.predicates.IComparisonPredicate;
 import org.spectra.cluster.predicates.ShareNComparisonPeaksPredicate;
 import org.spectra.cluster.similarity.CombinedFisherIntensityTest;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.net.URI;
@@ -50,9 +48,7 @@ public abstract class AbstractAssessorTest {
                 comparisonAssessor, firstRoundPredicate,
                 100);
 
-        MzSpectraReader spectraReader = new MzSpectraReader( new TideBinner(), new MaxPeakNormalizer(),
-                new BasicIntegerNormalizer(), new HighestPeakPerBinFunction(), loadingFilter,
-                GreedyClusteringEngine.COMPARISON_FILTER, engine, mgfFile);
+        MzSpectraReader spectraReader = new MzSpectraReader(new ClusteringParameters(), mgfFile);
         spectraReader.addSpectrumListener(comparisonAssessor);
 
         // get all spectra

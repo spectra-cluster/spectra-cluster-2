@@ -3,13 +3,13 @@ package org.spectra.cluster.filter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.spectra.cluster.engine.GreedyClusteringEngine;
 import org.spectra.cluster.filter.binaryspectrum.HighestIntensityNPeaksFunction;
 import org.spectra.cluster.filter.binaryspectrum.HighestPeakPerBinFunction;
 import org.spectra.cluster.filter.binaryspectrum.IBinarySpectrumFunction;
 import org.spectra.cluster.io.spectra.MzSpectraReader;
 import org.spectra.cluster.model.spectra.BinaryPeak;
 import org.spectra.cluster.model.spectra.IBinarySpectrum;
+import org.spectra.cluster.util.ClusteringParameters;
 
 import java.io.File;
 import java.util.*;
@@ -22,7 +22,7 @@ public class HighestPeakPerBinFilterTest {
     @Before
     public void setUp() throws Exception {
         File peakList = new File(Objects.requireNonNull(HighestPeakPerBinFilterTest.class.getClassLoader().getResource("same_sequence_cluster.mgf")).toURI());
-        MzSpectraReader reader = new MzSpectraReader(peakList, GreedyClusteringEngine.COMPARISON_FILTER);
+        MzSpectraReader reader = new MzSpectraReader(new ClusteringParameters(), peakList);
         spectrumIterator = reader.readBinarySpectraIterator();
     }
 

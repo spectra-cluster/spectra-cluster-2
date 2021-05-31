@@ -1,5 +1,6 @@
 package org.spectra.cluster.consensus;
 
+import io.github.bigbio.pgatk.io.common.CvParam;
 import io.github.bigbio.pgatk.io.common.DefaultSpectrum;
 import io.github.bigbio.pgatk.io.common.spectra.Spectrum;
 import io.github.bigbio.pgatk.io.properties.IPropertyStorage;
@@ -50,6 +51,17 @@ public class AverageConsensusSpectrumBuilder extends AbstractConsensusSpectrumBu
             for (ConsensusPeak p : filteredPeaks)
                 consensusPeaks.put(p.getMz(), p.getIntensity());
 
+            // add the peak counts as CV Param
+            List<CvParam> cvParams = new ArrayList<>(1);
+            String peak_counts = filteredPeaks
+                    .stream()
+                    .sorted(Comparator.comparingDouble(ConsensusPeak::getMz))
+                    .map(ConsensusPeak::getCount)
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+
+            cvParams.add(new CvParam("Peak Counts", peak_counts, "SC", "CV:0001"));
+
             // create the spectrum object
             return new DefaultSpectrum(
                     UUID.randomUUID().toString(), // create a new unique id
@@ -59,7 +71,7 @@ public class AverageConsensusSpectrumBuilder extends AbstractConsensusSpectrumBu
                     1.0,
                     consensusPeaks,
                     2,
-                    Collections.emptyList());
+                    cvParams);
         } catch (Exception e) {
             log.error(("Failed to build consensus spectrum: " + e.toString()));
             return null;
