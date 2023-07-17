@@ -17,7 +17,7 @@
         <commons-cli.version>1.2</commons-cli.version>
         <pgatk-io.version>1.0.1-SNAPSHOT</pgatk-io.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <logback.version>1.2.3</logback.version>
+        <logback.version>1.2.9</logback.version>
         <guava.version>29.0-jre</guava.version>
         <pride-mod.version>2.1.12</pride-mod.version>
     </properties>
